@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
   <title>Absensi Hidayatullah</title>
   
+  <!-- Mencegah Browser Menyimpan Cache -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <!-- Pengaturan PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -12,9 +17,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#064e3b">
   
-  <!-- Memanggil Ikon PWA Premium Anda -->
-  <link rel="icon" href="https://i.postimg.cc/0ygkP4z7/icon-PWA.jpg">
-  <link rel="apple-touch-icon" href="https://i.postimg.cc/0ygkP4z7/icon-PWA.jpg">
+  <!-- Memanggil Ikon PWA Premium Anda (Lokal dari GitHub) -->
+  <link rel="icon" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
 
   <style>
     body, html {
@@ -33,6 +38,12 @@
 </head>
 <body>
   <!-- Bingkai pemanggil Google Apps Script Anda -->
-  <iframe src="https://script.google.com/macros/s/AKfycbw5bgS5yRSYCzaPndGkclrAakjfJnMygScU5ryX_tbIh02wJKGi5EDo3xt-KNWJo4dE/exec" allow="geolocation; microphone; camera"></iframe>
+  <iframe id="appFrame" allow="geolocation; microphone; camera"></iframe>
+
+  <!-- Script untuk memastikan selalu mengambil versi terbaru (Anti-Cache) -->
+  <script>
+    var gasUrl = "https://script.google.com/macros/s/AKfycbw5bgS5yRSYCzaPndGkclrAakjfJnMygScU5ryX_tbIh02wJKGi5EDo3xt-KNWJo4dE/exec";
+    document.getElementById("appFrame").src = gasUrl + "?t=" + new Date().getTime();
+  </script>
 </body>
 </html>
