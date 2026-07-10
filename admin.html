@@ -196,7 +196,7 @@
         document.getElementById('pendingCount').textContent = d.length + ' pengajuan menunggu';
         if(!d.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Tidak ada pengajuan</td></tr>'; return; }
         d.forEach(function(r){
-          tb.innerHTML+='<tr><td style="font-size:13px;">'+r.waktu+'</td><td><strong>'+r.nama+'</strong><br><span style="font-size:11px;color:#64748b;">'+r.unit+'</span></td><td><span class="badge b-wait">'+r.jenis+'</span></td><td style="font-size:12px;color:#64748b;max-width:120px;">'+r.ket+'</td><td><button class="btn-aksi btn-setuju" onclick="prosesIzin('+r.rowIndex+',"Disetujui")">✅</button><button class="btn-aksi btn-tolak" onclick="prosesIzin('+r.rowIndex+',"Ditolak")">❌</button></td></tr>';
+          tb.innerHTML+='<tr><td style="font-size:13px;">'+r.waktu+'</td><td><strong>'+r.nama+'</strong><br><span style="font-size:11px;color:#64748b;">'+r.unit+'</span></td><td><span class="badge b-wait">'+r.jenis+'</span></td><td style="font-size:12px;color:#64748b;max-width:120px;">'+r.ket+'</td><td><button class="btn-aksi btn-setuju" onclick="prosesIzin('+r.rowIndex+',\'Disetujui\')">✅</button><button class="btn-aksi btn-tolak" onclick="prosesIzin('+r.rowIndex+',\'Ditolak\')">❌</button></td></tr>';
         });
       });
     }
@@ -235,8 +235,7 @@
     function downloadCSV(){
       document.getElementById('btnDl').innerText='Menyiapkan...';
       apiCall('getAllLogAdmin', {adminEmail: adminEmail}).then(function(data){
-        var csv='data:text/csv;charset=utf-8,'+data.map(function(r){ return r.map(function(c){ return '"'+c+'"'; }).join(','); }).join('\r
-');
+        var csv='data:text/csv;charset=utf-8,'+data.map(function(r){ return r.map(function(c){ return '"'+c+'"'; }).join(','); }).join('\\r\\n');
         var a=document.createElement('a'); a.setAttribute('href',encodeURI(csv)); a.setAttribute('download','Laporan_Absensi_Hidayatullah.csv');
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         document.getElementById('btnDl').innerText='📥 Ekspor CSV';
