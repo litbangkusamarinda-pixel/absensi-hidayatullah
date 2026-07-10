@@ -216,7 +216,8 @@
     <div class="footer">Sistem Absensi Digital · Yayasan Hidayatullah</div>
   </div>
 
-  <script>\n    const API_URL = "https://script.google.com/macros/s/AKfycbwfjQ1qbLTZ2nEbhgIXsD3tpkDq-ydy5hUdYUlJxiiS39ygO3AmTuEBoXGm3CIoArMV/exec";
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwfjQ1qbLTZ2nEbhgIXsD3tpkDq-ydy5hUdYUlJxiiS39ygO3AmTuEBoXGm3CIoArMV/exec";
     
     async function apiCall(action, payload = {}) {
       payload.action = action;
@@ -229,8 +230,13 @@
       } catch (err) {
         throw new Error("Gagal terhubung ke server.");
       }
-    }\n
-    var userEmail = localStorage.getItem('absen_email') || '';\n    if(!userEmail) {\n      userEmail = prompt('Masukkan Email Anda:');\n      if(userEmail) localStorage.setItem('absen_email', userEmail);\n    }
+    }
+
+    var userEmail = localStorage.getItem('absen_email') || '';
+    if(!userEmail) {
+      userEmail = prompt('Masukkan Email Anda:');
+      if(userEmail) localStorage.setItem('absen_email', userEmail);
+    }
     var userLat = null, userLon = null;
     var selectedIzin = 'Sakit';
 
