@@ -380,10 +380,17 @@
     function doRegister() {
       var nama = document.getElementById('inputNama').value.trim();
       var unit = document.getElementById('inputUnit').value;
+      if(!userEmail) {
+        userEmail = prompt('Masukkan Email Anda:');
+        if(userEmail) localStorage.setItem('absen_email', userEmail);
+        else { showToast('✏️','Email wajib diisi!',false); return; }
+      }
       if(!nama||!unit){ showToast('✏️','Nama dan unit wajib diisi!',false); return; }
       apiCall('registerUser', {email: userEmail, nama: nama, unit: unit}).then(function(res){
           if(res.success){ showToast('🎉','Berhasil! Selamat datang, '+nama+'!',true); setTimeout(function(){ location.reload(); },2000); }
           else showToast('⚠️',res.message,false);
+        }).catch(function(err){
+          showToast('⚠️','Gagal terhubung: ' + err.message,false);
         });
     }
 
