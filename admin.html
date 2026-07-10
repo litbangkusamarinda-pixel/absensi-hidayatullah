@@ -4,7 +4,8 @@
   <base target="_top">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">document.getElementById('adminEmailDisplay').innerText = adminEmail;\n  </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">document.getElementById('adminEmailDisplay').innerText = adminEmail;
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{--g9:#064e3b;--g8:#065f46;--g7:#047857;--g6:#059669;--g5:#10b981;--g4:#34d399;--g1:#d1fae5;--l4:#a3e635;--l3:#bef264;--l2:#d9f99d;--l1:#ecfccb;--surface:#f0fdf4;--glass:rgba(255,255,255,0.72);--gb:rgba(16,185,129,0.18);--r:16px;}
@@ -146,7 +147,8 @@
 
   </div>
 
-  <script>\n    const API_URL = "https://script.google.com/macros/s/AKfycbwfjQ1qbLTZ2nEbhgIXsD3tpkDq-ydy5hUdYUlJxiiS39ygO3AmTuEBoXGm3CIoArMV/exec";
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwfjQ1qbLTZ2nEbhgIXsD3tpkDq-ydy5hUdYUlJxiiS39ygO3AmTuEBoXGm3CIoArMV/exec";
     
     async function apiCall(action, payload = {}) {
       payload.action = action;
@@ -159,8 +161,10 @@
       } catch (err) {
         throw new Error("Gagal terhubung ke server.");
       }
-    }\n
-    var adminEmail = prompt('Masukkan Email Admin Anda:');\n    if(!adminEmail) { document.body.innerHTML = 'Akses Ditolak'; throw new Error('No email'); }
+    }
+
+    var adminEmail = prompt('Masukkan Email Admin Anda:');
+    if(!adminEmail) { document.body.innerHTML = 'Akses Ditolak'; throw new Error('No email'); }
     var map = L.map('map').setView([-6.2,106.8],13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OSM'}).addTo(map);
     var marker;
@@ -231,7 +235,8 @@
     function downloadCSV(){
       document.getElementById('btnDl').innerText='Menyiapkan...';
       apiCall('getAllLogAdmin', {adminEmail: adminEmail}).then(function(data){
-        var csv='data:text/csv;charset=utf-8,'+data.map(function(r){ return r.map(function(c){ return '"'+c+'"'; }).join(','); }).join('\r\n');
+        var csv='data:text/csv;charset=utf-8,'+data.map(function(r){ return r.map(function(c){ return '"'+c+'"'; }).join(','); }).join('\r
+');
         var a=document.createElement('a'); a.setAttribute('href',encodeURI(csv)); a.setAttribute('download','Laporan_Absensi_Hidayatullah.csv');
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         document.getElementById('btnDl').innerText='📥 Ekspor CSV';
@@ -248,7 +253,8 @@
     // INIT
     loadTableUnit(); loadTablePegawai(); loadTableLog(); loadIzinPending(); loadIzinAll();
     setInterval(function(){ loadTableLog(); loadIzinPending(); }, 30000);
-  document.getElementById('adminEmailDisplay').innerText = adminEmail;\n  </script>
+  document.getElementById('adminEmailDisplay').innerText = adminEmail;
+  </script>
 </body>
 </html>
 
