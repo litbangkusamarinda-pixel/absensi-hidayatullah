@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">document.getElementById('adminEmailDisplay').innerText = adminEmail;
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--g9:#064e3b;--g8:#065f46;--g7:#047857;--g6:#059669;--g5:#10b981;--g4:#34d399;--g1:#d1fae5;--l4:#a3e635;--l3:#bef264;--l2:#d9f99d;--l1:#ecfccb;--surface:#f0fdf4;--glass:rgba(255,255,255,0.72);--gb:rgba(16,185,129,0.18);--r:16px;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:var(--surface);background-image:radial-gradient(ellipse 80% 60% at 10% 0%,rgba(163,230,53,0.12) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 100%,rgba(16,185,129,0.10) 0%,transparent 60%);min-height:100vh;color:#1e293b;}
+    .header{background:linear-gradient(135deg,var(--g9) 0%,var(--g7) 50%,#4d7c0f 100%);padding:20px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 24px rgba(6,78,59,.25);}
+    .header h1{color:white;font-size:22px;font-weight:800;}
+    .header h1 span{color:var(--l3);}
+    .header-email{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);color:white;padding:8px 16px;border-radius:50px;font-size:13px;font-weight:500;}
+    .main{padding:24px 28px;}
+    .card{background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--gb);border-radius:var(--r);padding:24px;box-shadow:0 4px 16px rgba(6,78,59,.08);}
+    .card-title{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+    .t-left{display:flex;align-items:center;gap:10px;}
+    .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+    .icon-red{background:linear-gradient(135deg,#fecaca,#fca5a5);}
+    .icon-yellow{background:linear-gradient(135deg,#fef3c7,#fde68a);}
+    .icon-green{background:linear-gradient(135deg,var(--g1),var(--l2));}
+    .icon-blue{background:linear-gradient(135deg,var(--g1),var(--g1));}
+    .icon-purple{background:linear-gradient(135deg,var(--l2),var(--g4));}
+    .subtitle{font-size:12px;color:#64748b;font-weight:400;margin-top:4px;}
+    .grid-top{margin-bottom:24px;}
+    .grid-mid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
+    .grid-bottom{display:flex;gap:24px;flex-wrap:wrap;}
+    .col-left{flex:1;min-width:340px;}.col-right{flex:2;min-width:400px;display:flex;flex-direction:column;gap:24px;}
+    .table-wrap{overflow-x:auto;max-height:300px;overflow-y:auto;border-radius:12px;border:1px solid rgba(16,185,129,.12);}
+    table{width:100%;border-collapse:collapse;min-width:480px;}
+    th{background:linear-gradient(135deg,#ecfdf5,var(--l1));font-size:12px;text-transform:uppercase;font-weight:700;color:var(--g8);padding:12px 14px;text-align:left;position:sticky;top:0;z-index:1;}
+    td{padding:10px 14px;font-size:14px;border-bottom:1px solid rgba(16,185,129,.07);}
+    tr:hover td{background:rgba(16,185,129,.04);}
+    .badge{padding:4px 10px;border-radius:50px;font-size:11px;font-weight:700;display:inline-block;}
+    .b-ok{background:var(--g1);color:var(--g8);}
+    .b-late{background:#fef2f2;color:#991b1b;}
+    .b-unit{background:linear-gradient(135deg,var(--g1),var(--l1));color:var(--g8);}
+    .b-masuk{background:var(--g1);color:var(--g7);}
+    .b-pulang{background:var(--l1);color:#3f6212;}
+    .b-wait{background:#fef3c7;color:#92400e;}
+    .b-setuju{background:#d1fae5;color:#065f46;}
+    .b-tolak{background:#fee2e2;color:#991b1b;}
+
+    /* TOMBOL AKSI IZIN */
+    .btn-aksi{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:transform .15s;}
+    .btn-aksi:active{transform:scale(.96);}
+    .btn-setuju{background:linear-gradient(135deg,var(--g6),var(--g5));color:white;margin-right:4px;}
+    .btn-tolak{background:linear-gradient(135deg,#ef4444,#dc2626);color:white;}
+
+    #map{height:280px;width:100%;border-radius:12px;margin:12px 0;border:2px solid var(--gb);}
+    .form-row{display:flex;gap:12px;margin-bottom:12px;}
+    .form-group{flex:1;}
+    .form-group label{font-size:12px;font-weight:600;color:var(--g7);display:block;margin-bottom:6px;}
+    .form-group input{width:100%;padding:10px;border:1.5px solid rgba(16,185,129,.2);border-radius:10px;font-family:'Inter',sans-serif;outline:none;}
+    .btn-save{width:100%;padding:14px;background:linear-gradient(135deg,var(--g6) 0%,#4d7c0f 100%);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;box-shadow:0 4px 12px rgba(5,150,105,.3);margin-top:6px;}
+    .btn-download{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;border:none;padding:9px 14px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .15s;}
+    .btn-download:hover{transform:translateY(-1px);}
+    .live-dot{width:10px;height:10px;background:#ef4444;border-radius:50%;display:inline-block;margin-right:6px;animation:pulse 1.5s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
+    @media(max-width:768px){.main{padding:16px;}.grid-mid{grid-template-columns:1fr;}.grid-bottom{flex-direction:column;}}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div><h1>Dashboard <span>Admin</span> Yayasan</h1></div>
+    <div class="header-email"><span id='adminEmailDisplay'></span></div>
+  </div>
+
+  <div class="main">
+
+    <!-- ROW 1: LIVE MONITORING -->
+    <div class="card grid-top">
+      <div class="card-title">
+        <div class="t-left">
+          <div class="icon icon-red"><span class="live-dot"></span></div>
+          <div>LIVE — Pantau Absensi & Keterlambatan<div class="subtitle">100 data terbaru · auto-refresh tiap 30 detik</div></div>
+        </div>
+        <button class="btn-download" onclick="downloadCSV()" id="btnDl">📥 Ekspor CSV</button>
+      </div>
+      <div class="table-wrap" style="max-height:250px;">
+        <table id="tabelLog">
+          <thead><tr><th>Waktu</th><th>Nama</th><th>Unit</th><th>Jenis</th><th>Status</th></tr></thead>
+          <tbody><tr><td colspan="5" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ROW 2: PANEL IZIN (2 KOLOM) -->
+    <div class="grid-mid">
+      <!-- Menunggu Persetujuan -->
+      <div class="card">
+        <div class="card-title">
+          <div class="t-left">
+            <div class="icon icon-yellow">⏳</div>
+            <div>Izin Menunggu Persetujuan<div class="subtitle" id="pendingCount">—</div></div>
+          </div>
+        </div>
+        <div class="table-wrap" style="max-height:280px;">
+          <table id="tabelPending">
+            <thead><tr><th>Waktu</th><th>Nama</th><th>Jenis</th><th>Ket</th><th>Aksi</th></tr></thead>
+            <tbody><tr><td colspan="5" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Riwayat Izin -->
+      <div class="card">
+        <div class="card-title">
+          <div class="t-left">
+            <div class="icon icon-green">📋</div>
+            <div>Riwayat Semua Izin<div class="subtitle">50 data terbaru</div></div>
+          </div>
+        </div>
+        <div class="table-wrap" style="max-height:280px;">
+          <table id="tabelIzinAll">
+            <thead><tr><th>Waktu</th><th>Nama</th><th>Unit</th><th>Jenis</th><th>Status</th></tr></thead>
+            <tbody><tr><td colspan="5" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3: MAP + TABLES -->
+    <div class="grid-bottom">
+      <div class="col-left card">
+        <div class="card-title"><div class="icon icon-green">📍</div><div>Tambah Unit Sekolah<div class="subtitle">Klik peta untuk titik lokasi</div></div></div>
+        <div id="map"></div>
+        <div class="form-row"><div class="form-group"><label>Nama Unit</label><input type="text" id="unit" placeholder="SMP Hidayatullah"></div><div class="form-group"><label>Radius (M)</label><input type="number" id="radius" value="100"></div></div>
+        <div class="form-row"><div class="form-group"><label>Jam Masuk</label><input type="time" id="masuk" value="07:00"></div><div class="form-group"><label>Jam Pulang</label><input type="time" id="pulang" value="15:00"></div></div>
+        <div class="form-row"><div class="form-group"><label>Latitude</label><input type="text" id="lat" readonly></div><div class="form-group"><label>Longitude</label><input type="text" id="lon" readonly></div></div>
+        <button class="btn-save" onclick="simpanUnit()" id="btnSimpan">Simpan Unit Sekolah</button>
+      </div>
+      <div class="col-right">
+        <div class="card">
+          <div class="card-title"><div class="icon icon-blue">🏢</div><div>Daftar Unit Aktif</div></div>
+          <div class="table-wrap"><table id="tabelUnit"><thead><tr><th>Unit</th><th>Masuk</th><th>Pulang</th><th>Koordinat</th><th>Radius</th></tr></thead><tbody><tr><td colspan="5" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="icon icon-purple">👥</div><div>Guru & Karyawan Terdaftar</div></div>
+          <div class="table-wrap"><table id="tabelPegawai"><thead><tr><th>Nama</th><th>Email</th><th>Unit</th><th>Tgl Daftar</th></tr></thead><tbody><tr><td colspan="4" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbw5bgS5yRSYCzaPndGkclrAakjfJnMygScU5ryX_tbIh02wJKGi5EDo3xt-KNWJo4dE/exec";
+    
+    async function apiCall(action, payload = {}) {
+      payload.action = action;
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        return await response.json();
+      } catch (err) {
+        throw new Error("Gagal terhubung ke server.");
+      }
+    }
+
+    var adminEmail = prompt('Masukkan Email Admin Anda:');
+    var map = L.map('map').setView([-6.2,106.8],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OSM'}).addTo(map);
+    var marker;
+    map.on('click',function(e){
+      var la=e.latlng.lat.toFixed(6),lo=e.latlng.lng.toFixed(6);
+      if(marker) map.removeLayer(marker);
+      marker=L.marker([la,lo]).addTo(map);
+      document.getElementById('lat').value=la; document.getElementById('lon').value=lo;
+    });
+    if(navigator.geolocation) navigator.geolocation.getCurrentPosition(function(p){ map.setView([p.coords.latitude,p.coords.longitude],16); });
+
+    // ===== LOAD FUNCTIONS =====
+    function loadTableLog(){
+      google.script.run.withSuccessHandler(function(d){
+        var tb=document.querySelector('#tabelLog tbody'); tb.innerHTML='';
+        if(!d.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Belum ada data</td></tr>'; return; }
+        d.forEach(function(r){
+          var bc=(r.status==="Terlambat"||r.status==="Pulang Cepat")?"b-late":"b-ok";
+          var jc=r.jenis==="Masuk"?"b-masuk":"b-pulang";
+          tb.innerHTML+='<tr><td style="font-size:13px;">'+r.waktu+'</td><td><strong>'+r.nama+'</strong></td><td>'+r.unit+'</td><td><span class="badge '+jc+'">'+r.jenis+'</span></td><td><span class="badge '+bc+'">'+r.status+'</span></td></tr>';
+        });
+      }).getTodayLogAdmin();
+    }
+
+    function loadIzinPending(){
+      google.script.run.withSuccessHandler(function(d){
+        var tb=document.querySelector('#tabelPending tbody'); tb.innerHTML='';
+        document.getElementById('pendingCount').textContent = d.length + ' pengajuan menunggu';
+        if(!d.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Tidak ada pengajuan</td></tr>'; return; }
+        d.forEach(function(r){
+          tb.innerHTML+='<tr><td style="font-size:13px;">'+r.waktu+'</td><td><strong>'+r.nama+'</strong><br><span style="font-size:11px;color:#64748b;">'+r.unit+'</span></td><td><span class="badge b-wait">'+r.jenis+'</span></td><td style="font-size:12px;color:#64748b;max-width:120px;">'+r.ket+'</td><td><button class="btn-aksi btn-setuju" onclick="prosesIzin('+r.rowIndex+',"Disetujui")">✅</button><button class="btn-aksi btn-tolak" onclick="prosesIzin('+r.rowIndex+',"Ditolak")">❌</button></td></tr>';
+        });
+      }).getIzinPendingAdmin();
+    }
+
+    function loadIzinAll(){
+      google.script.run.withSuccessHandler(function(d){
+        var tb=document.querySelector('#tabelIzinAll tbody'); tb.innerHTML='';
+        if(!d.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Belum ada data</td></tr>'; return; }
+        d.forEach(function(r){
+          var sc=r.status==="Disetujui"?"b-setuju":r.status==="Ditolak"?"b-tolak":"b-wait";
+          tb.innerHTML+='<tr><td style="font-size:13px;">'+r.waktu+'</td><td><strong>'+r.nama+'</strong></td><td>'+r.unit+'</td><td><span class="badge b-wait">'+r.jenis+'</span></td><td><span class="badge '+sc+'">'+r.status+'</span></td></tr>';
+        });
+      }).getIzinAllAdmin();
+    }
+
+    function loadTableUnit(){
+      google.script.run.withSuccessHandler(function(d){
+        var tb=document.querySelector('#tabelUnit tbody'); tb.innerHTML='';
+        if(!d.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Belum ada unit</td></tr>'; return; }
+        d.forEach(function(r){ tb.innerHTML+='<tr><td><strong>'+r.unit+'</strong></td><td>'+r.masuk+'</td><td>'+r.pulang+'</td><td style="font-size:12px;color:#64748b;">'+r.lat+', '+r.lon+'</td><td><span class="badge b-unit">'+r.radius+'M</span></td></tr>'; });
+      }).getUnitListAdmin();
+    }
+
+    function loadTablePegawai(){
+      google.script.run.withSuccessHandler(function(d){
+        var tb=document.querySelector('#tabelPegawai tbody'); tb.innerHTML='';
+        if(!d.length){ tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:#94a3b8;">Belum ada guru</td></tr>'; return; }
+        d.forEach(function(r){ tb.innerHTML+='<tr><td><strong>'+r.nama+'</strong></td><td style="font-size:13px;">'+r.email+'</td><td><span class="badge b-unit">'+r.unit+'</span></td><td style="font-size:13px;">'+r.tgl+'</td></tr>'; });
+      }).getPegawaiListAdmin();
+    }
+
+    function prosesIzin(rowIndex, status){
+      var args = [rowIndex, status, adminEmail]; apiCall('prosesIzin', {rowIndex: args[0], status: args[1], adminEmail: args[2]}).then(function(res){ alert(res.message); loadIzinPending(); loadIzinAll(); });
+    }
+
+    function downloadCSV(){
+      document.getElementById('btnDl').innerText='Menyiapkan...';
+      google.script.run.withSuccessHandler(function(data){
+        var csv='data:text/csv;charset=utf-8,'+data.map(function(r){ return r.map(function(c){ return '"'+c+'"'; }).join(','); }).join('\r\n');
+        var a=document.createElement('a'); a.setAttribute('href',encodeURI(csv)); a.setAttribute('download','Laporan_Absensi_Hidayatullah.csv');
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        document.getElementById('btnDl').innerText='📥 Ekspor CSV';
+      }).getAllLogAdmin();
+    }
+
+    function simpanUnit(){
+      var d={unit:document.getElementById('unit').value,masuk:document.getElementById('masuk').value,pulang:document.getElementById('pulang').value,radius:document.getElementById('radius').value,lat:document.getElementById('lat').value,lon:document.getElementById('lon').value};
+      if(!d.unit||!d.lat){alert('Nama Unit dan titik Peta wajib diisi!');return;}
+      document.getElementById('btnSimpan').innerText='Menyimpan...';
+      google.script.run.withSuccessHandler(function(res){ alert(res.message); document.getElementById('btnSimpan').innerText='Simpan Unit Sekolah'; document.getElementById('unit').value=''; document.getElementById('lat').value=''; document.getElementById('lon').value=''; if(marker) map.removeLayer(marker); loadTableUnit(); }).saveUnitAdmin(d);
+    }
+
+    // INIT
+    loadTableUnit(); loadTablePegawai(); loadTableLog(); loadIzinPending(); loadIzinAll();
+    setInterval(function(){ loadTableLog(); loadIzinPending(); }, 30000);
+  </script>
+</body>
+</html>
+
