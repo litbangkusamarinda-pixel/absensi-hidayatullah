@@ -50,12 +50,39 @@
     .btn-absen:active{transform:scale(.97);}
     .btn-masuk{background:linear-gradient(135deg,var(--g6) 0%,var(--g5) 60%,var(--l4) 100%);box-shadow:0 6px 20px rgba(16,185,129,0.35);}
     .btn-pulang{background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 60%,#60a5fa 100%);box-shadow:0 6px 20px rgba(37,99,235,0.35);}
-    .btn-icon{font-size:26px;}
+    .btn-icon-wrapper {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+    }
+    .btn-icon-wrapper::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      z-index: 0;
+    }
+    .btn-icon-wrapper svg {
+      width: 26px;
+      height: 26px;
+      color: white;
+      z-index: 1;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+    }
     .btn-label{font-size:14px;font-weight:700;color:white;}
     .btn-sub{font-size:11px;color:rgba(255,255,255,.65);}
 
     /* IZIN BUTTON */
-    .btn-izin-wrap{margin-top:2px;}
+    .btn-izin-wrap{margin-top:16px;}
     .btn-izin{width:100%;padding:15px;background:rgba(245,158,11,0.12);border:1.5px solid rgba(245,158,11,0.25);border-radius:14px;color:#fbbf24;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
     .btn-izin:active{transform:scale(.98);}
     .btn-izin:hover{background:rgba(245,158,11,0.18);}
@@ -194,14 +221,22 @@
       <div class="section-label">Pilih Jenis Absensi</div>
       <div class="btn-grid">
         <button class="btn-absen btn-masuk" onclick="doAbsen('Masuk')">
-          <div class="btn-icon">🌅</div>
+          <div class="btn-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+          </div>
           <div class="btn-label">Absen Masuk</div>
           <div class="btn-sub">Klik saat tiba</div>
         </button>
         <button class="btn-absen btn-pulang" onclick="doAbsen('Pulang')">
-          <div class="btn-icon">🌇</div>
+          <div class="btn-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+            </svg>
+          </div>
           <div class="btn-label">Absen Pulang</div>
-          <div class="btn-sub">Klik saat hendak pulang</div>
+          <div class="btn-sub">Klik saat pulang</div>
         </button>
       </div>
       <div class="btn-izin-wrap">
