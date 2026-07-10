@@ -4,8 +4,7 @@
   <base target="_top">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">document.getElementById('adminEmailDisplay').innerText = adminEmail;
-  </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">document.getElementById('adminEmailDisplay').innerText = adminEmail;\n  </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{--g9:#064e3b;--g8:#065f46;--g7:#047857;--g6:#059669;--g5:#10b981;--g4:#34d399;--g1:#d1fae5;--l4:#a3e635;--l3:#bef264;--l2:#d9f99d;--l1:#ecfccb;--surface:#f0fdf4;--glass:rgba(255,255,255,0.72);--gb:rgba(16,185,129,0.18);--r:16px;}
@@ -147,8 +146,7 @@
 
   </div>
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbw5bgS5yRSYCzaPndGkclrAakjfJnMygScU5ryX_tbIh02wJKGi5EDo3xt-KNWJo4dE/exec";
+  <script>\n    const API_URL = "https://script.google.com/macros/s/AKfycbw5bgS5yRSYCzaPndGkclrAakjfJnMygScU5ryX_tbIh02wJKGi5EDo3xt-KNWJo4dE/exec";
     
     async function apiCall(action, payload = {}) {
       payload.action = action;
@@ -161,10 +159,8 @@
       } catch (err) {
         throw new Error("Gagal terhubung ke server.");
       }
-    }
-
-    var adminEmail = prompt('Masukkan Email Admin Anda:');
-if(!adminEmail) { document.body.innerHTML = 'Akses Ditolak'; throw new Error('No email'); }
+    }\n
+    var adminEmail = prompt('Masukkan Email Admin Anda:');\n    if(!adminEmail) { document.body.innerHTML = 'Akses Ditolak'; throw new Error('No email'); }
     var map = L.map('map').setView([-6.2,106.8],13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OSM'}).addTo(map);
     var marker;
@@ -178,7 +174,8 @@ if(!adminEmail) { document.body.innerHTML = 'Akses Ditolak'; throw new Error('No
 
     // ===== LOAD FUNCTIONS =====
     function loadTableLog(){
-      apiCall('getTodayLogAdmin', {adminEmail: adminEmail}).then(function(d){ if(d.success === false) { alert(d.message); return; } 
+      apiCall('getTodayLogAdmin', {adminEmail: adminEmail}).then(function(d){
+        if(d.success === false) { alert(d.message); return; }
         var tb=document.querySelector('#tabelLog tbody'); tb.innerHTML='';
         if(!d.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Belum ada data</td></tr>'; return; }
         d.forEach(function(r){
@@ -228,7 +225,7 @@ if(!adminEmail) { document.body.innerHTML = 'Akses Ditolak'; throw new Error('No
     }
 
     function prosesIzin(rowIndex, status){
-      var args = [d]; apiCall('saveUnitAdmin', {adminEmail: adminEmail, unitData: args[0]}).then(function(res){ alert(res.message); loadIzinPending(); loadIzinAll(); }).prosesIzin(rowIndex, status, adminEmail);
+      apiCall('prosesIzin', {rowIndex: rowIndex, status: status, adminEmail: adminEmail}).then(function(res){ alert(res.message); loadIzinPending(); loadIzinAll(); });
     }
 
     function downloadCSV(){
@@ -245,13 +242,13 @@ if(!adminEmail) { document.body.innerHTML = 'Akses Ditolak'; throw new Error('No
       var d={unit:document.getElementById('unit').value,masuk:document.getElementById('masuk').value,pulang:document.getElementById('pulang').value,radius:document.getElementById('radius').value,lat:document.getElementById('lat').value,lon:document.getElementById('lon').value};
       if(!d.unit||!d.lat){alert('Nama Unit dan titik Peta wajib diisi!');return;}
       document.getElementById('btnSimpan').innerText='Menyimpan...';
-      google.script.run.withSuccessHandler(function(res){ alert(res.message); document.getElementById('btnSimpan').innerText='Simpan Unit Sekolah'; document.getElementById('unit').value=''; document.getElementById('lat').value=''; document.getElementById('lon').value=''; if(marker) map.removeLayer(marker); loadTableUnit(); });
+      apiCall('saveUnitAdmin', {adminEmail: adminEmail, unitData: d}).then(function(res){ alert(res.message); document.getElementById('btnSimpan').innerText='Simpan Unit Sekolah'; document.getElementById('modalUnit').style.display='none'; loadTableUnit(); });
     }
 
     // INIT
     loadTableUnit(); loadTablePegawai(); loadTableLog(); loadIzinPending(); loadIzinAll();
     setInterval(function(){ loadTableLog(); loadIzinPending(); }, 30000);
-  </script>
+  document.getElementById('adminEmailDisplay').innerText = adminEmail;\n  </script>
 </body>
 </html>
 

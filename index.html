@@ -216,8 +216,7 @@
     <div class="footer">Sistem Absensi Digital · Yayasan Hidayatullah</div>
   </div>
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbw5bgS5yRSYCzaPndGkclrAakjfJnMygScU5ryX_tbIh02wJKGi5EDo3xt-KNWJo4dE/exec";
+  <script>\n    const API_URL = "https://script.google.com/macros/s/AKfycbw5bgS5yRSYCzaPndGkclrAakjfJnMygScU5ryX_tbIh02wJKGi5EDo3xt-KNWJo4dE/exec";
     
     async function apiCall(action, payload = {}) {
       payload.action = action;
@@ -230,13 +229,8 @@
       } catch (err) {
         throw new Error("Gagal terhubung ke server.");
       }
-    }
-
-    var userEmail = localStorage.getItem('absen_email') || '';
-    if(!userEmail) {
-      userEmail = prompt('Masukkan Email Anda:');
-      if(userEmail) localStorage.setItem('absen_email', userEmail);
-    }
+    }\n
+    var userEmail = localStorage.getItem('absen_email') || '';\n    if(!userEmail) {\n      userEmail = prompt('Masukkan Email Anda:');\n      if(userEmail) localStorage.setItem('absen_email', userEmail);\n    }
     var userLat = null, userLon = null;
     var selectedIzin = 'Sakit';
 
@@ -284,24 +278,22 @@
       var ket = document.getElementById('inputKet').value.trim();
       var btn = document.getElementById('btnKirimIzin');
       btn.textContent = 'Mengirim...'; btn.disabled = true;
-      apiCall('submitIzin', {email: userEmail, jenisIzin: selectedIzin, keterangan: ket || '-'}).then(function(res){
+      apiCall('submitIzin', {email: userEmail, jenisIzin: selectedIzin, keterangan: ket || '-'}).then(function(res) {
           btn.textContent = 'Kirim Pengajuan →'; btn.disabled = false;
           tutupModal();
           document.getElementById('inputKet').value = '';
           var icon = res.success ? '📋' : '⚠️';
           showToast(icon, res.message, res.success);
           if(res.success) simpanRiwayat('Izin (' + selectedIzin + ')', 'Menunggu', true);
-        })
-        .withFailureHandler(function(){ btn.textContent = 'Kirim Pengajuan →'; btn.disabled = false; showToast('⚠️','Gagal mengirim.',false); });
+        }).catch(function(){ btn.textContent = 'Kirim Pengajuan →'; btn.disabled = false; showToast('⚠️','Gagal mengirim.',false); });
     }
 
     function doAbsen(jenis) {
       if(!userLat) { showToast('📍','GPS belum siap. Tunggu atau aktifkan lokasi.',false); getLocation(); return; }
-      apiCall('processAttendance', {email:userEmail, lat:userLat, lon:userLon, jenisAbsen:jenis}).then(function(res){
+      apiCall('processAttendance', {email:userEmail, lat:userLat, lon:userLon, jenisAbsen:jenis}).then(function(res) {
           showToast(res.success ? '✅' : '🚫', res.message, res.success);
           if(res.success) { simpanRiwayat('Absen ' + jenis, res.message.includes('Terlambat') || res.message.includes('Cepat') ? 'Terlambat' : 'Tepat Waktu', false); showRiwayat(); }
-        })
-        .withFailureHandler(function(){ showToast('⚠️','Kesalahan koneksi.',false); });
+        }).catch(function(){ showToast('⚠️','Kesalahan koneksi.',false); });
     }
 
     function simpanRiwayat(jenis, status, isIzin) {
@@ -327,15 +319,14 @@
       var nama = document.getElementById('inputNama').value.trim();
       var unit = document.getElementById('inputUnit').value;
       if(!nama||!unit){ showToast('✏️','Nama dan unit wajib diisi!',false); return; }
-      var args = [userEmail, nama, unit]; apiCall('registerUser', {email: args[0], nama: args[1], unit: args[2]}).then(function(res){
+      apiCall('registerUser', {email: userEmail, nama: nama, unit: unit}).then(function(res){
           if(res.success){ showToast('🎉','Berhasil! Selamat datang, '+nama+'!',true); setTimeout(function(){ location.reload(); },2000); }
           else showToast('⚠️',res.message,false);
         });
     }
 
     function init() {
-      google.script.run
-        .withSuccessHandler(function(res){
+      apiCall('checkUserRegistration', {email: userEmail}).then(function(res){
           document.getElementById('loadingScreen').style.display='none';
           document.getElementById('mainApp').style.display='flex';
           if(res.registered){
@@ -347,13 +338,15 @@
             showRiwayat(); getLocation();
           } else {
             document.getElementById('registerSection').style.display='block';
-            google.script.run.withSuccessHandler(function(units){
+            apiCall('getUnitListNames').then(function(units){
               var sel = document.getElementById('inputUnit');
               sel.innerHTML = '<option value="">-- Pilih Unit --</option>';
               units.forEach(function(u){ sel.innerHTML+='<option value="'+u+'">'+u+'</option>'; });
-            }).getUnitListNames();
+            });
           }
-        }).checkUserRegistration(userEmail);
+        }).catch(function(err){
+          alert("Gagal memuat profil: " + err);
+        });
     }
     init();
   </script>
