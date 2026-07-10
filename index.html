@@ -315,7 +315,7 @@
       }, function() {
         document.getElementById('locText').textContent = 'GPS ditolak — aktifkan lokasi!';
         document.getElementById('locDot').style.background = '#f87171';
-      }, {enableHighAccuracy:true, timeout:15000});
+      }, {enableHighAccuracy:true, maximumAge:0, timeout:15000});
     }
 
     function showToast(icon, text, ok) {
