@@ -26,6 +26,12 @@ window.router = {
     }
     
     this.updateSidebarActiveState();
+
+    // Auto-close sidebar on mobile
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+      sidebar.classList.add('-translate-x-full');
+    }
   },
 
   updateLayout: function(layoutType) {
