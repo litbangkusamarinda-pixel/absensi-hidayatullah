@@ -53,7 +53,7 @@
     <!-- ═══════════════════════════════════════════════════ -->
     <!-- LEFT SIDEBAR                                        -->
     <!-- ═══════════════════════════════════════════════════ -->
-    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-[#072a1f]/90 backdrop-blur-xl border-r border-white/5 z-40 hidden md:flex flex-col shadow-2xl shadow-black/30">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-[#072a1f]/90 backdrop-blur-xl border-r border-white/5 z-[60] flex flex-col shadow-2xl shadow-black/30 transition-transform duration-300 -translate-x-full md:translate-x-0">
       
       <!-- Sidebar Header / Brand -->
       <div class="h-20 flex items-center px-6 border-b border-white/5 shrink-0 gap-4">
@@ -83,10 +83,10 @@
     <!-- ═══════════════════════════════════════════════════ -->
     <!-- TOP NAVBAR                                          -->
     <!-- ═══════════════════════════════════════════════════ -->
-    <header id="topnav" class="fixed top-0 right-0 left-0 md:left-64 h-20 bg-[#0a3d2e]/80 backdrop-blur-xl border-b border-white/5 z-30 hidden items-center justify-between px-4 md:px-8 transition-all duration-300">
+    <header id="topnav" class="fixed top-0 right-0 left-0 md:left-64 h-20 bg-[#0a3d2e]/80 backdrop-blur-xl border-b border-white/5 z-30 flex items-center justify-between px-4 md:px-8 transition-all duration-300">
       <div class="flex items-center gap-4">
         <!-- Mobile Menu Toggle -->
-        <button class="md:hidden p-2 -ml-2 text-white/60 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+        <button onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')" class="md:hidden p-2 -ml-2 text-white/60 hover:text-white hover:bg-white/10 rounded-xl transition-all">
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
         <!-- Mobile Logo -->
@@ -174,7 +174,7 @@
     <!-- ═══════════════════════════════════════════════════ -->
     <main id="content-area" class="flex-1 w-full min-h-screen transition-all duration-300 flex flex-col">
       <!-- App Router Mount Point -->
-      <div id="app-content" class="flex-1 p-4 md:p-6 lg:p-8 mt-0 md:mt-20 w-full max-w-7xl mx-auto relative z-10">
+      <div id="app-content" class="flex-1 p-4 md:p-6 lg:p-8 mt-20 w-full max-w-7xl mx-auto relative z-10">
         <!-- JS renders pages here -->
       </div>
     </main>

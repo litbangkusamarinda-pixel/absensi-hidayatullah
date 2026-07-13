@@ -34,14 +34,18 @@ window.router = {
     const rightSidebar = document.getElementById('right-sidebar');
     
     if (layoutType === 'none') {
-      sidebar.style.display = 'none';
-      topnav.style.display = 'none';
-      rightSidebar.style.display = 'none';
+      sidebar.classList.add('!hidden');
+      topnav.classList.add('!hidden');
+      rightSidebar.classList.add('!hidden');
       document.getElementById('main-container').classList.remove('md:ml-64');
     } else {
-      sidebar.style.display = 'flex';
-      topnav.style.display = 'flex';
-      rightSidebar.style.display = layoutType === 'admin' ? 'block' : 'none';
+      sidebar.classList.remove('!hidden');
+      topnav.classList.remove('!hidden');
+      if (layoutType === 'admin') {
+        rightSidebar.classList.remove('!hidden');
+      } else {
+        rightSidebar.classList.add('!hidden');
+      }
       
       document.getElementById('main-container').classList.add('md:ml-64');
       if (layoutType === 'admin') {
