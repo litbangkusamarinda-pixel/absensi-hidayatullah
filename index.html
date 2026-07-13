@@ -1,423 +1,248 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8"><base target="_top">
-  <title>Absensi Yayasan Hidayatullah</title>
+  <meta charset="UTF-8">
+  <base target="_top">
+  <title>HRMS Hidayatullah</title>
   <link rel="icon" href="icon.png">
-  <link rel="apple-touch-icon" href="icon.png">
-  <meta name="theme-color" content="#064e3b">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+  
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/globals.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for future charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
-    :root{--g9:#064e3b;--g8:#065f46;--g7:#047857;--g6:#059669;--g5:#10b981;--g4:#34d399;--g3:#6ee7b7;--g2:#a7f3d0;--g1:#d1fae5;--l4:#a3e635;--l3:#bef264;--l2:#d9f99d;}
-    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-    body{font-family:'Inter',sans-serif;min-height:100vh;background:var(--g9);background-image:radial-gradient(ellipse 120% 80% at 50% -20%,rgba(163,230,53,0.15) 0%,transparent 55%),radial-gradient(ellipse 80% 60% at 100% 80%,rgba(16,185,129,0.12) 0%,transparent 50%);display:flex;flex-direction:column;align-items:center;padding:20px 16px 48px;overflow-x:hidden;}
-    .orb{position:fixed;border-radius:50%;filter:blur(80px);z-index:0;pointer-events:none;}
-    .orb-1{width:300px;height:300px;background:radial-gradient(circle,rgba(163,230,53,0.1) 0%,transparent 70%);top:-100px;left:-100px;}
-    .orb-2{width:250px;height:250px;background:radial-gradient(circle,rgba(16,185,129,0.08) 0%,transparent 70%);bottom:100px;right:-80px;}
-    .wrapper{position:relative;z-index:1;width:100%;max-width:420px;display:flex;flex-direction:column;gap:16px;}
-    .brand{text-align:center;padding:16px 0 8px;}
-    .brand-logo{position:relative;width:90px;height:90px;border-radius:28px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;background:rgba(255,255,255,0.03);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);box-shadow:0 12px 32px rgba(0,0,0,0.3), inset 0 2px 2px rgba(255,255,255,0.1);z-index:2;}
-    .logo-glow{position:absolute;inset:-10px;background:var(--l4);border-radius:50%;filter:blur(20px);opacity:0.25;z-index:-1;animation:pulseGlow 4s ease-in-out infinite;}
-    @keyframes pulseGlow{0%,100%{opacity:0.15;transform:scale(0.9);}50%{opacity:0.35;transform:scale(1.1);}}
-    .brand-logo img{width:65%;height:65%;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.4));}
-    .logo-glow{position:absolute;inset:-10px;background:var(--l4);border-radius:50%;filter:blur(20px);opacity:0.25;z-index:-1;animation:pulseGlow 4s ease-in-out infinite;}
-    @keyframes pulseGlow{0%,100%{opacity:0.15;transform:scale(0.9);}50%{opacity:0.35;transform:scale(1.1);}}
-    .brand-logo img{width:65%;height:65%;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.4));}
-    .brand h1{font-size:20px;font-weight:800;color:white;}
-    .brand h1 span{color:var(--l3);}
-    .brand p{font-size:13px;color:rgba(255,255,255,0.45);margin-top:4px;}
-    .card{background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.10);border-radius:24px;padding:22px;box-shadow:0 8px 32px rgba(0,0,0,0.25);}
-    .user-card{display:flex;align-items:center;gap:14px;}
-    .avatar{width:50px;height:50px;background:linear-gradient(135deg,var(--g5),var(--l4));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-    .user-info{flex:1;min-width:0;}
-    .user-name{font-size:15px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .user-unit{font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;}
-    .status-pill{padding:6px 12px;border-radius:50px;font-size:11px;font-weight:700;flex-shrink:0;background:rgba(16,185,129,0.15);color:var(--g4);border:1px solid rgba(16,185,129,0.25);}
-    .clock-card{text-align:center;padding:20px 24px;}
-    .clock-time{font-size:52px;font-weight:800;letter-spacing:-2px;background:linear-gradient(180deg,#ffffff 0%,rgba(255,255,255,0.65) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-    .clock-date{font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px;font-weight:500;}
-    .clock-hijri{font-size:12px;color:var(--l4);margin-top:2px;font-style:italic;font-weight:600;}
-    .clock-sep{height:1px;background:rgba(255,255,255,0.07);margin:14px 0;}
-    .location-row{display:flex;align-items:center;gap:8px;justify-content:center;font-size:12px;color:rgba(255,255,255,0.4);}
-    .loc-dot{width:8px;height:8px;border-radius:50%;background:var(--g4);animation:pulse 2s ease-in-out infinite;}
-    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.7);}}
-
-    /* ABSEN BUTTONS */
-    .section-label{font-size:11px;font-weight:700;letter-spacing:.8px;color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:10px;text-align:center;}
-    .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .btn-absen{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 16px;border:none;border-radius:16px;cursor:pointer;transition:all .2s ease;font-family:'Inter',sans-serif;}
-    .btn-absen:active{transform:scale(.97);}
-    .btn-masuk{background:linear-gradient(135deg,var(--g6) 0%,var(--g5) 60%,var(--l4) 100%);box-shadow:0 6px 20px rgba(16,185,129,0.35);}
-    .btn-pulang{background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 60%,#60a5fa 100%);box-shadow:0 6px 20px rgba(37,99,235,0.35);}
-    .btn-icon-wrapper {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 6px;
-      background: rgba(255, 255, 255, 0.2);
-      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      position: relative;
-    }
-    .btn-icon-wrapper::after {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      z-index: 0;
-    }
-    .btn-icon-wrapper svg {
-      width: 26px;
-      height: 26px;
-      color: white;
-      z-index: 1;
-      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
-    }
-    .btn-label{font-size:14px;font-weight:700;color:white;}
-    .btn-sub{font-size:11px;color:rgba(255,255,255,.65);}
-
-    /* IZIN BUTTON */
-    .btn-izin-wrap{margin-top:16px;}
-    .btn-izin{width:100%;padding:15px;background:rgba(245,158,11,0.12);border:1.5px solid rgba(245,158,11,0.25);border-radius:14px;color:#fbbf24;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
-    .btn-izin:active{transform:scale(.98);}
-    .btn-izin:hover{background:rgba(245,158,11,0.18);}
-
-    /* MODAL IZIN */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .3s;}
-    .modal-overlay.open{opacity:1;pointer-events:all;}
-    .modal{background:#0d3326;border:1px solid rgba(255,255,255,0.1);border-radius:24px 24px 20px 20px;padding:28px 24px 32px;width:100%;max-width:420px;transform:translateY(30px);transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
-    .modal-overlay.open .modal{transform:translateY(0);}
-    .modal-title{font-size:18px;font-weight:800;color:white;margin-bottom:4px;}
-    .modal-sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px;}
-    .izin-options{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
-    .izin-opt{padding:14px 8px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);cursor:pointer;text-align:center;transition:all .2s;}
-    .izin-opt:hover,.izin-opt.sel{background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.4);}
-    .izin-opt-icon{font-size:22px;margin-bottom:6px;}
-    .izin-opt-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);}
-    .field-modal{margin-bottom:14px;}
-    .field-modal label{font-size:12px;font-weight:600;color:rgba(255,255,255,.5);display:block;margin-bottom:6px;}
-    .field-modal textarea{width:100%;padding:12px 14px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;color:white;font-family:'Inter',sans-serif;font-size:14px;outline:none;resize:none;min-height:80px;}
-    .field-modal textarea::placeholder{color:rgba(255,255,255,.2);}
-    .field-modal textarea:focus{border-color:var(--g5);background:rgba(16,185,129,0.06);}
-    .modal-btns{display:flex;gap:10px;}
-    .btn-cancel-modal{flex:1;padding:13px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:rgba(255,255,255,.6);font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;}
-    .btn-submit-modal{flex:2;padding:13px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:12px;color:white;font-family:'Inter',sans-serif;font-weight:800;cursor:pointer;font-size:14px;}
-
-    /* RIWAYAT */
-    .riwayat-title{font-size:12px;font-weight:700;letter-spacing:.6px;color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:12px;}
-    .riwayat-item{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 14px;border:1px solid rgba(255,255,255,0.07);margin-bottom:8px;}
-    .r-left{display:flex;align-items:center;gap:10px;}
-    .r-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-    .dot-g{background:var(--g4);}
-    .dot-b{background:#60a5fa;}
-    .dot-y{background:#fbbf24;}
-    .r-jenis{font-size:13px;font-weight:600;color:rgba(255,255,255,.85);}
-    .r-tgl{font-size:11px;color:rgba(255,255,255,.3);margin-top:1px;}
-    .r-status{font-size:11px;font-weight:700;}
-    .s-ok{color:var(--g4);}
-    .s-late{color:#fca5a5;}
-    .s-izin{color:#fbbf24;}
-    .txt-empty{font-size:13px;color:rgba(255,255,255,.25);text-align:center;padding:8px 0;}
-
-    /* FORM REGISTER */
-    .form-title{font-size:18px;font-weight:800;color:white;margin-bottom:4px;}
-    .form-sub{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:20px;}
-    .field{margin-bottom:14px;}
-    .field label{font-size:12px;font-weight:600;color:rgba(255,255,255,.55);display:block;margin-bottom:6px;}
-    .field input,.field select{width:100%;padding:13px 16px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.10);border-radius:12px;color:white;font-size:14px;font-family:'Inter',sans-serif;outline:none;}
-    .field input::placeholder{color:rgba(255,255,255,.25);}
-    .field select option{background:#064e3b;color:white;}
-    .btn-daftar{width:100%;padding:15px;background:linear-gradient(135deg,var(--g6) 0%,var(--l4) 100%);border:none;border-radius:12px;color:var(--g9);font-size:15px;font-weight:800;font-family:'Inter',sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(16,185,129,.35);}
-
-    /* TOAST */
-    .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-120px);z-index:999;min-width:280px;max-width:360px;background:rgba(6,78,59,0.95);backdrop-filter:blur(20px);border:1px solid rgba(16,185,129,.3);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.35);transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
-    .toast.show{transform:translateX(-50%) translateY(0);}
-    .toast-icon{font-size:22px;}
-    .toast-text{font-size:13px;color:white;font-weight:500;line-height:1.4;}
-    .loading-screen{position:fixed;inset:0;z-index:100;background:var(--g9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
-    .spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--g5);border-right-color:var(--l4);border-radius:50%;animation:spin .9s linear infinite;}
-    @keyframes spin{to{transform:rotate(360deg);}}
-    .loading-text{font-size:14px;color:rgba(255,255,255,.4);}
-    .footer{text-align:center;font-size:11px;color:rgba(255,255,255,.18);padding-top:8px;}
+    /* Inline minimal setup for loading state before scripts */
+    #initial-loader { position: fixed; inset: 0; background: #064e3b; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+    .loader-spin { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.2); border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
-<body>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-
-  <div class="loading-screen" id="loadingScreen">
-    <div class="spinner"></div>
-    <div class="loading-text">Memverifikasi akun...</div>
+<body class="bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground min-h-screen flex flex-col">
+  
+  <div id="initial-loader">
+    <div class="loader-spin mb-4"></div>
+    <div class="text-sm font-medium">Memuat HRMS...</div>
   </div>
 
-  <div class="toast" id="toast">
-    <div class="toast-icon" id="toastIcon">✅</div>
-    <div class="toast-text" id="toastText"></div>
-  </div>
-
-  <!-- MODAL IZIN -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-    <div class="modal">
-      <div class="modal-title">📋 Ajukan Izin</div>
-      <div class="modal-sub">Pilih jenis izin dan tambahkan keterangan</div>
-      <div class="izin-options">
-        <div class="izin-opt sel" id="opt-Sakit" onclick="pilihIzin('Sakit')">
-          <div class="izin-opt-icon">🤒</div>
-          <div class="izin-opt-lbl">Sakit</div>
+  <div id="main-container" class="flex-1 transition-all duration-300 relative flex">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 glass border-r z-40 hidden md:flex flex-col">
+      <div class="h-16 flex items-center px-6 border-b shrink-0 gap-3">
+        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
+          <i data-lucide="building-2" class="w-5 h-5"></i>
         </div>
-        <div class="izin-opt" id="opt-Izin" onclick="pilihIzin('Izin')">
-          <div class="izin-opt-icon">🏠</div>
-          <div class="izin-opt-lbl">Izin</div>
+        <span class="font-bold text-lg tracking-tight">HRMS</span>
+      </div>
+      <div class="p-4 flex-1 overflow-y-auto" id="sidebar-menu">
+        <!-- Rendered by router -->
+      </div>
+      <div class="p-4 border-t shrink-0">
+        <button onclick="window.auth.logout()" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors">
+          <i data-lucide="log-out" class="w-5 h-5"></i>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- TOP NAVBAR -->
+    <header id="topnav" class="fixed top-0 right-0 left-0 md:left-64 h-16 glass border-b z-30 hidden items-center justify-between px-4 md:px-6 transition-all duration-300">
+      <div class="flex items-center gap-4">
+        <!-- Mobile Menu Toggle -->
+        <button class="md:hidden p-2 -ml-2 text-muted-foreground hover:bg-secondary rounded-lg">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+        <div class="relative hidden sm:block">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
+          <input type="text" placeholder="Cari data..." class="pl-9 pr-4 py-1.5 bg-secondary border border-border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary w-64 transition-all">
         </div>
-        <div class="izin-opt" id="opt-Pulang Awal" onclick="pilihIzin('Pulang Awal')">
-          <div class="izin-opt-icon">🚪</div>
-          <div class="izin-opt-lbl">Pulang Awal</div>
-        </div>
       </div>
-      <div class="field-modal">
-        <label>Keterangan (opsional)</label>
-        <textarea id="inputKet" placeholder="Contoh: Demam dan batuk sejak kemarin..."></textarea>
-      </div>
-      <div class="modal-btns">
-        <button class="btn-cancel-modal" onclick="tutupModal()">Batal</button>
-        <button class="btn-submit-modal" onclick="kirimIzin()" id="btnKirimIzin">Kirim Pengajuan →</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="wrapper" id="mainApp" style="display:none;">
-    <div class="brand">
-      <div class="brand-logo"><div class="logo-glow"></div><img src="Logo_hidayatullah.webp" alt="Logo Hidayatullah"></div>
-      <h1>Absensi <span>Digital</span></h1>
-      <p>Yayasan Pondok Pesantren Hidayatullah Samarinda</p>
-    </div>
-
-    <div class="card user-card" id="userCard" style="display:none;">
-      <div class="avatar">👤</div>
-      <div class="user-info">
-        <div class="user-name" id="userName">—</div>
-        <div class="user-unit" id="userUnit">—</div>
-      </div>
-      <div class="status-pill">Aktif</div>
-    </div>
-
-    <div class="card clock-card">
-      <div class="clock-time" id="clockTime">00:00:00</div>
-      <div class="clock-date" id="clockDate">—</div>
-      <div class="clock-hijri" id="clockHijri">—</div>
-      <div class="clock-sep"></div>
-      <div class="location-row">
-        <div class="loc-dot" id="locDot"></div>
-        <span id="locText">Mendapatkan lokasi GPS...</span>
-      </div>
-    </div>
-
-    <div id="absenSection" style="display:none;">
-      <div class="section-label">Pilih Jenis Absensi</div>
-      <div class="btn-grid">
-        <button class="btn-absen btn-masuk" onclick="doAbsen('Masuk')">
-          <div class="btn-icon-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-            </svg>
+      
+      <div class="flex items-center gap-2 md:gap-4">
+        <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground transition-colors relative">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border border-background"></span>
+        </button>
+        <div class="w-px h-6 bg-border mx-1"></div>
+        <div class="flex items-center gap-3">
+          <div class="text-right hidden sm:block">
+            <div class="text-sm font-bold text-foreground" id="nav-user-name">User</div>
+            <div class="text-[10px] font-medium text-muted-foreground" id="nav-user-role">Role</div>
           </div>
-          <div class="btn-label">Absen Masuk</div>
-          <div class="btn-sub">Klik saat tiba</div>
-        </button>
-        <button class="btn-absen btn-pulang" onclick="doAbsen('Pulang')">
-          <div class="btn-icon-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-            </svg>
+          <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-emerald-400 text-white flex items-center justify-center font-bold shadow-sm" id="nav-user-initial">U</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- RIGHT SIDEBAR (For Admin) -->
+    <aside id="right-sidebar" class="fixed top-16 right-0 w-80 h-[calc(100vh-4rem)] glass border-l z-20 hidden xl:block overflow-y-auto p-6">
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4">Pengumuman</h3>
+          <div class="space-y-3">
+            <div class="bg-primary/10 border border-primary/20 p-3 rounded-xl">
+              <div class="text-xs font-bold text-primary mb-1">Rapat Yayasan</div>
+              <div class="text-[11px] text-muted-foreground">Jumat, 14:00 WITA. Wajib hadir untuk seluruh unit.</div>
+            </div>
           </div>
-          <div class="btn-label">Absen Pulang</div>
-          <div class="btn-sub">Klik saat pulang</div>
+        </div>
+        
+        <div>
+          <h3 class="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4">Unit Sekolah</h3>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-sm p-2 hover:bg-secondary rounded-lg cursor-pointer">
+              <span class="font-medium text-foreground">SD Integral</span>
+              <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded font-bold">Aktif</span>
+            </div>
+            <div class="flex items-center justify-between text-sm p-2 hover:bg-secondary rounded-lg cursor-pointer">
+              <span class="font-medium text-foreground">MTS-MA Putra</span>
+              <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded font-bold">Aktif</span>
+            </div>
+            <div class="flex items-center justify-between text-sm p-2 hover:bg-secondary rounded-lg cursor-pointer">
+              <span class="font-medium text-foreground">MTS-MA Putri</span>
+              <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded font-bold">Aktif</span>
+            </div>
+            <div class="flex items-center justify-between text-sm p-2 hover:bg-secondary rounded-lg cursor-pointer">
+              <span class="font-medium text-foreground">STIT HISAM</span>
+              <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded font-bold">Aktif</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="content-area" class="flex-1 w-full min-h-screen transition-all duration-300 flex flex-col">
+      <!-- App Router Mount Point -->
+      <div id="app-content" class="flex-1 p-4 md:p-6 lg:p-8 mt-0 md:mt-16 w-full max-w-7xl mx-auto relative z-10">
+        <!-- JS renders pages here -->
+      </div>
+    </main>
+
+  </div>
+
+  <!-- GLOBAL COMPONENTS -->
+  
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center">
+    <div class="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin mb-4"></div>
+    <div id="loading-text" class="text-sm font-medium text-foreground animate-pulse">Memuat...</div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="global-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl border transform -translate-y-24 opacity-0 pointer-events-none">
+    <div id="toast-icon" class="text-lg"></div>
+    <div id="toast-text" class="text-sm font-medium"></div>
+  </div>
+
+  <!-- Modal Izin (Employee) -->
+  <div id="modal-izin" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-[90] hidden items-end sm:items-center justify-center p-4">
+    <div class="modal-content w-full max-w-md glass border border-border shadow-2xl rounded-t-2xl sm:rounded-2xl p-6 transform scale-95 opacity-0 transition-all duration-200">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-bold text-foreground">Ajukan Izin</h2>
+          <p class="text-xs text-muted-foreground">Pilih jenis dan berikan keterangan</p>
+        </div>
+        <button onclick="window.ui.closeModal('modal-izin')" class="p-2 hover:bg-secondary rounded-lg text-muted-foreground">
+          <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
-      <div class="btn-izin-wrap">
-        <button class="btn-izin" onclick="bukaModal()">
-          📋 Ajukan Izin / Sakit / Pulang Awal
+      
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <button id="opt-Sakit" onclick="selectIzinOpt('Sakit')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-border bg-secondary hover:border-primary/50 transition-all ring-2 ring-primary ring-offset-2 ring-offset-background">
+          <span class="text-2xl">🤒</span>
+          <span class="text-[10px] font-bold text-foreground">Sakit</span>
+        </button>
+        <button id="opt-Izin" onclick="selectIzinOpt('Izin')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-border bg-background hover:border-primary/50 transition-all">
+          <span class="text-2xl">🏠</span>
+          <span class="text-[10px] font-bold text-muted-foreground">Izin</span>
+        </button>
+        <button id="opt-Pulang Awal" onclick="selectIzinOpt('Pulang Awal')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-border bg-background hover:border-primary/50 transition-all">
+          <span class="text-2xl">🚪</span>
+          <span class="text-[10px] font-bold text-muted-foreground">Pulang Awal</span>
         </button>
       </div>
+      
+      <div class="mb-6">
+        <label class="block text-xs font-bold text-muted-foreground mb-2">KETERANGAN</label>
+        <textarea id="izin-keterangan" rows="3" class="w-full px-3 py-2 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" placeholder="Tuliskan keterangan detail di sini..."></textarea>
+      </div>
+      
+      <button onclick="submitIzinForm()" class="w-full py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:-translate-y-0.5 transition-all shadow-lg shadow-primary/30">
+        Kirim Pengajuan
+      </button>
     </div>
-
-    <div class="card" id="riwayatCard" style="display:none;">
-      <div class="riwayat-title">Riwayat Terakhir</div>
-      <div id="riwayatList"><div class="txt-empty">Belum ada riwayat</div></div>
-    </div>
-
-    <div class="card" id="registerSection" style="display:none;">
-      <div class="form-title">Selamat Datang! 👋</div>
-      <div class="form-sub">Anda belum terdaftar. Isi data diri untuk mulai absensi.</div>
-      <div class="field"><label>Nama Lengkap</label><input type="text" id="inputNama" placeholder="Masukkan nama lengkap"></div>
-      <div class="field"><label>Unit Sekolah</label><select id="inputUnit"><option value="">Memuat...</option></select></div>
-      <button class="btn-daftar" onclick="doRegister()">Daftar & Mulai Absensi</button>
-    </div>
-
-    <div class="footer"><em>NSFZA<br>Building Smart Solutions for Education & Islamic Innovation</em></div>
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxYZb9eQ4TTWvSN4Z-d_OZ2xG2q-3VG1Mym43HLzbucEoyhB3QI92QzcCjo8qQ1vQfs6A/exec";
-    
-    async function apiCall(action, payload = {}) {
-      payload.action = action;
+    window.selectedIzinType = 'Sakit';
+    function selectIzinOpt(type) {
+      window.selectedIzinType = type;
+      document.querySelectorAll('.izin-opt-btn').forEach(b => {
+        b.classList.remove('bg-secondary', 'ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background');
+        b.classList.add('bg-background');
+        b.querySelector('span:last-child').classList.replace('text-foreground', 'text-muted-foreground');
+      });
+      const selected = document.getElementById('opt-'+type);
+      selected.classList.remove('bg-background');
+      selected.classList.add('bg-secondary', 'ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background');
+      selected.querySelector('span:last-child').classList.replace('text-muted-foreground', 'text-foreground');
+    }
+    async function submitIzinForm() {
+      const ket = document.getElementById('izin-keterangan').value.trim();
+      window.ui.showLoading("Mengirim...");
       try {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
+        const res = await window.api.submitIzin({
+          email: window.auth.currentUser.email,
+          jenisIzin: window.selectedIzinType,
+          keterangan: ket || '-'
         });
-        return await response.json();
-      } catch (err) {
-        throw new Error("Gagal terhubung ke server.");
-      }
-    }
-
-    var userEmail = localStorage.getItem('absen_email') || '';
-    if(!userEmail) {
-      userEmail = prompt('Masukkan Email Anda:');
-      if(userEmail) localStorage.setItem('absen_email', userEmail);
-    }
-    var userLat = null, userLon = null;
-    var selectedIzin = 'Sakit';
-
-    var days = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-    var months = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-    function updateClock() {
-      var now = new Date();
-      document.getElementById('clockTime').textContent = [now.getHours(),now.getMinutes(),now.getSeconds()].map(function(x){return String(x).padStart(2,'0');}).join(':');
-      
-      try {
-        var mFormatter = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        var hFormatter = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
-        document.getElementById('clockDate').textContent = mFormatter.format(now) + ' M';
-        let hDate = hFormatter.format(now);
-        if (hDate.endsWith('H') || hDate.endsWith('AH')) { hDate = hDate.replace(/\s*(AH|H)$/, ''); }
-        document.getElementById('clockHijri').textContent = hDate + ' H';
+        window.ui.hideLoading();
+        window.ui.closeModal('modal-izin');
+        window.ui.showToast(res.success ? '✅' : '⚠️', res.message, res.success);
+        document.getElementById('izin-keterangan').value = '';
       } catch(e) {
-        document.getElementById('clockDate').textContent = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear() + ' M';
+        window.ui.hideLoading();
+        window.ui.showToast('⚠️', 'Gagal mengirim', false);
       }
     }
-    updateClock(); setInterval(updateClock, 1000);
-
-    function getLocation(cb) {
-      if (!navigator.geolocation) { showToast('⚠️','Browser tidak mendukung GPS.',false); return; }
-      navigator.geolocation.getCurrentPosition(function(pos) {
-        userLat = pos.coords.latitude; userLon = pos.coords.longitude;
-        document.getElementById('locText').textContent = 'GPS aktif · Akurasi ' + Math.round(pos.coords.accuracy) + 'm';
-        document.getElementById('locDot').style.background = '#a3e635';
-        if(cb) cb();
-      }, function() {
-        document.getElementById('locText').textContent = 'GPS ditolak — aktifkan lokasi!';
-        document.getElementById('locDot').style.background = '#f87171';
-      }, {enableHighAccuracy:true, maximumAge:0, timeout:15000});
-    }
-
-    function showToast(icon, text, ok) {
-      var t = document.getElementById('toast');
-      t.style.borderColor = ok ? 'rgba(16,185,129,.3)' : 'rgba(239,68,68,.3)';
-      document.getElementById('toastIcon').textContent = icon;
-      document.getElementById('toastText').textContent = text;
-      t.classList.add('show');
-      setTimeout(function(){ t.classList.remove('show'); }, 3500);
-    }
-
-    // MODAL IZIN
-    function bukaModal() { document.getElementById('modalOverlay').classList.add('open'); }
-    function tutupModal() { document.getElementById('modalOverlay').classList.remove('open'); }
-    function closeModal(e) { if(e.target === document.getElementById('modalOverlay')) tutupModal(); }
-    function pilihIzin(jenis) {
-      selectedIzin = jenis;
-      ['Sakit','Izin','Pulang Awal'].forEach(function(j){ document.getElementById('opt-'+j).classList.remove('sel'); });
-      document.getElementById('opt-'+jenis).classList.add('sel');
-    }
-    function kirimIzin() {
-      var ket = document.getElementById('inputKet').value.trim();
-      var btn = document.getElementById('btnKirimIzin');
-      btn.textContent = 'Mengirim...'; btn.disabled = true;
-      apiCall('submitIzin', {email: userEmail, jenisIzin: selectedIzin, keterangan: ket || '-'}).then(function(res) {
-          btn.textContent = 'Kirim Pengajuan →'; btn.disabled = false;
-          tutupModal();
-          document.getElementById('inputKet').value = '';
-          var icon = res.success ? '📋' : '⚠️';
-          showToast(icon, res.message, res.success);
-          if(res.success) simpanRiwayat('Izin (' + selectedIzin + ')', 'Menunggu', true);
-        }).catch(function(){ btn.textContent = 'Kirim Pengajuan →'; btn.disabled = false; showToast('⚠️','Gagal mengirim.',false); });
-    }
-
-    function doAbsen(jenis) {
-      if(!userLat) { showToast('📍','GPS belum siap. Tunggu atau aktifkan lokasi.',false); getLocation(); return; }
-      apiCall('processAttendance', {email:userEmail, lat:userLat, lon:userLon, jenisAbsen:jenis}).then(function(res) {
-          showToast(res.success ? '✅' : '🚫', res.message, res.success);
-          if(res.success) { simpanRiwayat('Absen ' + jenis, res.message.includes('Terlambat') || res.message.includes('Cepat') ? 'Terlambat' : 'Tepat Waktu', false); showRiwayat(); }
-        }).catch(function(){ showToast('⚠️','Kesalahan koneksi.',false); });
-    }
-
-    function simpanRiwayat(jenis, status, isIzin) {
-      var r = JSON.parse(localStorage.getItem('rv_'+userEmail)||'[]');
-      var now = new Date();
-      r.unshift({jenis:jenis, status:status, waktu:now.toLocaleDateString('id-ID')+' '+now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}), isIzin:isIzin});
-      localStorage.setItem('rv_'+userEmail, JSON.stringify(r.slice(0,20)));
-      showRiwayat();
-    }
-
-    function showRiwayat() {
-      var r = JSON.parse(localStorage.getItem('rv_'+userEmail)||'[]');
-      var el = document.getElementById('riwayatList');
-      if(!r.length){ el.innerHTML='<div class="txt-empty">Belum ada riwayat</div>'; return; }
-      el.innerHTML = r.slice(0,5).map(function(x){
-        var dot = x.isIzin ? 'dot-y' : (x.jenis.includes('Masuk') ? 'dot-g' : 'dot-b');
-        var cls = x.isIzin ? 's-izin' : (x.status === 'Tepat Waktu' ? 's-ok' : 's-late');
-        return '<div class="riwayat-item"><div class="r-left"><div class="r-dot '+dot+'"></div><div><div class="r-jenis">'+x.jenis+'</div><div class="r-tgl">'+x.waktu+'</div></div></div><div class="r-status '+cls+'">'+x.status+'</div></div>';
-      }).join('');
-    }
-
-    function doRegister() {
-      var nama = document.getElementById('inputNama').value.trim();
-      var unit = document.getElementById('inputUnit').value;
-      if(!userEmail) {
-        userEmail = prompt('Masukkan Email Anda:');
-        if(userEmail) localStorage.setItem('absen_email', userEmail);
-        else { showToast('✏️','Email wajib diisi!',false); return; }
-      }
-      if(!nama||!unit){ showToast('✏️','Nama dan unit wajib diisi!',false); return; }
-      apiCall('registerUser', {email: userEmail, nama: nama, unit: unit}).then(function(res){
-          if(res.success){ showToast('🎉','Berhasil! Selamat datang, '+nama+'!',true); setTimeout(function(){ location.reload(); },2000); }
-          else showToast('⚠️',res.message,false);
-        }).catch(function(err){
-          showToast('⚠️','Gagal terhubung: ' + err.message,false);
-        });
-    }
-
-    function init() {
-      apiCall('checkUserRegistration', {email: userEmail}).then(function(res){
-          document.getElementById('loadingScreen').style.display='none';
-          document.getElementById('mainApp').style.display='flex';
-          if(res.registered){
-            document.getElementById('userCard').style.display='flex';
-            document.getElementById('userName').textContent = res.nama;
-            document.getElementById('userUnit').textContent = res.unit;
-            document.getElementById('absenSection').style.display='block';
-            document.getElementById('riwayatCard').style.display='block';
-            showRiwayat(); getLocation();
-          } else {
-            document.getElementById('registerSection').style.display='block';
-            apiCall('getUnitListNames').then(function(units){
-              var sel = document.getElementById('inputUnit');
-              sel.innerHTML = '<option value="">-- Pilih Unit --</option>';
-              units.forEach(function(u){ sel.innerHTML+='<option value="'+u+'">'+u+'</option>'; });
-            });
-          }
-        }).catch(function(err){
-          alert("Gagal memuat profil: " + err);
-        });
-    }
-    init();
   </script>
+
+  <!-- Load Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/components/ui.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/pages/auth_pages.js"></script>
+  <script src="js/pages/attendance.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/auth.js"></script>
+
+  <!-- App Initialization -->
+  <script>
+    window.onload = function() {
+      lucide.createIcons();
+      document.getElementById('initial-loader').style.display = 'none';
+      
+      // Override navigateTo to update user details in navbar
+      const originalNav = window.router.navigateTo.bind(window.router);
+      window.router.navigateTo = function(routeId) {
+        originalNav(routeId);
+        if (window.auth.currentUser && routeId !== 'login' && routeId !== 'register') {
+          const u = window.auth.currentUser;
+          document.getElementById('nav-user-name').innerText = u.name;
+          document.getElementById('nav-user-role').innerText = u.role === 'admin' ? 'Administrator' : u.unit;
+          document.getElementById('nav-user-initial').innerText = u.name.charAt(0).toUpperCase();
+        }
+      };
+
+      window.auth.init();
+    };
+  </script>
+
 </body>
 </html>
