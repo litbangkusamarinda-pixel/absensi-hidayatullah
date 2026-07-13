@@ -4,21 +4,21 @@ window.ui = {
     const toastIcon = document.getElementById('toast-icon');
     const toastText = document.getElementById('toast-text');
     
-    toast.className = `fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border transition-all duration-300 transform -translate-y-24 opacity-0 ${isSuccess ? 'bg-background border-primary text-foreground' : 'bg-destructive/10 border-destructive text-destructive'}`;
+    toast.className = `fixed top-4 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none backdrop-blur-xl ${isSuccess ? 'bg-[#84cc16]/20 border-[#84cc16]/30 text-white shadow-[0_0_20px_rgba(132,204,22,0.2)]' : 'bg-red-500/20 border-red-500/30 text-red-300 shadow-[0_0_20px_rgba(239,68,68,0.2)]'}`;
     
     toastIcon.innerHTML = icon;
     toastText.innerText = message;
     
     // Animate in
     setTimeout(() => {
-      toast.classList.remove('-translate-y-24', 'opacity-0');
+      toast.classList.remove('-translate-y-24', 'opacity-0', 'pointer-events-none');
       toast.classList.add('translate-y-0', 'opacity-100');
     }, 10);
     
     // Animate out
     setTimeout(() => {
       toast.classList.remove('translate-y-0', 'opacity-100');
-      toast.classList.add('-translate-y-24', 'opacity-0');
+      toast.classList.add('-translate-y-24', 'opacity-0', 'pointer-events-none');
     }, 3000);
   },
 

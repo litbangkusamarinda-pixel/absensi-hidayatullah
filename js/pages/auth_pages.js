@@ -64,36 +64,47 @@ window.pages.initLogin = function() {
 
 window.pages.renderRegister = function() {
   return `
-    <div class="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
-      <div class="absolute w-96 h-96 bg-primary/20 rounded-full blur-[100px] -top-20 -left-20 pointer-events-none"></div>
+    <div class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden animate-in fade-in duration-700">
+      <div class="absolute w-[500px] h-[500px] bg-[#84cc16]/15 rounded-full blur-[120px] -top-32 -left-32 pointer-events-none"></div>
       
-      <div class="w-full max-w-md glass rounded-2xl p-8 shadow-2xl z-10">
+      <div class="w-full max-w-md bg-white/5 backdrop-blur-xl rounded-3xl p-8 sm:p-10 border border-white/10 shadow-2xl z-10">
         <div class="text-center mb-8">
-          <h1 class="text-2xl font-bold text-foreground">Selamat Datang! 👋</h1>
-          <p class="text-sm text-muted-foreground mt-2">Email Anda belum terdaftar. Lengkapi data berikut.</p>
+          <div class="text-5xl mb-4">👋</div>
+          <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 tracking-tight mb-2">Selamat Datang!</h1>
+          <p class="text-sm font-medium text-white/60">Email Anda belum terdaftar. Lengkapi data berikut.</p>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-5">
           <div class="space-y-2">
-            <label class="text-sm font-medium text-foreground">Email</label>
-            <input type="text" id="reg-email" readonly class="w-full px-4 py-3 bg-muted border border-border rounded-xl text-muted-foreground cursor-not-allowed">
+            <label class="text-xs font-bold tracking-widest text-white/50 uppercase">Email</label>
+            <div class="relative">
+              <i data-lucide="mail" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/30"></i>
+              <input type="text" id="reg-email" readonly class="w-full pl-12 pr-4 py-3.5 bg-black/30 border border-white/10 rounded-2xl text-white/60 cursor-not-allowed">
+            </div>
           </div>
           <div class="space-y-2">
-            <label class="text-sm font-medium text-foreground">Nama Lengkap</label>
-            <input type="text" id="reg-nama" placeholder="Masukkan nama" class="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none">
+            <label class="text-xs font-bold tracking-widest text-white/50 uppercase">Nama Lengkap</label>
+            <div class="relative">
+              <i data-lucide="user" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/40"></i>
+              <input type="text" id="reg-nama" placeholder="Masukkan nama" class="w-full pl-12 pr-4 py-3.5 bg-black/20 border border-white/10 rounded-2xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#84cc16]/50 focus:border-[#84cc16]/30 transition-all shadow-inner">
+            </div>
           </div>
           <div class="space-y-2">
-            <label class="text-sm font-medium text-foreground">Unit Sekolah</label>
-            <select id="reg-unit" class="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none appearance-none">
-              <option value="">Memuat unit...</option>
-            </select>
+            <label class="text-xs font-bold tracking-widest text-white/50 uppercase">Unit Sekolah</label>
+            <div class="relative">
+              <i data-lucide="school" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/40"></i>
+              <select id="reg-unit" class="w-full pl-12 pr-4 py-3.5 bg-black/20 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-[#84cc16]/50 focus:border-[#84cc16]/30 appearance-none transition-all shadow-inner">
+                <option value="">Memuat unit...</option>
+              </select>
+            </div>
           </div>
 
-          <button onclick="handleRegister()" class="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-xl shadow-lg hover:-translate-y-0.5 transition-all active:scale-95 mt-4">
+          <button onclick="handleRegister()" class="w-full py-4 mt-2 bg-gradient-to-tr from-[#84cc16] to-[#10b981] text-white font-bold rounded-2xl shadow-lg shadow-[#84cc16]/30 hover:shadow-[#84cc16]/50 hover:-translate-y-1 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 group">
             Daftar & Mulai
+            <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
           </button>
           
-          <button onclick="window.auth.logout()" class="w-full py-3 text-sm text-muted-foreground hover:text-foreground transition-all">
+          <button onclick="window.auth.logout()" class="w-full py-3 text-sm font-bold text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all">
             Batal
           </button>
         </div>

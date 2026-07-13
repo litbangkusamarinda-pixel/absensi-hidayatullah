@@ -5,7 +5,6 @@ window.router = {
     'register': { render: () => window.pages.renderRegister(), layout: 'none' },
     'dashboard': { render: () => window.pages.renderDashboard(), layout: 'admin' },
     'attendance': { render: () => window.pages.renderAttendance(), layout: 'employee' },
-    // Add other routes here like 'teachers', 'reports' as needed.
   },
 
   navigateTo: function(routeId) {
@@ -73,11 +72,17 @@ window.router = {
       ];
     }
 
-    menuContainer.innerHTML = items.map(item => `
+    menuContainer.innerHTML = `
+      <div class="mb-4">
+        <p class="text-[9px] font-black tracking-[0.2em] text-white/30 uppercase px-3 mb-3">Menu Utama</p>
+      </div>
+    ` + items.map(item => `
       <a href="#" onclick="window.router.navigateTo('${item.id}'); return false;" 
          id="menu-${item.id}"
-         class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors mb-1">
-        <i data-lucide="${item.icon}" class="w-5 h-5"></i>
+         class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-white/50 hover:bg-white/5 hover:text-white transition-all duration-300 mb-1 group">
+        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#84cc16]/20 group-hover:text-[#a3e635] transition-all duration-300 shrink-0">
+          <i data-lucide="${item.icon}" class="w-4 h-4"></i>
+        </div>
         ${item.label}
       </a>
     `).join('');
@@ -90,14 +95,25 @@ window.router = {
 
   updateSidebarActiveState: function() {
     document.querySelectorAll('.sidebar-item').forEach(el => {
-      el.classList.remove('bg-secondary', 'text-foreground');
-      el.classList.add('text-muted-foreground');
+      el.classList.remove('bg-[#84cc16]/10', 'text-white', '!text-[#a3e635]', 'active');
+      el.classList.add('text-white/50');
+      // Reset icon bg
+      const iconBg = el.querySelector('div');
+      if (iconBg) {
+        iconBg.classList.remove('bg-[#84cc16]/20', 'text-[#a3e635]');
+        iconBg.classList.add('bg-white/5');
+      }
     });
     
     const activeItem = document.getElementById('menu-' + this.currentRoute);
     if (activeItem) {
-      activeItem.classList.remove('text-muted-foreground');
-      activeItem.classList.add('bg-secondary', 'text-foreground');
+      activeItem.classList.remove('text-white/50');
+      activeItem.classList.add('bg-[#84cc16]/10', 'text-white', 'active');
+      const iconBg = activeItem.querySelector('div');
+      if (iconBg) {
+        iconBg.classList.remove('bg-white/5');
+        iconBg.classList.add('bg-[#84cc16]/20', 'text-[#a3e635]');
+      }
     }
   },
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <base target="_top">
   <title>HRMS Hidayatullah</title>
-  <link rel="icon" href="icon.png">
+  <link rel="icon" href="Logo_hidayatullah.webp">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -16,164 +16,223 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    /* Inline minimal setup for loading state before scripts */
+    /* Loading screen */
     #initial-loader { position: fixed; inset: 0; background: #0a3d2e; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-    .loader-spin { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.2); border-top-color: #84cc16; border-radius: 50%; animation: spin 1s linear infinite; }
+    .loader-spin { width: 48px; height: 48px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #84cc16; border-radius: 50%; animation: spin 0.8s ease-in-out infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Global scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+    /* Sidebar menu item transitions */
+    .sidebar-item { position: relative; overflow: hidden; }
+    .sidebar-item::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; background: #84cc16; border-radius: 0 4px 4px 0; transition: height 0.3s ease; }
+    .sidebar-item.active::before { height: 60%; }
+
+    /* Toast slide-in */
+    .toast-enter { transform: translateX(-50%) translateY(0) !important; opacity: 1 !important; }
+    .toast-exit { transform: translateX(-50%) translateY(-150%) !important; opacity: 0 !important; }
   </style>
 </head>
-<body class="bg-[#0a3d2e] text-white antialiased selection:bg-[#84cc16]/30 selection:text-white min-h-screen flex flex-col overflow-x-hidden">
+<body class="bg-[#0a3d2e] text-white antialiased selection:bg-[#84cc16]/30 selection:text-white min-h-screen flex flex-col overflow-x-hidden" style="font-family: 'Inter', sans-serif;">
   
+  <!-- Initial Loader -->
   <div id="initial-loader">
+    <div class="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center border border-white/10 mb-6 shadow-[0_0_30px_rgba(132,204,22,0.15)]">
+      <img src="Logo_hidayatullah.webp" alt="Logo" class="w-10 h-10 object-contain" onerror="this.outerHTML='<div class=\'loader-spin\'></div>'">
+    </div>
     <div class="loader-spin mb-4"></div>
-    <div class="text-sm font-medium">Memuat HRMS...</div>
+    <div class="text-sm font-bold tracking-widest text-white/60 uppercase">Memuat HRMS...</div>
   </div>
 
   <div id="main-container" class="flex-1 transition-all duration-300 relative flex">
     
-    <!-- LEFT SIDEBAR -->
-    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 glass border-r z-40 hidden md:flex flex-col">
-      <div class="h-16 flex items-center px-6 border-b shrink-0 gap-3">
-        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
-          <i data-lucide="building-2" class="w-5 h-5"></i>
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- LEFT SIDEBAR                                        -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-[#072a1f]/90 backdrop-blur-xl border-r border-white/5 z-40 hidden md:flex flex-col shadow-2xl shadow-black/30">
+      
+      <!-- Sidebar Header / Brand -->
+      <div class="h-20 flex items-center px-6 border-b border-white/5 shrink-0 gap-4">
+        <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shadow-lg shadow-[#84cc16]/20 border border-white/10">
+          <img src="Logo_hidayatullah.webp" alt="Logo Hidayatullah" class="w-9 h-9 object-contain drop-shadow-md" onerror="this.outerHTML='<i data-lucide=\'building-2\' class=\'w-6 h-6 text-[#a3e635]\'></i>'">
         </div>
-        <span class="font-bold text-lg tracking-tight">HRMS</span>
+        <div>
+          <span class="font-extrabold text-lg tracking-tight text-white">HRMS</span>
+          <div class="text-[9px] font-bold tracking-widest text-[#a3e635] uppercase">Hidayatullah</div>
+        </div>
       </div>
+
+      <!-- Sidebar Menu -->
       <div class="p-4 flex-1 overflow-y-auto" id="sidebar-menu">
         <!-- Rendered by router -->
       </div>
-      <div class="p-4 border-t shrink-0">
-        <button onclick="window.auth.logout()" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors">
-          <i data-lucide="log-out" class="w-5 h-5"></i>
+
+      <!-- Sidebar Footer -->
+      <div class="p-4 border-t border-white/5 shrink-0">
+        <button onclick="window.auth.logout()" class="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-red-400/80 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 group">
+          <i data-lucide="log-out" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
           Logout
         </button>
       </div>
     </aside>
 
-    <!-- TOP NAVBAR -->
-    <header id="topnav" class="fixed top-0 right-0 left-0 md:left-64 h-16 glass border-b z-30 hidden items-center justify-between px-4 md:px-6 transition-all duration-300">
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- TOP NAVBAR                                          -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <header id="topnav" class="fixed top-0 right-0 left-0 md:left-64 h-20 bg-[#0a3d2e]/80 backdrop-blur-xl border-b border-white/5 z-30 hidden items-center justify-between px-4 md:px-8 transition-all duration-300">
       <div class="flex items-center gap-4">
         <!-- Mobile Menu Toggle -->
-        <button class="md:hidden p-2 -ml-2 text-muted-foreground hover:bg-secondary rounded-lg">
+        <button class="md:hidden p-2 -ml-2 text-white/60 hover:text-white hover:bg-white/10 rounded-xl transition-all">
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
+        <!-- Mobile Logo -->
+        <div class="md:hidden flex items-center gap-2">
+          <img src="Logo_hidayatullah.webp" alt="Logo" class="w-7 h-7 object-contain drop-shadow-md">
+          <span class="font-extrabold text-sm tracking-tight text-white">HRMS</span>
+        </div>
         <div class="relative hidden sm:block">
-          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
-          <input type="text" placeholder="Cari data..." class="pl-9 pr-4 py-1.5 bg-secondary border border-border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary w-64 transition-all">
+          <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-white/30"></i>
+          <input type="text" placeholder="Cari data..." class="pl-11 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#84cc16]/50 focus:border-[#84cc16]/30 w-64 transition-all">
         </div>
       </div>
       
-      <div class="flex items-center gap-2 md:gap-4">
-        <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground transition-colors relative">
-          <i data-lucide="bell" class="w-5 h-5"></i>
-          <span class="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border border-background"></span>
+      <div class="flex items-center gap-3 md:gap-5">
+        <!-- Notification Bell -->
+        <button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 text-white/60 hover:text-white transition-all relative group">
+          <i data-lucide="bell" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+          <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#0a3d2e] animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
         </button>
-        <div class="w-px h-6 bg-border mx-1"></div>
+
+        <div class="w-px h-8 bg-white/10 mx-1"></div>
+
+        <!-- User Profile -->
         <div class="flex items-center gap-3">
           <div class="text-right hidden sm:block">
-            <div class="text-sm font-bold text-foreground" id="nav-user-name">User</div>
-            <div class="text-[10px] font-medium text-muted-foreground" id="nav-user-role">Role</div>
+            <div class="text-sm font-bold text-white" id="nav-user-name">User</div>
+            <div class="text-[10px] font-bold tracking-wider text-[#a3e635] uppercase" id="nav-user-role">Role</div>
           </div>
-          <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-emerald-400 text-white flex items-center justify-center font-bold shadow-sm" id="nav-user-initial">U</div>
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#84cc16] to-[#10b981] text-white flex items-center justify-center font-black text-sm shadow-lg shadow-[#84cc16]/30" id="nav-user-initial">U</div>
         </div>
       </div>
     </header>
 
-    <!-- RIGHT SIDEBAR (For Admin) -->
-    <aside id="right-sidebar" class="fixed top-16 right-0 w-80 h-[calc(100vh-4rem)] glass border-l z-20 hidden xl:block overflow-y-auto p-6">
-      <div class="space-y-6">
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- RIGHT SIDEBAR (Admin Panel)                         -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <aside id="right-sidebar" class="fixed top-20 right-0 w-80 h-[calc(100vh-5rem)] bg-[#072a1f]/80 backdrop-blur-xl border-l border-white/5 z-20 hidden xl:block overflow-y-auto p-6 shadow-2xl shadow-black/20">
+      <div class="space-y-8">
+
+        <!-- Announcements -->
         <div>
-          <h3 class="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4">Pengumuman</h3>
+          <h3 class="text-[10px] font-black tracking-[0.2em] text-white/40 uppercase mb-4 flex items-center gap-2">
+            <i data-lucide="megaphone" class="w-3.5 h-3.5"></i> Pengumuman
+          </h3>
           <div class="space-y-3">
-            <div class="bg-primary/10 border border-primary/20 p-3 rounded-xl">
-              <div class="text-xs font-bold text-primary mb-1">Rapat Yayasan</div>
-              <div class="text-[11px] text-muted-foreground">Jumat, 14:00 WITA. Wajib hadir untuk seluruh unit.</div>
+            <div class="bg-[#84cc16]/10 border border-[#84cc16]/20 p-4 rounded-2xl hover:border-[#84cc16]/40 transition-all duration-300 group">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-2 h-2 rounded-full bg-[#84cc16] shadow-[0_0_8px_rgba(132,204,22,0.6)]"></div>
+                <div class="text-xs font-bold text-[#a3e635]">Rapat Yayasan</div>
+              </div>
+              <div class="text-[11px] text-white/60 leading-relaxed">Jumat, 14:00 WITA. Wajib hadir untuk seluruh unit.</div>
             </div>
           </div>
         </div>
         
+        <!-- Unit Sekolah -->
         <div>
-          <h3 class="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-4">Unit Sekolah</h3>
+          <h3 class="text-[10px] font-black tracking-[0.2em] text-white/40 uppercase mb-4 flex items-center gap-2">
+            <i data-lucide="school" class="w-3.5 h-3.5"></i> Unit Sekolah
+          </h3>
           <div class="space-y-2">
-            <div class="flex items-center justify-between text-sm p-2 hover:bg-secondary rounded-lg cursor-pointer">
-              <span class="font-medium text-foreground">SD Integral</span>
-              <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded font-bold">Aktif</span>
+            <div class="flex items-center justify-between text-sm p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all duration-300 group">
+              <span class="font-bold text-white/80 group-hover:text-white transition-colors">SD Integral</span>
+              <span class="text-[10px] bg-[#84cc16]/20 text-[#a3e635] px-2.5 py-1 rounded-lg font-black tracking-wider border border-[#84cc16]/20">Aktif</span>
             </div>
-            <div class="flex items-center justify-between text-sm p-2 hover:bg-secondary rounded-lg cursor-pointer">
-              <span class="font-medium text-foreground">MTS-MA Putra</span>
-              <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded font-bold">Aktif</span>
+            <div class="flex items-center justify-between text-sm p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all duration-300 group">
+              <span class="font-bold text-white/80 group-hover:text-white transition-colors">MTS-MA Putra</span>
+              <span class="text-[10px] bg-[#84cc16]/20 text-[#a3e635] px-2.5 py-1 rounded-lg font-black tracking-wider border border-[#84cc16]/20">Aktif</span>
             </div>
-            <div class="flex items-center justify-between text-sm p-2 hover:bg-secondary rounded-lg cursor-pointer">
-              <span class="font-medium text-foreground">MTS-MA Putri</span>
-              <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded font-bold">Aktif</span>
+            <div class="flex items-center justify-between text-sm p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all duration-300 group">
+              <span class="font-bold text-white/80 group-hover:text-white transition-colors">MTS-MA Putri</span>
+              <span class="text-[10px] bg-[#84cc16]/20 text-[#a3e635] px-2.5 py-1 rounded-lg font-black tracking-wider border border-[#84cc16]/20">Aktif</span>
             </div>
-            <div class="flex items-center justify-between text-sm p-2 hover:bg-secondary rounded-lg cursor-pointer">
-              <span class="font-medium text-foreground">STIT HISAM</span>
-              <span class="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded font-bold">Aktif</span>
+            <div class="flex items-center justify-between text-sm p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all duration-300 group">
+              <span class="font-bold text-white/80 group-hover:text-white transition-colors">STIT HISAM</span>
+              <span class="text-[10px] bg-[#84cc16]/20 text-[#a3e635] px-2.5 py-1 rounded-lg font-black tracking-wider border border-[#84cc16]/20">Aktif</span>
             </div>
           </div>
         </div>
       </div>
     </aside>
 
-    <!-- MAIN CONTENT AREA -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT AREA                                   -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <main id="content-area" class="flex-1 w-full min-h-screen transition-all duration-300 flex flex-col">
       <!-- App Router Mount Point -->
-      <div id="app-content" class="flex-1 p-4 md:p-6 lg:p-8 mt-0 md:mt-16 w-full max-w-7xl mx-auto relative z-10">
+      <div id="app-content" class="flex-1 p-4 md:p-6 lg:p-8 mt-0 md:mt-20 w-full max-w-7xl mx-auto relative z-10">
         <!-- JS renders pages here -->
       </div>
     </main>
 
   </div>
 
-  <!-- GLOBAL COMPONENTS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- GLOBAL COMPONENTS                                   -->
+  <!-- ═══════════════════════════════════════════════════ -->
   
   <!-- Loading Overlay -->
-  <div id="loading-overlay" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center">
-    <div class="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin mb-4"></div>
-    <div id="loading-text" class="text-sm font-medium text-foreground animate-pulse">Memuat...</div>
+  <div id="loading-overlay" class="fixed inset-0 bg-[#0a3d2e]/90 backdrop-blur-md z-[100] hidden flex-col items-center justify-center">
+    <div class="w-14 h-14 border-4 border-white/10 border-t-[#84cc16] rounded-full animate-spin mb-5 shadow-[0_0_20px_rgba(132,204,22,0.3)]"></div>
+    <div id="loading-text" class="text-sm font-bold tracking-widest text-white/60 uppercase animate-pulse">Memuat...</div>
   </div>
 
   <!-- Toast Notification -->
-  <div id="global-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl border transform -translate-y-24 opacity-0 pointer-events-none">
+  <div id="global-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border transform -translate-y-24 opacity-0 pointer-events-none backdrop-blur-xl">
     <div id="toast-icon" class="text-lg"></div>
-    <div id="toast-text" class="text-sm font-medium"></div>
+    <div id="toast-text" class="text-sm font-bold"></div>
   </div>
 
-  <!-- Modal Izin (Employee) -->
-  <div id="modal-izin" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-[90] hidden items-end sm:items-center justify-center p-4">
-    <div class="modal-content w-full max-w-md glass border border-border shadow-2xl rounded-t-2xl sm:rounded-2xl p-6 transform scale-95 opacity-0 transition-all duration-200">
-      <div class="flex items-center justify-between mb-4">
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- Modal Izin (Employee)                               -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div id="modal-izin" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[90] hidden items-end sm:items-center justify-center p-4">
+    <div class="modal-content w-full max-w-md bg-[#0d4a35] backdrop-blur-xl border border-white/10 shadow-2xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 transform scale-95 opacity-0 transition-all duration-300">
+      <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="text-lg font-bold text-foreground">Ajukan Izin</h2>
-          <p class="text-xs text-muted-foreground">Pilih jenis dan berikan keterangan</p>
+          <h2 class="text-xl font-extrabold text-white tracking-tight">Ajukan Izin</h2>
+          <p class="text-xs font-medium text-white/50 mt-1">Pilih jenis dan berikan keterangan</p>
         </div>
-        <button onclick="window.ui.closeModal('modal-izin')" class="p-2 hover:bg-secondary rounded-lg text-muted-foreground">
+        <button onclick="window.ui.closeModal('modal-izin')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-all">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
       
-      <div class="grid grid-cols-3 gap-2 mb-4">
-        <button id="opt-Sakit" onclick="selectIzinOpt('Sakit')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-border bg-secondary hover:border-primary/50 transition-all ring-2 ring-primary ring-offset-2 ring-offset-background">
+      <div class="grid grid-cols-3 gap-3 mb-6">
+        <button id="opt-Sakit" onclick="selectIzinOpt('Sakit')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-[#84cc16]/30 bg-[#84cc16]/10 hover:bg-[#84cc16]/20 transition-all ring-2 ring-[#84cc16] ring-offset-2 ring-offset-[#0d4a35]">
           <span class="text-2xl">🤒</span>
-          <span class="text-[10px] font-bold text-foreground">Sakit</span>
+          <span class="text-[10px] font-bold text-white tracking-wider uppercase">Sakit</span>
         </button>
-        <button id="opt-Izin" onclick="selectIzinOpt('Izin')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-border bg-background hover:border-primary/50 transition-all">
+        <button id="opt-Izin" onclick="selectIzinOpt('Izin')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all">
           <span class="text-2xl">🏠</span>
-          <span class="text-[10px] font-bold text-muted-foreground">Izin</span>
+          <span class="text-[10px] font-bold text-white/50 tracking-wider uppercase">Izin</span>
         </button>
-        <button id="opt-Pulang Awal" onclick="selectIzinOpt('Pulang Awal')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-border bg-background hover:border-primary/50 transition-all">
+        <button id="opt-Pulang Awal" onclick="selectIzinOpt('Pulang Awal')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all">
           <span class="text-2xl">🚪</span>
-          <span class="text-[10px] font-bold text-muted-foreground">Pulang Awal</span>
+          <span class="text-[10px] font-bold text-white/50 tracking-wider uppercase">Pulang Awal</span>
         </button>
       </div>
       
       <div class="mb-6">
-        <label class="block text-xs font-bold text-muted-foreground mb-2">KETERANGAN</label>
-        <textarea id="izin-keterangan" rows="3" class="w-full px-3 py-2 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" placeholder="Tuliskan keterangan detail di sini..."></textarea>
+        <label class="block text-[10px] font-black tracking-[0.2em] text-white/40 uppercase mb-2">Keterangan</label>
+        <textarea id="izin-keterangan" rows="3" class="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-2xl text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#84cc16]/50 focus:border-[#84cc16]/30 resize-none transition-all" placeholder="Tuliskan keterangan detail di sini..."></textarea>
       </div>
       
-      <button onclick="submitIzinForm()" class="w-full py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:-translate-y-0.5 transition-all shadow-lg shadow-primary/30">
+      <button onclick="submitIzinForm()" class="w-full py-4 bg-gradient-to-tr from-[#84cc16] to-[#10b981] text-white font-bold rounded-2xl hover:-translate-y-0.5 transition-all shadow-lg shadow-[#84cc16]/30 hover:shadow-[#84cc16]/50 active:scale-95">
         Kirim Pengajuan
       </button>
     </div>
@@ -184,14 +243,16 @@
     function selectIzinOpt(type) {
       window.selectedIzinType = type;
       document.querySelectorAll('.izin-opt-btn').forEach(b => {
-        b.classList.remove('bg-secondary', 'ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background');
-        b.classList.add('bg-background');
-        b.querySelector('span:last-child').classList.replace('text-foreground', 'text-muted-foreground');
+        b.classList.remove('bg-[#84cc16]/10', 'border-[#84cc16]/30', 'ring-2', 'ring-[#84cc16]', 'ring-offset-2', 'ring-offset-[#0d4a35]');
+        b.classList.add('bg-white/5', 'border-white/10');
+        b.querySelector('span:last-child').classList.remove('text-white');
+        b.querySelector('span:last-child').classList.add('text-white/50');
       });
       const selected = document.getElementById('opt-'+type);
-      selected.classList.remove('bg-background');
-      selected.classList.add('bg-secondary', 'ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background');
-      selected.querySelector('span:last-child').classList.replace('text-muted-foreground', 'text-foreground');
+      selected.classList.remove('bg-white/5', 'border-white/10');
+      selected.classList.add('bg-[#84cc16]/10', 'border-[#84cc16]/30', 'ring-2', 'ring-[#84cc16]', 'ring-offset-2', 'ring-offset-[#0d4a35]');
+      selected.querySelector('span:last-child').classList.remove('text-white/50');
+      selected.querySelector('span:last-child').classList.add('text-white');
     }
     async function submitIzinForm() {
       const ket = document.getElementById('izin-keterangan').value.trim();
