@@ -11,7 +11,7 @@ window.pages.renderAttendance = function() {
         <!-- Header -->
         <div class="text-center pt-6 pb-2">
           <div class="w-14 h-14 mx-auto mb-2 bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 shadow-lg">
-             <img src="icon.png" alt="Logo Hidayatullah" class="w-10 h-10 object-contain drop-shadow-md" onerror="this.outerHTML='<i data-lucide=\\'building-2\\' class=\\'w-7 h-7 text-white\\'></i>'">
+             <img src="Logo_hidayatullah.webp" alt="Logo Hidayatullah" class="w-10 h-10 object-contain drop-shadow-md" onerror="this.outerHTML='<i data-lucide=\\'building-2\\' class=\\'w-7 h-7 text-white\\'></i>'">
           </div>
           <h1 class="text-2xl font-bold text-white mb-1 tracking-tight">Absensi <span class="text-[#a3e635]">Digital</span></h1>
           <p class="text-xs text-white/60">Yayasan Pondok Pesantren Hidayatullah Samarinda</p>

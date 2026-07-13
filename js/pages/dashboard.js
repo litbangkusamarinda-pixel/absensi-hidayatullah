@@ -1,48 +1,82 @@
 window.pages = window.pages || {};
 
 window.pages.renderDashboard = function() {
+  const user = window.auth.currentUser || { name: 'Admin', role: 'admin' };
+  
   return `
-    <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
       
+      <!-- Greeting Section -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 tracking-tight mb-2">
+            Selamat Datang, ${user.name.split(' ')[0]}
+          </h1>
+          <p class="text-sm md:text-base text-white/60 font-medium">
+            Berikut adalah ringkasan aktivitas HRMS Hidayatullah hari ini.
+          </p>
+        </div>
+        <div class="text-right hidden md:block">
+          <div class="text-xs font-bold tracking-widest text-primary uppercase mb-1">Status Sistem</div>
+          <div class="flex items-center gap-2 text-sm text-white/80 bg-white/5 px-4 py-2 rounded-full border border-white/10 shadow-lg backdrop-blur-md">
+            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            Online & Sinkron
+          </div>
+        </div>
+      </div>
+
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="glass p-5 rounded-2xl flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
-            <i data-lucide="users" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <p class="text-sm text-muted-foreground font-medium">Total Pegawai</p>
-            <h3 class="text-2xl font-bold text-foreground" id="stat-total">-</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- Card 1: Total Pegawai -->
+        <div class="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-500/30 transition-all duration-300 group">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-[11px] font-bold tracking-widest text-white/50 uppercase mb-1">Total Pegawai</p>
+              <h3 class="text-3xl font-black text-white drop-shadow-sm" id="stat-total">-</h3>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
+              <i data-lucide="users" class="w-6 h-6 text-white"></i>
+            </div>
           </div>
         </div>
         
-        <div class="glass p-5 rounded-2xl flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-            <i data-lucide="user-check" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <p class="text-sm text-muted-foreground font-medium">Hadir Hari Ini</p>
-            <h3 class="text-2xl font-bold text-foreground" id="stat-hadir">-</h3>
-          </div>
-        </div>
-        
-        <div class="glass p-5 rounded-2xl flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center shrink-0">
-            <i data-lucide="clock" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <p class="text-sm text-muted-foreground font-medium">Terlambat</p>
-            <h3 class="text-2xl font-bold text-foreground" id="stat-telat">-</h3>
+        <!-- Card 2: Hadir Hari Ini -->
+        <div class="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/30 transition-all duration-300 group">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-[11px] font-bold tracking-widest text-white/50 uppercase mb-1">Hadir Hari Ini</p>
+              <h3 class="text-3xl font-black text-white drop-shadow-sm" id="stat-hadir">-</h3>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#84cc16] to-[#10b981] flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform">
+              <i data-lucide="user-check" class="w-6 h-6 text-white"></i>
+            </div>
           </div>
         </div>
         
-        <div class="glass p-5 rounded-2xl flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
-            <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+        <!-- Card 3: Terlambat -->
+        <div class="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:shadow-red-500/20 hover:border-red-500/30 transition-all duration-300 group">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-[11px] font-bold tracking-widest text-white/50 uppercase mb-1">Terlambat</p>
+              <h3 class="text-3xl font-black text-white drop-shadow-sm" id="stat-telat">-</h3>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-400 to-rose-600 flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform">
+              <i data-lucide="clock" class="w-6 h-6 text-white"></i>
+            </div>
           </div>
-          <div>
-            <p class="text-sm text-muted-foreground font-medium">Izin Pending</p>
-            <h3 class="text-2xl font-bold text-foreground" id="stat-izin">-</h3>
+        </div>
+        
+        <!-- Card 4: Izin Pending -->
+        <div class="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:shadow-amber-500/20 hover:border-amber-500/30 transition-all duration-300 group">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-[11px] font-bold tracking-widest text-white/50 uppercase mb-1">Izin Pending</p>
+              <h3 class="text-3xl font-black text-white drop-shadow-sm" id="stat-izin">-</h3>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform">
+              <i data-lucide="clipboard-list" class="w-6 h-6 text-white"></i>
+            </div>
           </div>
         </div>
       </div>
@@ -50,53 +84,61 @@ window.pages.renderDashboard = function() {
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Live Log Table -->
-        <div class="lg:col-span-2 glass rounded-2xl p-6 flex flex-col h-[400px]">
-          <div class="flex items-center justify-between mb-4 shrink-0">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center">
-                <div class="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></div>
+        <div class="lg:col-span-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col h-[450px] shadow-2xl relative overflow-hidden">
+          
+          <!-- Subtle background glow -->
+          <div class="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0 z-10">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-black/20 border border-white/10 text-white flex items-center justify-center shadow-inner">
+                <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>
               </div>
               <div>
-                <h3 class="font-bold text-foreground">Log Absensi Live</h3>
-                <p class="text-xs text-muted-foreground">Auto-refresh tiap 30 detik</p>
+                <h3 class="text-lg font-bold text-white tracking-tight">Log Absensi Live</h3>
+                <p class="text-xs text-white/50">Auto-refresh tiap 30 detik</p>
               </div>
             </div>
-            <button onclick="window.pages.downloadCSV()" id="btnDl" class="px-3 py-1.5 bg-primary text-primary-foreground text-xs font-medium rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2">
+            <button onclick="window.pages.downloadCSV()" id="btnDl" class="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg backdrop-blur-sm">
               <i data-lucide="download" class="w-4 h-4"></i> Ekspor CSV
             </button>
           </div>
           
-          <div class="flex-1 overflow-auto rounded-xl border border-border/50 bg-background/50">
+          <div class="flex-1 overflow-auto rounded-2xl bg-black/20 border border-white/5 z-10">
             <table class="w-full text-sm text-left">
-              <thead class="text-xs text-muted-foreground uppercase bg-secondary/50 sticky top-0 z-10">
+              <thead class="text-xs text-white/40 uppercase bg-black/40 backdrop-blur-md sticky top-0 z-20">
                 <tr>
-                  <th class="px-4 py-3 font-medium">Waktu</th>
-                  <th class="px-4 py-3 font-medium">Nama / Unit</th>
-                  <th class="px-4 py-3 font-medium">Jenis</th>
-                  <th class="px-4 py-3 font-medium">Status</th>
+                  <th class="px-5 py-4 font-bold tracking-wider">Waktu</th>
+                  <th class="px-5 py-4 font-bold tracking-wider">Nama / Unit</th>
+                  <th class="px-5 py-4 font-bold tracking-wider">Jenis</th>
+                  <th class="px-5 py-4 font-bold tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody id="tabelLog" class="divide-y divide-border/50">
-                <tr><td colspan="4" class="text-center py-8 text-muted-foreground">Memuat data...</td></tr>
+              <tbody id="tabelLog" class="divide-y divide-white/5">
+                <tr><td colspan="4" class="text-center py-12 text-white/40 font-medium">Memuat data live...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
         
         <!-- Izin Pending -->
-        <div class="glass rounded-2xl p-6 flex flex-col h-[400px]">
-          <div class="flex items-center gap-3 mb-4 shrink-0">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-              <i data-lucide="inbox" class="w-5 h-5"></i>
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col h-[450px] shadow-2xl relative overflow-hidden">
+          
+          <!-- Subtle background glow -->
+          <div class="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+
+          <div class="flex items-center gap-4 mb-6 shrink-0 z-10">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+              <i data-lucide="inbox" class="w-6 h-6"></i>
             </div>
             <div>
-              <h3 class="font-bold text-foreground">Menunggu Persetujuan</h3>
-              <p class="text-xs text-muted-foreground" id="pendingCount">0 pengajuan</p>
+              <h3 class="text-lg font-bold text-white tracking-tight">Persetujuan Izin</h3>
+              <p class="text-xs text-amber-400/80 font-medium" id="pendingCount">0 menunggu</p>
             </div>
           </div>
           
-          <div class="flex-1 overflow-auto space-y-3" id="tabelPending">
-            <div class="text-center py-8 text-muted-foreground text-sm">Memuat data...</div>
+          <div class="flex-1 overflow-auto space-y-3 z-10 pr-2" id="tabelPending">
+            <div class="text-center py-12 text-white/40 font-medium text-sm">Tidak ada pengajuan izin</div>
           </div>
         </div>
 
@@ -132,21 +174,21 @@ window.pages.initDashboard = function() {
         if(r.status === "Terlambat") { hadirCount++; telatCount++; }
         
         const bc = (r.status === "Terlambat" || r.status === "Pulang Cepat") 
-            ? "bg-red-500/10 text-red-600 border border-red-500/20" 
-            : "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20";
+            ? "bg-red-500/20 text-red-400 border border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]" 
+            : "bg-[#84cc16]/20 text-[#a3e635] border border-[#84cc16]/30 shadow-[0_0_10px_rgba(132,204,22,0.2)]";
         const jc = r.jenis === "Masuk" 
-            ? "bg-primary/10 text-primary border border-primary/20" 
-            : "bg-blue-500/10 text-blue-600 border border-blue-500/20";
+            ? "bg-white/10 text-white border border-white/20" 
+            : "bg-blue-500/20 text-blue-400 border border-blue-500/30";
             
         return `
-          <tr class="hover:bg-secondary/30 transition-colors">
-            <td class="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">${r.waktu}</td>
-            <td class="px-4 py-3">
-              <div class="font-medium text-foreground">${r.nama}</div>
-              <div class="text-xs text-muted-foreground truncate max-w-[120px]">${r.unit}</div>
+          <tr class="hover:bg-white/5 transition-colors group cursor-default">
+            <td class="px-5 py-4 whitespace-nowrap text-xs text-white/60 group-hover:text-white/80 transition-colors">${r.waktu}</td>
+            <td class="px-5 py-4">
+              <div class="font-bold text-white group-hover:text-primary transition-colors">${r.nama}</div>
+              <div class="text-xs text-white/50 truncate max-w-[150px]">${r.unit}</div>
             </td>
-            <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${jc}">${r.jenis}</span></td>
-            <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${bc}">${r.status}</span></td>
+            <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${jc}">${r.jenis}</span></td>
+            <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${bc}">${r.status}</span></td>
           </tr>
         `;
       }).join('');
@@ -165,27 +207,27 @@ window.pages.initDashboard = function() {
       const d = await window.api.getIzinPendingAdmin(adminEmail);
       const tb = document.getElementById('tabelPending');
       
-      document.getElementById('pendingCount').textContent = d.length + ' pengajuan';
+      document.getElementById('pendingCount').textContent = d.length + ' menunggu';
       document.getElementById('stat-izin').innerText = d.length;
       
       if(!d.length){ 
-        tb.innerHTML = '<div class="text-center py-8 text-muted-foreground text-sm">Tidak ada pengajuan</div>'; 
+        tb.innerHTML = '<div class="text-center py-12 text-white/40 font-medium text-sm">Tidak ada pengajuan izin</div>'; 
         return; 
       }
       
       tb.innerHTML = d.map(r => `
-        <div class="bg-secondary/50 rounded-xl p-3 border border-border/50 text-sm">
-          <div class="flex justify-between items-start mb-2">
+        <div class="bg-black/20 hover:bg-black/40 rounded-2xl p-4 border border-white/5 hover:border-white/10 transition-all duration-300 text-sm shadow-inner group">
+          <div class="flex justify-between items-start mb-3">
             <div>
-              <div class="font-bold text-foreground">${r.nama}</div>
-              <div class="text-xs text-muted-foreground">${r.waktu} • ${r.unit}</div>
+              <div class="font-bold text-white text-base group-hover:text-amber-400 transition-colors">${r.nama}</div>
+              <div class="text-xs text-white/50">${r.waktu} • ${r.unit}</div>
             </div>
-            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 uppercase tracking-wider border border-amber-500/20">${r.jenis}</span>
+            <span class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-amber-500/20 text-amber-400 uppercase tracking-widest border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">${r.jenis}</span>
           </div>
-          <p class="text-xs text-muted-foreground bg-background/50 p-2 rounded-lg mb-2">${r.ket || '-'}</p>
-          <div class="flex gap-2">
-            <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Disetujui')" class="flex-1 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20 rounded-lg text-xs font-bold transition-colors">Terima</button>
-            <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Ditolak')" class="flex-1 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20 rounded-lg text-xs font-bold transition-colors">Tolak</button>
+          <p class="text-sm text-white/70 bg-white/5 p-3 rounded-xl mb-3 italic">"${r.ket || '-'}"</p>
+          <div class="flex gap-3">
+            <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Disetujui')" class="flex-1 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]">Setujui</button>
+            <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Ditolak')" class="flex-1 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)]">Tolak</button>
           </div>
         </div>
       `).join('');
