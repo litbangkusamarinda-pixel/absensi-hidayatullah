@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxYZb9eQ4TTWvSN4Z-d_OZ2xG2q-3VG1Mym43HLzbucEoyhB3QI92QzcCjo8qQ1vQfs6A/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycby3nYZ8ET_z1ZV-ESztZ1X2gzpwL10noPzpcdGZForFAiEvbhvqlvx-mdncSjLdElfeag/exec";
 
 window.apiCall = async function(action, payload = {}) {
   payload.action = action;
