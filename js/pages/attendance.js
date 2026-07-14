@@ -4,7 +4,7 @@ window.pages.renderAttendance = function() {
   const user = window.auth.currentUser;
   
   return `
-    <div class="absolute inset-0 bg-[#0B1A14] font-sans overflow-y-auto z-50">
+    <div class="absolute inset-0 bg-[#102B22] font-sans overflow-y-auto z-50">
       <div class="min-h-screen p-4 md:p-6 lg:p-8">
         <div class="max-w-md mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
         

@@ -23,7 +23,7 @@
 
   <style>
     /* ═══ Loading Screen ═══ */
-    #initial-loader { position:fixed; inset:0; background:linear-gradient(135deg, #0B1A14 0%, #0F2A1F 50%, #132F24 100%); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; }
+    #initial-loader { position:fixed; inset:0; background:linear-gradient(135deg, #102B22 0%, #0F2A1F 50%, #132F24 100%); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; }
     .loader-ring { width:52px; height:52px; border:3px solid rgba(255,255,255,0.06); border-top-color:#14B88A; border-radius:50%; animation:spin 0.8s ease-in-out infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
     .loader-bar { width:160px; height:3px; background:rgba(255,255,255,0.06); border-radius:99px; overflow:hidden; margin-top:20px; }
@@ -43,7 +43,7 @@
     #sidebar-overlay.active { display:block; }
   </style>
 </head>
-<body class="bg-[#0B1A14] text-white antialiased selection:bg-[#14B88A]/30 selection:text-white min-h-screen flex flex-col overflow-x-hidden" style="font-family:'Inter',sans-serif;">
+<body class="bg-[#102B22] text-white antialiased selection:bg-[#14B88A]/30 selection:text-white min-h-screen flex flex-col overflow-x-hidden" style="font-family:'Inter',sans-serif;">
   
   <!-- ═══════════ INITIAL LOADER ═══════════ -->
   <div id="initial-loader">
@@ -64,7 +64,7 @@
     <!-- ═══════════════════════════════════════════════ -->
     <!-- LEFT SIDEBAR                                    -->
     <!-- ═══════════════════════════════════════════════ -->
-    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-[260px] bg-[#0B1A14]/95 backdrop-blur-2xl border-r border-white/[0.04] z-[60] flex flex-col shadow-2xl shadow-black/40 transition-transform duration-200 -translate-x-full md:translate-x-0">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-[260px] bg-[#102B22]/95 backdrop-blur-2xl border-r border-white/[0.04] z-[60] flex flex-col shadow-2xl shadow-black/40 transition-transform duration-200 -translate-x-full md:translate-x-0">
       
       <!-- Brand Header -->
       <div class="h-[72px] flex items-center px-5 border-b border-white/[0.04] shrink-0 gap-3">
@@ -104,7 +104,7 @@
     <!-- ═══════════════════════════════════════════════ -->
     <!-- TOP NAVBAR                                      -->
     <!-- ═══════════════════════════════════════════════ -->
-    <header id="topnav" class="fixed top-0 right-0 left-0 md:left-[260px] h-[72px] bg-[#0B1A14]/80 backdrop-blur-2xl border-b border-white/[0.04] z-30 flex items-center justify-between px-4 md:px-6 transition-all duration-300">
+    <header id="topnav" class="fixed top-0 right-0 left-0 md:left-[260px] h-[72px] bg-[#102B22]/80 backdrop-blur-2xl border-b border-white/[0.04] z-30 flex items-center justify-between px-4 md:px-6 transition-all duration-300">
       <div class="flex items-center gap-3">
         <!-- Mobile Menu Toggle -->
         <button onclick="toggleSidebar(true)" class="md:hidden p-2 -ml-2 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all">
@@ -132,7 +132,7 @@
         <!-- Notification Bell -->
         <button class="btn-icon relative group" data-tooltip="Notifikasi">
           <i data-lucide="bell" class="w-[18px] h-[18px] group-hover:scale-110 transition-transform"></i>
-          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-[#EF4444] rounded-full border-2 border-[#0B1A14] animate-pulse"></span>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-[#EF4444] rounded-full border-2 border-[#102B22] animate-pulse"></span>
         </button>
 
         <div class="w-px h-8 bg-white/[0.06] mx-1 hidden sm:block"></div>
@@ -151,7 +151,7 @@
     <!-- ═══════════════════════════════════════════════ -->
     <!-- RIGHT SIDEBAR                                   -->
     <!-- ═══════════════════════════════════════════════ -->
-    <aside id="right-sidebar" class="fixed top-[72px] right-0 w-[300px] h-[calc(100vh-72px)] bg-[#0B1A14]/90 backdrop-blur-2xl border-l border-white/[0.04] z-20 hidden xl:block overflow-y-auto p-5 shadow-2xl shadow-black/20">
+    <aside id="right-sidebar" class="fixed top-[72px] right-0 w-[300px] h-[calc(100vh-72px)] bg-[#102B22]/90 backdrop-blur-2xl border-l border-white/[0.04] z-20 hidden xl:block overflow-y-auto p-5 shadow-2xl shadow-black/20">
       <div class="space-y-7">
 
         <!-- Today's Date Widget -->
@@ -249,7 +249,7 @@
   <!-- ═══════════════════════════════════════════════ -->
   
   <!-- Loading Overlay -->
-  <div id="loading-overlay" class="fixed inset-0 bg-[#0B1A14]/90 backdrop-blur-md z-[100] hidden flex-col items-center justify-center">
+  <div id="loading-overlay" class="fixed inset-0 bg-[#102B22]/90 backdrop-blur-md z-[100] hidden flex-col items-center justify-center">
     <div class="w-14 h-14 border-4 border-white/[0.06] border-t-[#14B88A] rounded-full animate-spin mb-5 shadow-[0_0_20px_rgba(20,184,138,0.2)]"></div>
     <div id="loading-text" class="text-sm font-bold tracking-widest text-white/50 uppercase animate-pulse">Memuat...</div>
   </div>

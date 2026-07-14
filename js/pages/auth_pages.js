@@ -34,7 +34,7 @@ window.pages.renderLogin = function() {
           
           <div class="relative py-6">
             <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
-            <div class="relative flex justify-center text-[10px] font-bold tracking-widest uppercase"><span class="bg-[#0B1A14] px-4 text-white/40 rounded-full">Atau Akses Sebagai Admin</span></div>
+            <div class="relative flex justify-center text-[10px] font-bold tracking-widest uppercase"><span class="bg-[#102B22] px-4 text-white/40 rounded-full">Atau Akses Sebagai Admin</span></div>
           </div>
           
           <button onclick="handleAdminLogin()" class="w-full py-3.5 bg-white/5 text-white/80 border border-white/10 font-bold rounded-2xl hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2">

@@ -4,7 +4,7 @@
   "description": "Enterprise Human Resource Management System — Yayasan Pondok Pesantren Hidayatullah Samarinda",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#0B1A14",
+  "background_color": "#102B22",
   "theme_color": "#14B88A",
   "icons": [
     {

@@ -371,7 +371,7 @@ window.pages.initDashboard = function() {
             pointRadius: 4,
             pointHoverRadius: 7,
             pointBackgroundColor: '#14B88A',
-            pointBorderColor: '#0B1A14',
+            pointBorderColor: '#102B22',
             pointBorderWidth: 2,
           },
           {
@@ -385,7 +385,7 @@ window.pages.initDashboard = function() {
             pointRadius: 3,
             pointHoverRadius: 6,
             pointBackgroundColor: '#F59E0B',
-            pointBorderColor: '#0B1A14',
+            pointBorderColor: '#102B22',
             pointBorderWidth: 2,
           }
         ]
@@ -443,7 +443,7 @@ window.pages.initDashboard = function() {
         datasets: [{
           data: [hadir - telat, telat, izin, absen],
           backgroundColor: ['#14B88A', '#F59E0B', '#3B82F6', '#EF4444'],
-          borderColor: '#0B1A14',
+          borderColor: '#102B22',
           borderWidth: 3,
           hoverOffset: 6
         }]
