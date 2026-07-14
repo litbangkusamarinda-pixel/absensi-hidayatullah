@@ -4,7 +4,7 @@ window.pages.renderAttendance = function() {
   const user = window.auth.currentUser;
   
   return `
-    <div class="absolute inset-0 bg-[#0a3d2e] font-sans overflow-y-auto z-50">
+    <div class="absolute inset-0 bg-[#0B1A14] font-sans overflow-y-auto z-50">
       <div class="min-h-screen p-4 md:p-6 lg:p-8">
         <div class="max-w-md mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
         
@@ -13,21 +13,21 @@ window.pages.renderAttendance = function() {
           <div class="w-14 h-14 mx-auto mb-2 bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 shadow-lg">
              <img src="Logo_hidayatullah.webp" alt="Logo Hidayatullah" class="w-10 h-10 object-contain drop-shadow-md" onerror="this.outerHTML='<i data-lucide=\\'building-2\\' class=\\'w-7 h-7 text-white\\'></i>'">
           </div>
-          <h1 class="text-2xl font-bold text-white mb-1 tracking-tight">Absensi <span class="text-[#a3e635]">Digital</span></h1>
+          <h1 class="text-2xl font-bold text-white mb-1 tracking-tight">Absensi <span class="text-[#14B88A]">Digital</span></h1>
           <p class="text-xs text-white/60">Yayasan Pondok Pesantren Hidayatullah Samarinda</p>
         </div>
 
         <!-- User Card -->
         <div class="bg-white/5 backdrop-blur-md rounded-3xl p-4 flex items-center justify-between gap-4 border border-white/10 shadow-lg">
           <div class="flex items-center gap-4 w-full">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#84cc16] to-[#22c55e] flex items-center justify-center shadow-lg shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#14B88A] to-[#22c55e] flex items-center justify-center shadow-lg shrink-0">
               <i data-lucide="user" class="w-6 h-6 text-white/80"></i>
             </div>
             <div class="flex-1 min-w-0">
               <h2 class="text-lg font-bold text-white truncate">${user.name}</h2>
               <p class="text-xs text-white/70 truncate">${user.unit}</p>
             </div>
-            <div class="px-4 py-1.5 rounded-full bg-[#84cc16]/20 border border-[#84cc16]/30 text-[#a3e635] text-xs font-bold shrink-0">
+            <div class="px-4 py-1.5 rounded-full bg-[#14B88A]/20 border border-[#14B88A]/30 text-[#14B88A] text-xs font-bold shrink-0">
               Aktif
             </div>
           </div>
@@ -40,7 +40,7 @@ window.pages.renderAttendance = function() {
               00:00:00
             </div>
             <div id="att-date" class="text-sm font-medium text-white/80 mt-2">Memuat tanggal...</div>
-            <div id="att-hijri" class="text-sm font-bold italic text-[#a3e635] mt-1"></div>
+            <div id="att-hijri" class="text-sm font-bold italic text-[#14B88A] mt-1"></div>
           </div>
           
           <div class="h-px w-full bg-white/10 my-4"></div>
@@ -59,7 +59,7 @@ window.pages.renderAttendance = function() {
         <!-- Action Buttons -->
         <div class="grid grid-cols-2 gap-4">
           <!-- Absen Masuk -->
-          <button onclick="handleAbsen('Masuk')" class="flex flex-col items-center justify-center gap-5 p-6 rounded-3xl bg-gradient-to-tr from-[#84cc16] to-[#10b981] text-white shadow-lg shadow-[#84cc16]/30 hover:scale-105 transition-transform active:scale-95 group border border-[#84cc16]/20">
+          <button onclick="handleAbsen('Masuk')" class="flex flex-col items-center justify-center gap-5 p-6 rounded-3xl bg-gradient-to-tr from-[#14B88A] to-[#0D9B73] text-white shadow-lg shadow-[#14B88A]/30 hover:scale-105 transition-transform active:scale-95 group border border-[#14B88A]/20">
             <div class="relative w-14 h-14 flex items-center justify-center mt-2">
               <div class="absolute inset-0 rounded-full border border-white/20 scale-[1.3] transition-transform group-hover:scale-[1.4]"></div>
               <div class="absolute inset-0 rounded-full border border-white/10 scale-[1.6] transition-transform group-hover:scale-[1.7]"></div>

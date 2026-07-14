@@ -5,14 +5,14 @@ window.pages.renderLogin = function() {
     <div class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden animate-in fade-in duration-700">
       
       <!-- Decorative Orbs -->
-      <div class="absolute w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] -top-32 -left-32 pointer-events-none"></div>
-      <div class="absolute w-[500px] h-[500px] bg-[#84cc16]/10 rounded-full blur-[120px] -bottom-32 -right-32 pointer-events-none"></div>
+      <div class="absolute w-[500px] h-[500px] bg-[#14B88A]/20 rounded-full blur-[120px] -top-32 -left-32 pointer-events-none"></div>
+      <div class="absolute w-[500px] h-[500px] bg-[#14B88A]/10 rounded-full blur-[120px] -bottom-32 -right-32 pointer-events-none"></div>
 
       <div class="w-full max-w-md bg-white/5 backdrop-blur-xl rounded-3xl p-8 sm:p-10 border border-white/10 shadow-2xl z-10 relative">
         <div class="text-center mb-8">
-          <div class="w-20 h-20 bg-white/5 rounded-3xl mx-auto flex items-center justify-center mb-5 border border-white/10 shadow-[0_0_25px_rgba(132,204,22,0.15)] relative group">
+          <div class="w-20 h-20 bg-white/5 rounded-3xl mx-auto flex items-center justify-center mb-5 border border-white/10 shadow-[0_0_25px_rgba(20,184,138,0.15)] relative group">
              <div class="absolute inset-0 rounded-3xl border border-white/20 scale-110 transition-transform duration-500 group-hover:scale-125"></div>
-             <img src="Logo_hidayatullah.webp" alt="Logo Hidayatullah" class="w-12 h-12 object-contain drop-shadow-md relative z-10" onerror="this.outerHTML='<i data-lucide=\\'shield-check\\' class=\\'w-10 h-10 text-[#a3e635]\\'></i>'">
+             <img src="Logo_hidayatullah.webp" alt="Logo Hidayatullah" class="w-12 h-12 object-contain drop-shadow-md relative z-10" onerror="this.outerHTML='<i data-lucide=\\'shield-check\\' class=\\'w-10 h-10 text-[#14B88A]\\'></i>'">
           </div>
           <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 tracking-tight mb-2">HRMS Hidayatullah</h1>
           <p class="text-sm font-medium text-white/60">Login untuk mengakses absensi atau dashboard</p>
@@ -23,18 +23,18 @@ window.pages.renderLogin = function() {
             <label class="text-xs font-bold tracking-widest text-white/50 uppercase">Alamat Email</label>
             <div class="relative">
               <i data-lucide="mail" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/40"></i>
-              <input type="email" id="login-email" placeholder="nama@hidayatullah.id" class="w-full pl-12 pr-4 py-3.5 bg-black/20 border border-white/10 rounded-2xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#84cc16] focus:border-transparent transition-all shadow-inner">
+              <input type="email" id="login-email" placeholder="nama@hidayatullah.id" class="w-full pl-12 pr-4 py-3.5 bg-black/20 border border-white/10 rounded-2xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#14B88A] focus:border-transparent transition-all shadow-inner">
             </div>
           </div>
 
-          <button onclick="handleLogin()" class="w-full py-4 mt-2 bg-gradient-to-tr from-[#84cc16] to-[#10b981] text-white font-bold rounded-2xl shadow-lg shadow-[#84cc16]/30 hover:shadow-[#84cc16]/50 hover:-translate-y-1 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 group">
+          <button onclick="handleLogin()" class="w-full py-4 mt-2 bg-gradient-to-tr from-[#14B88A] to-[#0D9B73] text-white font-bold rounded-2xl shadow-lg shadow-[#14B88A]/30 hover:shadow-[#14B88A]/50 hover:-translate-y-1 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 group">
             Masuk / Verifikasi
             <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
           </button>
           
           <div class="relative py-6">
             <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
-            <div class="relative flex justify-center text-[10px] font-bold tracking-widest uppercase"><span class="bg-[#0a3d2e] px-4 text-white/40 rounded-full">Atau Akses Sebagai Admin</span></div>
+            <div class="relative flex justify-center text-[10px] font-bold tracking-widest uppercase"><span class="bg-[#0B1A14] px-4 text-white/40 rounded-full">Atau Akses Sebagai Admin</span></div>
           </div>
           
           <button onclick="handleAdminLogin()" class="w-full py-3.5 bg-white/5 text-white/80 border border-white/10 font-bold rounded-2xl hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2">
@@ -99,7 +99,7 @@ window.pages.renderRegister = function() {
             </div>
           </div>
 
-          <button onclick="handleRegister()" class="w-full py-4 mt-2 bg-gradient-to-tr from-[#84cc16] to-[#10b981] text-white font-bold rounded-2xl shadow-lg shadow-[#84cc16]/30 hover:shadow-[#84cc16]/50 hover:-translate-y-1 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 group">
+          <button onclick="handleRegister()" class="w-full py-4 mt-2 bg-gradient-to-tr from-[#14B88A] to-[#0D9B73] text-white font-bold rounded-2xl shadow-lg shadow-[#14B88A]/30 hover:shadow-[#14B88A]/50 hover:-translate-y-1 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 group">
             Daftar & Mulai
             <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
           </button>

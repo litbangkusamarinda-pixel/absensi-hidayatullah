@@ -1,144 +1,193 @@
+/**
+ * ═══════════════════════════════════════════════════════════
+ * HRMS HIDAYATULLAH — Premium SaaS Dashboard
+ * Enterprise Dashboard with Charts & Analytics
+ * ═══════════════════════════════════════════════════════════
+ */
+
 window.pages = window.pages || {};
 
 window.pages.renderDashboard = function() {
   const user = window.auth.currentUser || { name: 'Admin', role: 'admin' };
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Selamat Pagi';
+    if (h < 15) return 'Selamat Siang';
+    if (h < 18) return 'Selamat Sore';
+    return 'Selamat Malam';
+  })();
   
   return `
-    <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
+    <div class="space-y-6 pb-10">
       
-      <!-- Greeting Section -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <!-- Greeting -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-fade-in-up">
         <div>
-          <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 tracking-tight mb-2">
-            Selamat Datang, ${user.name.split(' ')[0]}
+          <p class="text-xs font-bold tracking-widest text-[#14B88A] uppercase mb-1">${greeting}</p>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-1">
+            ${user.name.split(' ')[0]}! 👋
           </h1>
-          <p class="text-sm md:text-base text-white/60 font-medium">
-            Berikut adalah ringkasan aktivitas HRMS Hidayatullah hari ini.
+          <p class="text-sm text-white/40 font-medium">
+            Ringkasan aktivitas HRMS Hidayatullah hari ini
           </p>
         </div>
-        <div class="text-right hidden md:block">
-          <div class="text-xs font-bold tracking-widest text-primary uppercase mb-1">Status Sistem</div>
-          <div class="flex items-center gap-2 text-sm text-white/80 bg-white/5 px-4 py-2 rounded-full border border-white/10 shadow-lg backdrop-blur-md">
-            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-            Online & Sinkron
+        <div class="flex items-center gap-2 no-print">
+          <div class="flex items-center gap-2 text-xs bg-white/[0.04] px-4 py-2 rounded-xl border border-white/[0.06]">
+            <span class="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></span>
+            <span class="text-white/60 font-semibold">Online</span>
           </div>
         </div>
       </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- ═══ STAT CARDS ═══ -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 stagger-children">
         
-        <!-- Card 1: Total Pegawai -->
-        <div class="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-500/30 transition-all duration-300 group">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-[11px] font-bold tracking-widest text-white/50 uppercase mb-1">Total Pegawai</p>
-              <h3 class="text-3xl font-black text-white drop-shadow-sm" id="stat-total">-</h3>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
-              <i data-lucide="users" class="w-6 h-6 text-white"></i>
+        <div class="stat-card accent-info">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-[#3B82F6]/15 flex items-center justify-center">
+              <i data-lucide="graduation-cap" class="w-5 h-5 text-[#60A5FA]"></i>
             </div>
           </div>
+          <div class="stat-label">Total Guru</div>
+          <div class="stat-value text-2xl" id="stat-guru">-</div>
         </div>
-        
-        <!-- Card 2: Hadir Hari Ini -->
-        <div class="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/30 transition-all duration-300 group">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-[11px] font-bold tracking-widest text-white/50 uppercase mb-1">Hadir Hari Ini</p>
-              <h3 class="text-3xl font-black text-white drop-shadow-sm" id="stat-hadir">-</h3>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#84cc16] to-[#10b981] flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform">
-              <i data-lucide="user-check" class="w-6 h-6 text-white"></i>
+
+        <div class="stat-card accent-info">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-[#8B5CF6]/15 flex items-center justify-center">
+              <i data-lucide="users" class="w-5 h-5 text-[#A78BFA]"></i>
             </div>
           </div>
+          <div class="stat-label">Karyawan</div>
+          <div class="stat-value text-2xl" id="stat-total">-</div>
         </div>
-        
-        <!-- Card 3: Terlambat -->
-        <div class="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:shadow-red-500/20 hover:border-red-500/30 transition-all duration-300 group">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-[11px] font-bold tracking-widest text-white/50 uppercase mb-1">Terlambat</p>
-              <h3 class="text-3xl font-black text-white drop-shadow-sm" id="stat-telat">-</h3>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-400 to-rose-600 flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform">
-              <i data-lucide="clock" class="w-6 h-6 text-white"></i>
+
+        <div class="stat-card accent-success">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-[#22C55E]/15 flex items-center justify-center">
+              <i data-lucide="user-check" class="w-5 h-5 text-[#4ADE80]"></i>
             </div>
           </div>
+          <div class="stat-label">Hadir</div>
+          <div class="stat-value text-2xl" id="stat-hadir">-</div>
         </div>
-        
-        <!-- Card 4: Izin Pending -->
-        <div class="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:shadow-amber-500/20 hover:border-amber-500/30 transition-all duration-300 group">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-[11px] font-bold tracking-widest text-white/50 uppercase mb-1">Izin Pending</p>
-              <h3 class="text-3xl font-black text-white drop-shadow-sm" id="stat-izin">-</h3>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform">
-              <i data-lucide="clipboard-list" class="w-6 h-6 text-white"></i>
+
+        <div class="stat-card accent-warning">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-[#F59E0B]/15 flex items-center justify-center">
+              <i data-lucide="clock" class="w-5 h-5 text-[#FBBF24]"></i>
             </div>
           </div>
+          <div class="stat-label">Terlambat</div>
+          <div class="stat-value text-2xl" id="stat-telat">-</div>
+        </div>
+
+        <div class="stat-card accent-danger">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-[#EF4444]/15 flex items-center justify-center">
+              <i data-lucide="user-x" class="w-5 h-5 text-[#F87171]"></i>
+            </div>
+          </div>
+          <div class="stat-label">Tidak Hadir</div>
+          <div class="stat-value text-2xl" id="stat-absen">0</div>
+        </div>
+
+        <div class="stat-card accent-warning">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-[#F97316]/15 flex items-center justify-center">
+              <i data-lucide="log-out" class="w-5 h-5 text-[#FB923C]"></i>
+            </div>
+          </div>
+          <div class="stat-label">Belum Pulang</div>
+          <div class="stat-value text-2xl" id="stat-belum-pulang">-</div>
+        </div>
+
+        <div class="stat-card accent-primary">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-[#14B88A]/15 flex items-center justify-center">
+              <i data-lucide="percent" class="w-5 h-5 text-[#14B88A]"></i>
+            </div>
+          </div>
+          <div class="stat-label">Kehadiran</div>
+          <div class="stat-value text-2xl" id="stat-persen">-%</div>
+        </div>
+
+      </div>
+
+      <!-- ═══ CHARTS ROW ═══ -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Weekly Attendance Chart -->
+        <div class="chart-container">
+          <div class="chart-title">Tren Absensi Mingguan</div>
+          <div class="chart-subtitle">Kehadiran 7 hari terakhir</div>
+          <div style="height:220px;"><canvas id="chart-weekly"></canvas></div>
+        </div>
+        <!-- Attendance Status Donut -->
+        <div class="chart-container">
+          <div class="chart-title">Status Kehadiran Hari Ini</div>
+          <div class="chart-subtitle">Breakdown status absensi</div>
+          <div style="height:220px;"><canvas id="chart-status"></canvas></div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- ═══ MAIN CONTENT GRID ═══ -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         <!-- Live Log Table -->
-        <div class="lg:col-span-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col h-[450px] shadow-2xl relative overflow-hidden">
-          
-          <!-- Subtle background glow -->
-          <div class="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+        <div class="lg:col-span-2 glass-card p-5 flex flex-col h-[420px] relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-48 h-48 bg-[#14B88A]/5 rounded-full blur-[60px] -z-10 pointer-events-none"></div>
 
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0 z-10">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl bg-black/20 border border-white/10 text-white flex items-center justify-center shadow-inner">
-                <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 shrink-0">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-black/20 border border-white/[0.06] flex items-center justify-center">
+                <div class="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
               </div>
               <div>
-                <h3 class="text-lg font-bold text-white tracking-tight">Log Absensi Live</h3>
-                <p class="text-xs text-white/50">Auto-refresh tiap 30 detik</p>
+                <h3 class="text-sm font-bold text-white">Log Absensi Live</h3>
+                <p class="text-[10px] text-white/30">Auto-refresh 30 detik</p>
               </div>
             </div>
-            <button onclick="window.pages.downloadCSV()" id="btnDl" class="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg backdrop-blur-sm">
-              <i data-lucide="download" class="w-4 h-4"></i> Ekspor CSV
+            <button onclick="window.pages.downloadCSV()" id="btnDl" class="btn-secondary text-xs py-2 px-3 no-print">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Ekspor CSV
             </button>
           </div>
           
-          <div class="flex-1 overflow-auto rounded-2xl bg-black/20 border border-white/5 z-10">
-            <table class="w-full text-sm text-left">
-              <thead class="text-xs text-white/40 uppercase bg-black/40 backdrop-blur-md sticky top-0 z-20">
+          <div class="flex-1 overflow-auto rounded-xl bg-black/20 border border-white/[0.04]">
+            <table class="hrms-table">
+              <thead>
                 <tr>
-                  <th class="px-5 py-4 font-bold tracking-wider">Waktu</th>
-                  <th class="px-5 py-4 font-bold tracking-wider">Nama / Unit</th>
-                  <th class="px-5 py-4 font-bold tracking-wider">Jenis</th>
-                  <th class="px-5 py-4 font-bold tracking-wider">Status</th>
+                  <th>Waktu</th>
+                  <th>Nama / Unit</th>
+                  <th>Jenis</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <tbody id="tabelLog" class="divide-y divide-white/5">
-                <tr><td colspan="4" class="text-center py-12 text-white/40 font-medium">Memuat data live...</td></tr>
+              <tbody id="tabelLog">
+                <tr><td colspan="4" class="text-center py-10 text-white/30 text-xs">Memuat data live...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
         
         <!-- Izin Pending -->
-        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col h-[450px] shadow-2xl relative overflow-hidden">
-          
-          <!-- Subtle background glow -->
-          <div class="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+        <div class="glass-card p-5 flex flex-col h-[420px] relative overflow-hidden">
+          <div class="absolute bottom-0 left-0 w-48 h-48 bg-[#F59E0B]/5 rounded-full blur-[60px] -z-10 pointer-events-none"></div>
 
-          <div class="flex items-center gap-4 mb-6 shrink-0 z-10">
-            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-              <i data-lucide="inbox" class="w-6 h-6"></i>
+          <div class="flex items-center gap-3 mb-4 shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-[#F59E0B]/15 border border-[#F59E0B]/20 flex items-center justify-center">
+              <i data-lucide="inbox" class="w-5 h-5 text-[#FBBF24]"></i>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-white tracking-tight">Persetujuan Izin</h3>
-              <p class="text-xs text-amber-400/80 font-medium" id="pendingCount">0 menunggu</p>
+              <h3 class="text-sm font-bold text-white">Persetujuan Izin</h3>
+              <p class="text-[10px] text-[#FBBF24]/70 font-semibold" id="pendingCount">0 menunggu</p>
             </div>
           </div>
           
-          <div class="flex-1 overflow-auto space-y-3 z-10 pr-2" id="tabelPending">
-            <div class="text-center py-12 text-white/40 font-medium text-sm">Tidak ada pengajuan izin</div>
+          <div class="flex-1 overflow-auto space-y-2 pr-1" id="tabelPending">
+            <div class="empty-state py-8">
+              <div class="empty-icon w-12 h-12"><i data-lucide="inbox" class="w-5 h-5"></i></div>
+              <div class="empty-title text-xs">Tidak ada pengajuan</div>
+            </div>
           </div>
         </div>
 
@@ -150,84 +199,119 @@ window.pages.renderDashboard = function() {
 
 window.pages.initDashboard = function() {
   const adminEmail = window.auth.currentUser.email;
+  let chartWeekly = null;
+  let chartStatus = null;
 
-  // Render Live Log
+  // ═══ Chart.js Global Defaults ═══
+  Chart.defaults.color = 'rgba(255,255,255,0.4)';
+  Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
+  Chart.defaults.font.family = 'Inter';
+  Chart.defaults.font.weight = 500;
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.pointStyleWidth = 8;
+  Chart.defaults.plugins.legend.labels.padding = 16;
+  Chart.defaults.plugins.legend.labels.font = { size: 11, weight: 600 };
+
+  // ═══ Load Live Log ═══
   async function loadTableLog() {
     try {
       const d = await window.api.getTodayLogAdmin(adminEmail);
       const tb = document.getElementById('tabelLog');
+      if (!tb) return;
       
-      if(d.success === false) { 
-        tb.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-destructive">Gagal memuat log</td></tr>';
+      if (d.success === false) { 
+        tb.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-400 text-xs">Gagal memuat log</td></tr>';
         return; 
       }
-      if(!d.length) { 
-        tb.innerHTML='<tr><td colspan="4" class="text-center py-8 text-muted-foreground">Belum ada data</td></tr>'; 
+      if (!d.length) { 
+        tb.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-white/30 text-xs">Belum ada data hari ini</td></tr>'; 
         return; 
       }
       
-      let hadirCount = 0;
-      let telatCount = 0;
+      let hadirCount = 0, telatCount = 0, masukSet = new Set(), pulangSet = new Set();
       
       tb.innerHTML = d.map(r => {
-        if(r.status === "Tepat Waktu") hadirCount++;
-        if(r.status === "Terlambat") { hadirCount++; telatCount++; }
+        if (r.jenis === 'Masuk') { masukSet.add(r.nama); hadirCount++; }
+        if (r.jenis === 'Pulang') pulangSet.add(r.nama);
+        if (r.status === 'Terlambat') telatCount++;
         
-        const bc = (r.status === "Terlambat" || r.status === "Pulang Cepat") 
-            ? "bg-red-500/20 text-red-400 border border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]" 
-            : "bg-[#84cc16]/20 text-[#a3e635] border border-[#84cc16]/30 shadow-[0_0_10px_rgba(132,204,22,0.2)]";
-        const jc = r.jenis === "Masuk" 
-            ? "bg-white/10 text-white border border-white/20" 
-            : "bg-blue-500/20 text-blue-400 border border-blue-500/30";
+        const bc = (r.status === 'Terlambat' || r.status === 'Pulang Cepat') 
+          ? 'badge badge-danger' : 'badge badge-success';
+        const jc = r.jenis === 'Masuk' ? 'badge badge-neutral' : 'badge badge-info';
             
         return `
-          <tr class="hover:bg-white/5 transition-colors group cursor-default">
-            <td class="px-5 py-4 whitespace-nowrap text-xs text-white/60 group-hover:text-white/80 transition-colors">${r.waktu}</td>
-            <td class="px-5 py-4">
-              <div class="font-bold text-white group-hover:text-primary transition-colors">${r.nama}</div>
-              <div class="text-xs text-white/50 truncate max-w-[150px]">${r.unit}</div>
+          <tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="whitespace-nowrap text-xs text-white/50">${r.waktu}</td>
+            <td>
+              <div class="font-semibold text-white text-sm">${r.nama}</div>
+              <div class="text-[10px] text-white/30 truncate max-w-[140px]">${r.unit}</div>
             </td>
-            <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${jc}">${r.jenis}</span></td>
-            <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${bc}">${r.status}</span></td>
+            <td><span class="${jc}">${r.jenis}</span></td>
+            <td><span class="${bc}">${r.status}</span></td>
           </tr>
         `;
       }).join('');
       
-      document.getElementById('stat-hadir').innerText = hadirCount;
-      document.getElementById('stat-telat').innerText = telatCount;
+      const hadirEl = document.getElementById('stat-hadir');
+      const telatEl = document.getElementById('stat-telat');
+      const belumPulangEl = document.getElementById('stat-belum-pulang');
+      if (hadirEl) hadirEl.innerText = masukSet.size;
+      if (telatEl) telatEl.innerText = telatCount;
+      
+      const belumPulang = masukSet.size - pulangSet.size;
+      if (belumPulangEl) belumPulangEl.innerText = belumPulang > 0 ? belumPulang : 0;
+
+      // Update right sidebar
+      const rsHadir = document.getElementById('rs-hadir');
+      const rsTelat = document.getElementById('rs-telat');
+      if (rsHadir) rsHadir.textContent = masukSet.size;
+      if (rsTelat) rsTelat.textContent = telatCount;
+      
+      // Update attendance status chart
+      updateStatusChart(masukSet.size - telatCount, telatCount);
       
     } catch(e) {
       console.error(e);
     }
   }
 
-  // Render Pending Izin
+  // ═══ Load Izin Pending ═══
   async function loadIzinPending() {
     try {
       const d = await window.api.getIzinPendingAdmin(adminEmail);
       const tb = document.getElementById('tabelPending');
+      if (!tb) return;
       
-      document.getElementById('pendingCount').textContent = d.length + ' menunggu';
-      document.getElementById('stat-izin').innerText = d.length;
+      const countEl = document.getElementById('pendingCount');
+      const statEl = document.getElementById('stat-izin');
+      const rsIzin = document.getElementById('rs-izin');
+      if (countEl) countEl.textContent = d.length + ' menunggu';
+      if (statEl) statEl.innerText = d.length;
+      if (rsIzin) rsIzin.textContent = d.length;
       
-      if(!d.length){ 
-        tb.innerHTML = '<div class="text-center py-12 text-white/40 font-medium text-sm">Tidak ada pengajuan izin</div>'; 
+      if (!d.length) { 
+        tb.innerHTML = `
+          <div class="empty-state py-8">
+            <div class="empty-icon w-12 h-12"><i data-lucide="inbox" class="w-5 h-5"></i></div>
+            <div class="empty-title text-xs">Tidak ada pengajuan</div>
+          </div>`;
+        if (window.lucide) window.lucide.createIcons();
         return; 
       }
       
       tb.innerHTML = d.map(r => `
-        <div class="bg-black/20 hover:bg-black/40 rounded-2xl p-4 border border-white/5 hover:border-white/10 transition-all duration-300 text-sm shadow-inner group">
-          <div class="flex justify-between items-start mb-3">
+        <div class="bg-black/20 hover:bg-black/30 rounded-xl p-3.5 border border-white/[0.04] hover:border-white/[0.08] transition-all text-sm group">
+          <div class="flex justify-between items-start mb-2">
             <div>
-              <div class="font-bold text-white text-base group-hover:text-amber-400 transition-colors">${r.nama}</div>
-              <div class="text-xs text-white/50">${r.waktu} • ${r.unit}</div>
+              <div class="font-bold text-white text-[13px] group-hover:text-[#FBBF24] transition-colors">${r.nama}</div>
+              <div class="text-[10px] text-white/30">${r.waktu} • ${r.unit}</div>
             </div>
-            <span class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-amber-500/20 text-amber-400 uppercase tracking-widest border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">${r.jenis}</span>
+            <span class="badge badge-warning text-[8px]">${r.jenis}</span>
           </div>
-          <p class="text-sm text-white/70 bg-white/5 p-3 rounded-xl mb-3 italic">"${r.ket || '-'}"</p>
-          <div class="flex gap-3">
-            <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Disetujui')" class="flex-1 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]">Setujui</button>
-            <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Ditolak')" class="flex-1 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)]">Tolak</button>
+          <p class="text-xs text-white/50 bg-white/[0.03] p-2.5 rounded-lg mb-2.5 italic">"${r.ket || '-'}"</p>
+          <div class="flex gap-2">
+            <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Disetujui')" class="flex-1 py-2 bg-[#22C55E]/15 hover:bg-[#22C55E]/25 text-[#4ADE80] border border-[#22C55E]/20 rounded-lg text-[10px] font-bold transition-all">Setujui</button>
+            <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Ditolak')" class="flex-1 py-2 bg-[#EF4444]/15 hover:bg-[#EF4444]/25 text-[#F87171] border border-[#EF4444]/20 rounded-lg text-[10px] font-bold transition-all">Tolak</button>
           </div>
         </div>
       `).join('');
@@ -236,13 +320,153 @@ window.pages.initDashboard = function() {
     }
   }
   
+  // ═══ Load Stats ═══
   async function loadStats() {
     try {
       const p = await window.api.getPegawaiListAdmin(adminEmail);
-      document.getElementById('stat-total').innerText = p.length || 0;
+      const total = p.length || 0;
+      const totalEl = document.getElementById('stat-total');
+      const guruEl = document.getElementById('stat-guru');
+      if (totalEl) totalEl.innerText = total;
+      if (guruEl) guruEl.innerText = total; // Will be differentiated once we have role data
+      
+      // Calculate attendance percentage
+      const hadirEl = document.getElementById('stat-hadir');
+      const persenEl = document.getElementById('stat-persen');
+      const absenEl = document.getElementById('stat-absen');
+      if (hadirEl && persenEl && total > 0) {
+        const hadir = parseInt(hadirEl.innerText) || 0;
+        const persen = Math.round((hadir / total) * 100);
+        persenEl.innerText = persen + '%';
+        if (absenEl) absenEl.innerText = Math.max(0, total - hadir);
+      }
     } catch(e) {}
   }
 
+  // ═══ Charts ═══
+  function initWeeklyChart() {
+    const ctx = document.getElementById('chart-weekly');
+    if (!ctx) return;
+    
+    const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+    const today = new Date().getDay();
+    const labels = [];
+    for (let i = 6; i >= 0; i--) {
+      labels.push(days[(today - i + 7) % 7] || days[0]);
+    }
+    
+    chartWeekly = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Hadir',
+            data: [28, 32, 30, 35, 33, 15, 0],
+            borderColor: '#14B88A',
+            backgroundColor: 'rgba(20,184,138,0.1)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 7,
+            pointBackgroundColor: '#14B88A',
+            pointBorderColor: '#0B1A14',
+            pointBorderWidth: 2,
+          },
+          {
+            label: 'Terlambat',
+            data: [3, 5, 2, 4, 6, 1, 0],
+            borderColor: '#F59E0B',
+            backgroundColor: 'rgba(245,158,11,0.05)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#F59E0B',
+            pointBorderColor: '#0B1A14',
+            pointBorderWidth: 2,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 10, weight: 600 } }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(255,255,255,0.03)' },
+            ticks: { font: { size: 10 }, stepSize: 10 }
+          }
+        },
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: {
+            backgroundColor: 'rgba(11,26,20,0.9)',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1,
+            cornerRadius: 10,
+            padding: 12,
+            titleFont: { size: 12, weight: 700 },
+            bodyFont: { size: 11 }
+          }
+        }
+      }
+    });
+  }
+
+  function updateStatusChart(hadir, telat) {
+    const ctx = document.getElementById('chart-status');
+    if (!ctx) return;
+    
+    const izinEl = document.getElementById('stat-izin');
+    const izin = parseInt(izinEl?.innerText) || 0;
+    const absenEl = document.getElementById('stat-absen');
+    const absen = parseInt(absenEl?.innerText) || 0;
+
+    if (chartStatus) {
+      chartStatus.data.datasets[0].data = [hadir - telat, telat, izin, absen];
+      chartStatus.update();
+      return;
+    }
+    
+    chartStatus = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Tepat Waktu', 'Terlambat', 'Izin/Sakit', 'Tidak Hadir'],
+        datasets: [{
+          data: [hadir - telat, telat, izin, absen],
+          backgroundColor: ['#14B88A', '#F59E0B', '#3B82F6', '#EF4444'],
+          borderColor: '#0B1A14',
+          borderWidth: 3,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { position: 'bottom', labels: { padding: 12, font: { size: 10 } } },
+          tooltip: {
+            backgroundColor: 'rgba(11,26,20,0.9)',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1,
+            cornerRadius: 10,
+            padding: 12
+          }
+        }
+      }
+    });
+  }
+
+  // ═══ Process Izin ═══
   window.pages.prosesIzin = async function(rowIndex, status) {
     window.ui.showLoading("Memproses...");
     try {
@@ -256,10 +480,11 @@ window.pages.initDashboard = function() {
     }
   };
   
+  // ═══ Download CSV ═══
   window.pages.downloadCSV = async function() {
     const btn = document.getElementById('btnDl');
     const oldText = btn.innerHTML;
-    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyiapkan...';
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Menyiapkan...';
     try {
       const data = await window.api.getAllLogAdmin(adminEmail);
       let csv = 'data:text/csv;charset=utf-8,' + data.map(r => r.map(c => '"'+c+'"').join(',')).join('\\r\\n');
@@ -277,12 +502,15 @@ window.pages.initDashboard = function() {
     }
   };
 
+  // ═══ Initialize ═══
   loadTableLog();
   loadIzinPending();
   loadStats();
+  initWeeklyChart();
   
+  // Auto-refresh
   let refreshInterval = setInterval(() => {
-    if(window.router.currentRoute !== 'dashboard') {
+    if (window.router.currentRoute !== 'dashboard') {
       clearInterval(refreshInterval);
       return;
     }

@@ -3,220 +3,280 @@
 <head>
   <meta charset="UTF-8">
   <base target="_top">
-  <title>HRMS Hidayatullah</title>
+  <title>HRMS Hidayatullah — Enterprise Human Resource Management</title>
   <link rel="icon" href="Logo_hidayatullah.webp">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+  <meta name="description" content="Sistem Manajemen SDM Terpadu — Yayasan Pondok Pesantren Hidayatullah Samarinda">
   
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/globals.css">
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Chart.js for future charts -->
+  
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Custom Design System -->
+  <link rel="stylesheet" href="css/globals.css">
 
   <style>
-    /* Loading screen */
-    #initial-loader { position: fixed; inset: 0; background: #0a3d2e; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-    .loader-spin { width: 48px; height: 48px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #84cc16; border-radius: 50%; animation: spin 0.8s ease-in-out infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    /* ═══ Loading Screen ═══ */
+    #initial-loader { position:fixed; inset:0; background:linear-gradient(135deg, #0B1A14 0%, #0F2A1F 50%, #132F24 100%); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; }
+    .loader-ring { width:52px; height:52px; border:3px solid rgba(255,255,255,0.06); border-top-color:#14B88A; border-radius:50%; animation:spin 0.8s ease-in-out infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loader-bar { width:160px; height:3px; background:rgba(255,255,255,0.06); border-radius:99px; overflow:hidden; margin-top:20px; }
+    .loader-bar-fill { width:40%; height:100%; background:linear-gradient(90deg,#14B88A,#22C55E); border-radius:99px; animation:loadSlide 1.5s ease-in-out infinite; }
+    @keyframes loadSlide { 0%{transform:translateX(-100%);} 100%{transform:translateX(400%);} }
 
-    /* Global scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+    /* ═══ Sidebar ═══ */
+    .sidebar-item { position:relative; overflow:hidden; }
+    .sidebar-item::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:0; background:linear-gradient(180deg,#14B88A,#22C55E); border-radius:0 4px 4px 0; transition:height 0.3s ease; }
+    .sidebar-item.active::before { height:60%; }
+    
+    .sidebar-section-label { font-size:9px; font-weight:800; letter-spacing:0.2em; text-transform:uppercase; color:rgba(255,255,255,0.2); padding:0 12px; margin-bottom:8px; margin-top:20px; }
+    .sidebar-section-label:first-child { margin-top:0; }
 
-    /* Sidebar menu item transitions */
-    .sidebar-item { position: relative; overflow: hidden; }
-    .sidebar-item::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; background: #84cc16; border-radius: 0 4px 4px 0; transition: height 0.3s ease; }
-    .sidebar-item.active::before { height: 60%; }
-
-    /* Toast slide-in */
-    .toast-enter { transform: translateX(-50%) translateY(0) !important; opacity: 1 !important; }
-    .toast-exit { transform: translateX(-50%) translateY(-150%) !important; opacity: 0 !important; }
+    /* ═══ Mobile Overlay ═══ */
+    #sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); z-index:55; }
+    #sidebar-overlay.active { display:block; }
   </style>
 </head>
-<body class="bg-[#0a3d2e] text-white antialiased selection:bg-[#84cc16]/30 selection:text-white min-h-screen flex flex-col overflow-x-hidden" style="font-family: 'Inter', sans-serif;">
+<body class="bg-[#0B1A14] text-white antialiased selection:bg-[#14B88A]/30 selection:text-white min-h-screen flex flex-col overflow-x-hidden" style="font-family:'Inter',sans-serif;">
   
-  <!-- Initial Loader -->
+  <!-- ═══════════ INITIAL LOADER ═══════════ -->
   <div id="initial-loader">
-    <div class="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center border border-white/10 mb-6 shadow-[0_0_30px_rgba(132,204,22,0.15)]">
-      <img src="Logo_hidayatullah.webp" alt="Logo" class="w-10 h-10 object-contain" onerror="this.outerHTML='<div class=\'loader-spin\'></div>'">
+    <div class="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center border border-white/10 mb-8 shadow-[0_0_40px_rgba(20,184,138,0.15)]">
+      <img src="Logo_hidayatullah.webp" alt="Logo" class="w-12 h-12 object-contain" onerror="this.outerHTML='<div class=\'loader-ring\'></div>'">
     </div>
-    <div class="loader-spin mb-4"></div>
-    <div class="text-sm font-bold tracking-widest text-white/60 uppercase">Memuat HRMS...</div>
+    <div class="loader-ring mb-6"></div>
+    <div class="text-base font-bold tracking-tight text-white/80 mb-1">HRMS Hidayatullah</div>
+    <div class="text-[10px] font-bold tracking-[0.3em] text-white/30 uppercase mb-6">Enterprise Human Resource Management</div>
+    <div class="loader-bar"><div class="loader-bar-fill"></div></div>
   </div>
+
+  <!-- ═══════════ MOBILE SIDEBAR OVERLAY ═══════════ -->
+  <div id="sidebar-overlay" onclick="toggleSidebar(false)"></div>
 
   <div id="main-container" class="flex-1 transition-all duration-300 relative flex">
     
-    <!-- ═══════════════════════════════════════════════════ -->
-    <!-- LEFT SIDEBAR                                        -->
-    <!-- ═══════════════════════════════════════════════════ -->
-    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-[#072a1f]/90 backdrop-blur-xl border-r border-white/5 z-[60] flex flex-col shadow-2xl shadow-black/30 transition-transform duration-150 -translate-x-full md:translate-x-0">
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- LEFT SIDEBAR                                    -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-[260px] bg-[#0B1A14]/95 backdrop-blur-2xl border-r border-white/[0.04] z-[60] flex flex-col shadow-2xl shadow-black/40 transition-transform duration-200 -translate-x-full md:translate-x-0">
       
-      <!-- Sidebar Header / Brand -->
-      <div class="h-20 flex items-center px-6 border-b border-white/5 shrink-0 gap-4">
-        <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shadow-lg shadow-[#84cc16]/20 border border-white/10">
-          <img src="Logo_hidayatullah.webp" alt="Logo Hidayatullah" class="w-9 h-9 object-contain drop-shadow-md" onerror="this.outerHTML='<i data-lucide=\'building-2\' class=\'w-6 h-6 text-[#a3e635]\'></i>'">
+      <!-- Brand Header -->
+      <div class="h-[72px] flex items-center px-5 border-b border-white/[0.04] shrink-0 gap-3">
+        <div class="w-11 h-11 bg-gradient-to-br from-[#14B88A]/20 to-[#14B88A]/10 rounded-xl flex items-center justify-center shadow-lg border border-[#14B88A]/20">
+          <img src="Logo_hidayatullah.webp" alt="Logo" class="w-7 h-7 object-contain drop-shadow-md" onerror="this.outerHTML='<i data-lucide=\'building-2\' class=\'w-5 h-5 text-[#14B88A]\'></i>'">
         </div>
-        <div class="flex-1">
-          <span class="font-extrabold text-lg tracking-tight text-white">HRMS</span>
-          <div class="text-[9px] font-bold tracking-widest text-[#a3e635] uppercase">Hidayatullah</div>
+        <div class="flex-1 min-w-0">
+          <span class="font-extrabold text-[15px] tracking-tight text-white block">HRMS</span>
+          <div class="text-[8px] font-bold tracking-[0.2em] text-[#14B88A] uppercase">Hidayatullah</div>
         </div>
-        <button onclick="document.getElementById('sidebar').classList.add('-translate-x-full')" class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 transition-all ml-auto shrink-0 shadow-lg">
-          <i data-lucide="x" class="w-5 h-5"></i>
+        <button onclick="toggleSidebar(false)" class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-400 transition-all shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
       <!-- Sidebar Menu -->
-      <div class="p-4 flex-1 overflow-y-auto" id="sidebar-menu">
+      <div class="p-3 flex-1 overflow-y-auto" id="sidebar-menu">
         <!-- Rendered by router -->
       </div>
 
       <!-- Sidebar Footer -->
-      <div class="p-4 border-t border-white/5 shrink-0">
-        <button onclick="window.auth.logout()" class="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-red-400/80 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 group">
-          <i data-lucide="log-out" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
-          Logout
+      <div class="p-3 border-t border-white/[0.04] shrink-0">
+        <div class="flex items-center gap-3 px-3 py-2 mb-2">
+          <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-[#14B88A] to-[#0D9B73] flex items-center justify-center text-white font-bold text-xs shadow-lg" id="sidebar-user-initial">U</div>
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-bold text-white truncate" id="sidebar-user-name">User</div>
+            <div class="text-[9px] font-bold text-[#14B88A] uppercase tracking-wider truncate" id="sidebar-user-role">Role</div>
+          </div>
+        </div>
+        <button onclick="window.auth.logout()" class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-xs font-bold text-red-400/70 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group">
+          <i data-lucide="log-out" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+          Keluar
         </button>
       </div>
     </aside>
 
-    <!-- ═══════════════════════════════════════════════════ -->
-    <!-- TOP NAVBAR                                          -->
-    <!-- ═══════════════════════════════════════════════════ -->
-    <header id="topnav" class="fixed top-0 right-0 left-0 md:left-64 h-20 bg-[#0a3d2e]/80 backdrop-blur-xl border-b border-white/5 z-30 flex items-center justify-between px-4 md:px-8 transition-all duration-300">
-      <div class="flex items-center gap-4">
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOP NAVBAR                                      -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <header id="topnav" class="fixed top-0 right-0 left-0 md:left-[260px] h-[72px] bg-[#0B1A14]/80 backdrop-blur-2xl border-b border-white/[0.04] z-30 flex items-center justify-between px-4 md:px-6 transition-all duration-300">
+      <div class="flex items-center gap-3">
         <!-- Mobile Menu Toggle -->
-        <button onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')" class="md:hidden p-2 -ml-2 text-white/60 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+        <button onclick="toggleSidebar(true)" class="md:hidden p-2 -ml-2 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all">
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
-        <!-- Mobile Logo -->
+        <!-- Mobile Brand -->
         <div class="md:hidden flex items-center gap-2">
-          <img src="Logo_hidayatullah.webp" alt="Logo" class="w-7 h-7 object-contain drop-shadow-md">
-          <span class="font-extrabold text-sm tracking-tight text-white">HRMS</span>
+          <img src="Logo_hidayatullah.webp" alt="Logo" class="w-6 h-6 object-contain">
+          <span class="font-extrabold text-sm text-white">HRMS</span>
         </div>
-        <div class="relative hidden sm:block">
-          <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-white/30"></i>
-          <input type="text" placeholder="Cari data..." class="pl-11 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#84cc16]/50 focus:border-[#84cc16]/30 w-64 transition-all">
+        <!-- Breadcrumb / Page Title -->
+        <div class="hidden md:flex items-center gap-2">
+          <div id="page-title" class="text-base font-bold text-white tracking-tight">Dashboard</div>
+          <span id="page-badge" class="text-[9px] font-bold tracking-widest text-[#14B88A] uppercase bg-[#14B88A]/10 px-2 py-1 rounded-md border border-[#14B88A]/20 hidden"></span>
         </div>
       </div>
       
-      <div class="flex items-center gap-3 md:gap-5">
+      <div class="flex items-center gap-2 md:gap-3">
+        <!-- Search (Desktop) -->
+        <div class="relative hidden lg:block">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25"></i>
+          <input type="text" placeholder="Cari data..." class="pl-10 pr-4 py-2 bg-white/[0.04] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-[#14B88A]/40 focus:border-[#14B88A]/30 w-56 transition-all">
+        </div>
+
         <!-- Notification Bell -->
-        <button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 text-white/60 hover:text-white transition-all relative group">
-          <i data-lucide="bell" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
-          <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#0a3d2e] animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
+        <button class="btn-icon relative group" data-tooltip="Notifikasi">
+          <i data-lucide="bell" class="w-[18px] h-[18px] group-hover:scale-110 transition-transform"></i>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-[#EF4444] rounded-full border-2 border-[#0B1A14] animate-pulse"></span>
         </button>
 
-        <div class="w-px h-8 bg-white/10 mx-1"></div>
+        <div class="w-px h-8 bg-white/[0.06] mx-1 hidden sm:block"></div>
 
         <!-- User Profile -->
         <div class="flex items-center gap-3">
           <div class="text-right hidden sm:block">
-            <div class="text-sm font-bold text-white" id="nav-user-name">User</div>
-            <div class="text-[10px] font-bold tracking-wider text-[#a3e635] uppercase" id="nav-user-role">Role</div>
+            <div class="text-xs font-bold text-white" id="nav-user-name">User</div>
+            <div class="text-[9px] font-bold tracking-wider text-[#14B88A] uppercase" id="nav-user-role">Role</div>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#84cc16] to-[#10b981] text-white flex items-center justify-center font-black text-sm shadow-lg shadow-[#84cc16]/30" id="nav-user-initial">U</div>
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#14B88A] to-[#0D9B73] text-white flex items-center justify-center font-bold text-xs shadow-lg shadow-[#14B88A]/20" id="nav-user-initial">U</div>
         </div>
       </div>
     </header>
 
-    <!-- ═══════════════════════════════════════════════════ -->
-    <!-- RIGHT SIDEBAR (Admin Panel)                         -->
-    <!-- ═══════════════════════════════════════════════════ -->
-    <aside id="right-sidebar" class="fixed top-20 right-0 w-80 h-[calc(100vh-5rem)] bg-[#072a1f]/80 backdrop-blur-xl border-l border-white/5 z-20 hidden xl:block overflow-y-auto p-6 shadow-2xl shadow-black/20">
-      <div class="space-y-8">
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- RIGHT SIDEBAR                                   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <aside id="right-sidebar" class="fixed top-[72px] right-0 w-[300px] h-[calc(100vh-72px)] bg-[#0B1A14]/90 backdrop-blur-2xl border-l border-white/[0.04] z-20 hidden xl:block overflow-y-auto p-5 shadow-2xl shadow-black/20">
+      <div class="space-y-7">
+
+        <!-- Today's Date Widget -->
+        <div>
+          <div class="glass-card p-4 text-center">
+            <div class="text-[10px] font-bold tracking-[0.2em] text-white/30 uppercase mb-2">Hari Ini</div>
+            <div id="rs-clock" class="text-3xl font-black text-white tracking-tight">--:--</div>
+            <div id="rs-date" class="text-xs text-white/50 mt-1">Memuat...</div>
+          </div>
+        </div>
+
+        <!-- Live Attendance Summary -->
+        <div>
+          <h3 class="sidebar-section-label flex items-center gap-2 !px-0"><i data-lucide="activity" class="w-3 h-3"></i> Absensi Live</h3>
+          <div id="rs-live-summary" class="space-y-2">
+            <div class="flex items-center justify-between p-3 glass-surface rounded-xl">
+              <span class="text-xs text-white/50">Hadir</span>
+              <span class="text-sm font-bold text-[#22C55E]" id="rs-hadir">-</span>
+            </div>
+            <div class="flex items-center justify-between p-3 glass-surface rounded-xl">
+              <span class="text-xs text-white/50">Terlambat</span>
+              <span class="text-sm font-bold text-[#F59E0B]" id="rs-telat">-</span>
+            </div>
+            <div class="flex items-center justify-between p-3 glass-surface rounded-xl">
+              <span class="text-xs text-white/50">Izin / Sakit</span>
+              <span class="text-sm font-bold text-[#60A5FA]" id="rs-izin">-</span>
+            </div>
+          </div>
+        </div>
 
         <!-- Announcements -->
         <div>
-          <h3 class="text-[10px] font-black tracking-[0.2em] text-white/40 uppercase mb-4 flex items-center gap-2">
-            <i data-lucide="megaphone" class="w-3.5 h-3.5"></i> Pengumuman
-          </h3>
-          <div class="space-y-3">
-            <div class="bg-[#84cc16]/10 border border-[#84cc16]/20 p-4 rounded-2xl hover:border-[#84cc16]/40 transition-all duration-300 group">
-              <div class="flex items-center gap-2 mb-2">
-                <div class="w-2 h-2 rounded-full bg-[#84cc16] shadow-[0_0_8px_rgba(132,204,22,0.6)]"></div>
-                <div class="text-xs font-bold text-[#a3e635]">Rapat Yayasan</div>
+          <h3 class="sidebar-section-label flex items-center gap-2 !px-0"><i data-lucide="megaphone" class="w-3 h-3"></i> Pengumuman</h3>
+          <div class="space-y-2">
+            <div class="glass-surface p-3.5 rounded-xl hover:border-[#14B88A]/20 transition-all cursor-pointer group">
+              <div class="flex items-center gap-2 mb-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-[#14B88A] shadow-[0_0_6px_rgba(20,184,138,0.5)]"></div>
+                <div class="text-[11px] font-bold text-[#14B88A]">Rapat Yayasan</div>
               </div>
-              <div class="text-[11px] text-white/60 leading-relaxed">Jumat, 14:00 WITA. Wajib hadir untuk seluruh unit.</div>
+              <div class="text-[10px] text-white/40 leading-relaxed">Jumat, 14:00 WITA. Wajib hadir untuk seluruh unit.</div>
+            </div>
+            <div class="glass-surface p-3.5 rounded-xl hover:border-[#F59E0B]/20 transition-all cursor-pointer group">
+              <div class="flex items-center gap-2 mb-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-[#F59E0B] shadow-[0_0_6px_rgba(245,158,11,0.5)]"></div>
+                <div class="text-[11px] font-bold text-[#F59E0B]">Pelatihan Guru</div>
+              </div>
+              <div class="text-[10px] text-white/40 leading-relaxed">Workshop peningkatan kompetensi pedagogik.</div>
             </div>
           </div>
         </div>
-        
+
         <!-- Unit Sekolah -->
         <div>
-          <h3 class="text-[10px] font-black tracking-[0.2em] text-white/40 uppercase mb-4 flex items-center gap-2">
-            <i data-lucide="school" class="w-3.5 h-3.5"></i> Unit Sekolah
-          </h3>
-          <div class="space-y-2">
-            <div class="flex items-center justify-between text-sm p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all duration-300 group">
-              <span class="font-bold text-white/80 group-hover:text-white transition-colors">SD Integral</span>
-              <span class="text-[10px] bg-[#84cc16]/20 text-[#a3e635] px-2.5 py-1 rounded-lg font-black tracking-wider border border-[#84cc16]/20">Aktif</span>
+          <h3 class="sidebar-section-label flex items-center gap-2 !px-0"><i data-lucide="school" class="w-3 h-3"></i> Unit Sekolah</h3>
+          <div class="space-y-1" id="rs-unit-list">
+            <div class="flex items-center justify-between text-xs p-2.5 hover:bg-white/[0.03] rounded-lg cursor-pointer transition-all group">
+              <span class="font-bold text-white/60 group-hover:text-white transition-colors">SD Integral Hidayatullah</span>
+              <span class="badge badge-primary text-[8px]">Aktif</span>
             </div>
-            <div class="flex items-center justify-between text-sm p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all duration-300 group">
-              <span class="font-bold text-white/80 group-hover:text-white transition-colors">MTS-MA Putra</span>
-              <span class="text-[10px] bg-[#84cc16]/20 text-[#a3e635] px-2.5 py-1 rounded-lg font-black tracking-wider border border-[#84cc16]/20">Aktif</span>
+            <div class="flex items-center justify-between text-xs p-2.5 hover:bg-white/[0.03] rounded-lg cursor-pointer transition-all group">
+              <span class="font-bold text-white/60 group-hover:text-white transition-colors">MTS-MA Putra</span>
+              <span class="badge badge-primary text-[8px]">Aktif</span>
             </div>
-            <div class="flex items-center justify-between text-sm p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all duration-300 group">
-              <span class="font-bold text-white/80 group-hover:text-white transition-colors">MTS-MA Putri</span>
-              <span class="text-[10px] bg-[#84cc16]/20 text-[#a3e635] px-2.5 py-1 rounded-lg font-black tracking-wider border border-[#84cc16]/20">Aktif</span>
+            <div class="flex items-center justify-between text-xs p-2.5 hover:bg-white/[0.03] rounded-lg cursor-pointer transition-all group">
+              <span class="font-bold text-white/60 group-hover:text-white transition-colors">MTS-MA Putri</span>
+              <span class="badge badge-primary text-[8px]">Aktif</span>
             </div>
-            <div class="flex items-center justify-between text-sm p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all duration-300 group">
-              <span class="font-bold text-white/80 group-hover:text-white transition-colors">STIT HISAM</span>
-              <span class="text-[10px] bg-[#84cc16]/20 text-[#a3e635] px-2.5 py-1 rounded-lg font-black tracking-wider border border-[#84cc16]/20">Aktif</span>
+            <div class="flex items-center justify-between text-xs p-2.5 hover:bg-white/[0.03] rounded-lg cursor-pointer transition-all group">
+              <span class="font-bold text-white/60 group-hover:text-white transition-colors">TK & TPA</span>
+              <span class="badge badge-primary text-[8px]">Aktif</span>
+            </div>
+            <div class="flex items-center justify-between text-xs p-2.5 hover:bg-white/[0.03] rounded-lg cursor-pointer transition-all group">
+              <span class="font-bold text-white/60 group-hover:text-white transition-colors">STIT HISAM</span>
+              <span class="badge badge-primary text-[8px]">Aktif</span>
             </div>
           </div>
         </div>
+
       </div>
     </aside>
 
-    <!-- ═══════════════════════════════════════════════════ -->
-    <!-- MAIN CONTENT AREA                                   -->
-    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT AREA                               -->
+    <!-- ═══════════════════════════════════════════════ -->
     <main id="content-area" class="flex-1 w-full min-h-screen transition-all duration-300 flex flex-col">
-      <!-- App Router Mount Point -->
-      <div id="app-content" class="flex-1 p-4 md:p-6 lg:p-8 mt-20 w-full max-w-7xl mx-auto relative z-10">
+      <div id="app-content" class="flex-1 p-4 md:p-6 lg:p-8 mt-[72px] w-full max-w-[1400px] mx-auto relative z-10">
         <!-- JS renders pages here -->
       </div>
     </main>
 
   </div>
 
-  <!-- ═══════════════════════════════════════════════════ -->
-  <!-- GLOBAL COMPONENTS                                   -->
-  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- GLOBAL COMPONENTS                               -->
+  <!-- ═══════════════════════════════════════════════ -->
   
   <!-- Loading Overlay -->
-  <div id="loading-overlay" class="fixed inset-0 bg-[#0a3d2e]/90 backdrop-blur-md z-[100] hidden flex-col items-center justify-center">
-    <div class="w-14 h-14 border-4 border-white/10 border-t-[#84cc16] rounded-full animate-spin mb-5 shadow-[0_0_20px_rgba(132,204,22,0.3)]"></div>
-    <div id="loading-text" class="text-sm font-bold tracking-widest text-white/60 uppercase animate-pulse">Memuat...</div>
+  <div id="loading-overlay" class="fixed inset-0 bg-[#0B1A14]/90 backdrop-blur-md z-[100] hidden flex-col items-center justify-center">
+    <div class="w-14 h-14 border-4 border-white/[0.06] border-t-[#14B88A] rounded-full animate-spin mb-5 shadow-[0_0_20px_rgba(20,184,138,0.2)]"></div>
+    <div id="loading-text" class="text-sm font-bold tracking-widest text-white/50 uppercase animate-pulse">Memuat...</div>
   </div>
 
   <!-- Toast Notification -->
-  <div id="global-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border transform -translate-y-24 opacity-0 pointer-events-none backdrop-blur-xl">
+  <div id="global-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border transform -translate-y-24 opacity-0 pointer-events-none backdrop-blur-xl transition-all duration-300">
     <div id="toast-icon" class="text-lg"></div>
     <div id="toast-text" class="text-sm font-bold"></div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════ -->
-  <!-- Modal Izin (Employee)                               -->
-  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- Modal Izin (Employee)                           -->
+  <!-- ═══════════════════════════════════════════════ -->
   <div id="modal-izin" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[90] hidden items-end sm:items-center justify-center p-4">
-    <div class="modal-content w-full max-w-md bg-[#0d4a35] backdrop-blur-xl border border-white/10 shadow-2xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 transform scale-95 opacity-0 transition-all duration-300">
+    <div class="modal-content w-full max-w-md bg-[#132F24] backdrop-blur-xl border border-white/10 shadow-2xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 transform scale-95 opacity-0 transition-all duration-300">
       <div class="flex items-center justify-between mb-6">
         <div>
           <h2 class="text-xl font-extrabold text-white tracking-tight">Ajukan Izin</h2>
-          <p class="text-xs font-medium text-white/50 mt-1">Pilih jenis dan berikan keterangan</p>
+          <p class="text-xs font-medium text-white/40 mt-1">Pilih jenis dan berikan keterangan</p>
         </div>
-        <button onclick="window.ui.closeModal('modal-izin')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-all">
+        <button onclick="window.ui.closeModal('modal-izin')" class="btn-icon text-white/40 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
       
       <div class="grid grid-cols-3 gap-3 mb-6">
-        <button id="opt-Sakit" onclick="selectIzinOpt('Sakit')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-[#84cc16]/30 bg-[#84cc16]/10 hover:bg-[#84cc16]/20 transition-all ring-2 ring-[#84cc16] ring-offset-2 ring-offset-[#0d4a35]">
+        <button id="opt-Sakit" onclick="selectIzinOpt('Sakit')" class="izin-opt-btn flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-[#14B88A]/30 bg-[#14B88A]/10 transition-all ring-2 ring-[#14B88A] ring-offset-2 ring-offset-[#132F24]">
           <span class="text-2xl">🤒</span>
           <span class="text-[10px] font-bold text-white tracking-wider uppercase">Sakit</span>
         </button>
@@ -231,29 +291,30 @@
       </div>
       
       <div class="mb-6">
-        <label class="block text-[10px] font-black tracking-[0.2em] text-white/40 uppercase mb-2">Keterangan</label>
-        <textarea id="izin-keterangan" rows="3" class="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-2xl text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#84cc16]/50 focus:border-[#84cc16]/30 resize-none transition-all" placeholder="Tuliskan keterangan detail di sini..."></textarea>
+        <label class="block text-[10px] font-black tracking-[0.2em] text-white/30 uppercase mb-2">Keterangan</label>
+        <textarea id="izin-keterangan" rows="3" class="hrms-input resize-none rounded-2xl" placeholder="Tuliskan keterangan detail di sini..."></textarea>
       </div>
       
-      <button onclick="submitIzinForm()" class="w-full py-4 bg-gradient-to-tr from-[#84cc16] to-[#10b981] text-white font-bold rounded-2xl hover:-translate-y-0.5 transition-all shadow-lg shadow-[#84cc16]/30 hover:shadow-[#84cc16]/50 active:scale-95">
+      <button onclick="submitIzinForm()" class="btn-primary w-full py-4 rounded-2xl text-base">
         Kirim Pengajuan
       </button>
     </div>
   </div>
 
   <script>
+    // ═══ Izin Modal Logic ═══
     window.selectedIzinType = 'Sakit';
     function selectIzinOpt(type) {
       window.selectedIzinType = type;
       document.querySelectorAll('.izin-opt-btn').forEach(b => {
-        b.classList.remove('bg-[#84cc16]/10', 'border-[#84cc16]/30', 'ring-2', 'ring-[#84cc16]', 'ring-offset-2', 'ring-offset-[#0d4a35]');
+        b.classList.remove('bg-[#14B88A]/10', 'border-[#14B88A]/30', 'ring-2', 'ring-[#14B88A]', 'ring-offset-2', 'ring-offset-[#132F24]');
         b.classList.add('bg-white/5', 'border-white/10');
         b.querySelector('span:last-child').classList.remove('text-white');
         b.querySelector('span:last-child').classList.add('text-white/50');
       });
       const selected = document.getElementById('opt-'+type);
       selected.classList.remove('bg-white/5', 'border-white/10');
-      selected.classList.add('bg-[#84cc16]/10', 'border-[#84cc16]/30', 'ring-2', 'ring-[#84cc16]', 'ring-offset-2', 'ring-offset-[#0d4a35]');
+      selected.classList.add('bg-[#14B88A]/10', 'border-[#14B88A]/30', 'ring-2', 'ring-[#14B88A]', 'ring-offset-2', 'ring-offset-[#132F24]');
       selected.querySelector('span:last-child').classList.remove('text-white/50');
       selected.querySelector('span:last-child').classList.add('text-white');
     }
@@ -275,6 +336,35 @@
         window.ui.showToast('⚠️', 'Gagal mengirim', false);
       }
     }
+
+    // ═══ Sidebar Toggle ═══
+    function toggleSidebar(show) {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      if (show) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.add('active');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.remove('active');
+      }
+    }
+
+    // ═══ Right Sidebar Clock ═══
+    function updateRightSidebarClock() {
+      const now = new Date();
+      const clockEl = document.getElementById('rs-clock');
+      const dateEl = document.getElementById('rs-date');
+      if (clockEl) clockEl.textContent = [now.getHours(), now.getMinutes()].map(x => String(x).padStart(2,'0')).join(':');
+      if (dateEl) {
+        try {
+          dateEl.textContent = new Intl.DateTimeFormat('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' }).format(now);
+        } catch(e) {
+          dateEl.textContent = now.toLocaleDateString('id-ID');
+        }
+      }
+    }
+    setInterval(updateRightSidebarClock, 1000);
   </script>
 
   <!-- Load Scripts -->
@@ -284,6 +374,11 @@
   <script src="js/pages/auth_pages.js"></script>
   <script src="js/pages/attendance.js"></script>
   <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/report_center.js"></script>
+  <script src="js/pages/report_monthly.js"></script>
+  <script src="js/pages/employees.js"></script>
+  <script src="js/pages/units.js"></script>
+  <script src="js/pages/settings.js"></script>
   <script src="js/auth.js"></script>
 
   <!-- App Initialization -->
@@ -291,6 +386,7 @@
     window.onload = function() {
       lucide.createIcons();
       document.getElementById('initial-loader').style.display = 'none';
+      updateRightSidebarClock();
       
       // Override navigateTo to update user details in navbar
       const originalNav = window.router.navigateTo.bind(window.router);
@@ -301,6 +397,13 @@
           document.getElementById('nav-user-name').innerText = u.name;
           document.getElementById('nav-user-role').innerText = u.role === 'admin' ? 'Administrator' : u.unit;
           document.getElementById('nav-user-initial').innerText = u.name.charAt(0).toUpperCase();
+          // Sidebar user
+          const sn = document.getElementById('sidebar-user-name');
+          const sr = document.getElementById('sidebar-user-role');
+          const si = document.getElementById('sidebar-user-initial');
+          if (sn) sn.innerText = u.name;
+          if (sr) sr.innerText = u.role === 'admin' ? 'Administrator' : u.unit;
+          if (si) si.innerText = u.name.charAt(0).toUpperCase();
         }
       };
 
