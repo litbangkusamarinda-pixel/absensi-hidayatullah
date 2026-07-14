@@ -147,23 +147,23 @@ window.pages.renderReportMonthly = function() {
             <i data-lucide="briefcase" class="w-5 h-5"></i>
           </div>
           <div>
-            <div class="section-title">Kehadiran per Jabatan</div>
-            <div class="section-subtitle">Breakdown berdasarkan posisi</div>
+            <div class="section-title">Kehadiran Per Unit</div>
+            <div class="section-subtitle">Breakdown berdasarkan unit</div>
           </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           ${[
-            { pos:'Guru', pct:'95%', count:25, color:'#14B88A' },
-            { pos:'Administrasi', pct:'92%', count:8, color:'#3B82F6' },
-            { pos:'Keamanan', pct:'98%', count:4, color:'#22C55E' },
-            { pos:'Kebersihan', pct:'90%', count:6, color:'#F59E0B' },
-            { pos:'Manajemen', pct:'100%', count:3, color:'#8B5CF6' },
+            { unit:'SD Integral', pct:'96%', count:25, color:'#14B88A' },
+            { unit:'MTS-MA Putra', pct:'93%', count:18, color:'#3B82F6' },
+            { unit:'MTS-MA Putri', pct:'95%', count:15, color:'#22C55E' },
+            { unit:'TK & TPA', pct:'91%', count:8, color:'#F59E0B' },
+            { unit:'STIT HISAM', pct:'94%', count:12, color:'#8B5CF6' },
           ].map(p => `
             <div class="glass-card p-4 text-center hover:-translate-y-1 transition-all">
               <div class="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center" style="background:${p.color}15; border:1px solid ${p.color}25;">
                 <i data-lucide="users" class="w-4 h-4" style="color:${p.color}"></i>
               </div>
-              <div class="text-xs font-bold text-white/50 mb-1">${p.pos}</div>
+              <div class="text-xs font-bold text-white/50 mb-1">${p.unit}</div>
               <div class="text-2xl font-black text-white">${p.pct}</div>
               <div class="text-[10px] text-white/30 mt-1">${p.count} orang</div>
             </div>
