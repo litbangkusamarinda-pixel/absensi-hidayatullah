@@ -184,17 +184,17 @@ window.pages.renderReportMonthly = function() {
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" id="rpt-top-discipline">
           ${[
-            { name:'Ahmad Fauzi', pos:'Guru', pct:'100%', rank:1, medal:'🥇' },
-            { name:'Siti Aminah', pos:'Administrasi', pct:'98%', rank:2, medal:'🥈' },
-            { name:'M. Ridwan', pos:'Guru', pct:'97%', rank:3, medal:'🥉' },
-            { name:'Nur Hasanah', pos:'Guru', pct:'96%', rank:4, medal:'⭐' },
-            { name:'Hasan Basri', pos:'Keamanan', pct:'95%', rank:5, medal:'⭐' },
+            { name:'Ahmad Fauzi', unit:'STIT HISAM', pct:'100%', rank:1, medal:'🥇' },
+            { name:'Siti Aminah', unit:'SD Integral', pct:'98%', rank:2, medal:'🥈' },
+            { name:'M. Ridwan', unit:'MTS-MA Putra', pct:'97%', rank:3, medal:'🥉' },
+            { name:'Nur Hasanah', unit:'MTS-MA Putri', pct:'96%', rank:4, medal:'⭐' },
+            { name:'Hasan Basri', unit:'TK & TPA', pct:'95%', rank:5, medal:'⭐' },
           ].map(e => `
             <div class="rank-card">
               <div class="rank-badge bg-[#EAB308]/20 text-[#EAB308]">${e.medal}</div>
               <div class="rank-avatar">${e.name.charAt(0)}</div>
               <div class="rank-name">${e.name}</div>
-              <div class="rank-position">${e.pos}</div>
+              <div class="rank-position">${e.unit}</div>
               <div class="rank-score">${e.pct}</div>
               <div class="rank-score-label">Kehadiran</div>
             </div>
@@ -215,9 +215,9 @@ window.pages.renderReportMonthly = function() {
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="rpt-attention">
           ${[
-            { name:'Budi Santoso', pos:'Guru', late:8, absent:3, sick:2, badge:'⚠️ Perlu Pembinaan', color:'#EF4444' },
-            { name:'Dewi Lestari', pos:'Administrasi', late:5, absent:2, sick:1, badge:'🔶 Pantau', color:'#F59E0B' },
-            { name:'Rizki Pratama', pos:'Kebersihan', late:4, absent:1, sick:3, badge:'🔶 Pantau', color:'#F59E0B' },
+            { name:'Budi Santoso', unit:'SD Integral', late:8, absent:3, sick:2, badge:'⚠️ Perlu Pembinaan', color:'#EF4444' },
+            { name:'Dewi Lestari', unit:'STIT HISAM', late:5, absent:2, sick:1, badge:'🔶 Pantau', color:'#F59E0B' },
+            { name:'Rizki Pratama', unit:'MTS-MA Putra', late:4, absent:1, sick:3, badge:'🔶 Pantau', color:'#F59E0B' },
           ].map(e => `
             <div class="glass-card p-4 border-l-2 hover:-translate-y-1 transition-all" style="border-left-color:${e.color}">
               <div class="flex items-center gap-3 mb-3">
@@ -226,7 +226,7 @@ window.pages.renderReportMonthly = function() {
                 </div>
                 <div>
                   <div class="text-sm font-bold text-white">${e.name}</div>
-                  <div class="text-[10px] text-white/30">${e.pos}</div>
+                  <div class="text-[10px] text-white/30">${e.unit}</div>
                 </div>
               </div>
               <div class="grid grid-cols-3 gap-2 mb-3">
