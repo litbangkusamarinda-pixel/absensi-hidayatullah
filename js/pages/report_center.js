@@ -9,24 +9,24 @@ window.pages = window.pages || {};
 
 window.pages.renderReportCenter = function() {
   const reports = [
-    { id: 'daily',         icon: 'calendar-check', color: '#14B88A', title: 'Laporan Harian',            desc: 'Rekap absensi per hari' },
-    { id: 'weekly',        icon: 'calendar-range',  color: '#3B82F6', title: 'Laporan Mingguan',          desc: 'Rekap absensi per minggu' },
-    { id: 'monthly',       icon: 'calendar',        color: '#8B5CF6', title: 'Laporan Bulanan',           desc: 'Rekap lengkap per bulan', featured: true },
-    { id: 'yearly',        icon: 'calendar-clock',  color: '#EC4899', title: 'Laporan Tahunan',           desc: 'Ringkasan absensi tahunan' },
-    { id: 'emp-history',   icon: 'user-search',     color: '#F59E0B', title: 'Riwayat Karyawan',          desc: 'Detail per individu karyawan' },
-    { id: 'teacher-history',icon: 'graduation-cap', color: '#14B88A', title: 'Riwayat Guru',              desc: 'Detail per individu guru' },
-    { id: 'late',          icon: 'alarm-clock',     color: '#EF4444', title: 'Laporan Keterlambatan',     desc: 'Analisis jam datang terlambat' },
-    { id: 'absent',        icon: 'user-x',          color: '#DC2626', title: 'Laporan Ketidakhadiran',    desc: 'Pegawai yang tidak masuk' },
-    { id: 'permission',    icon: 'clipboard-list',  color: '#F59E0B', title: 'Laporan Izin',              desc: 'Rekap pengajuan izin' },
-    { id: 'sick',          icon: 'heart-pulse',     color: '#06B6D4', title: 'Laporan Sakit',             desc: 'Rekap absen sakit' },
-    { id: 'performance',   icon: 'trending-up',     color: '#22C55E', title: 'Performa Kehadiran',        desc: 'Skor disiplin kehadiran' },
-    { id: 'compare-unit',  icon: 'git-compare-arrows',color:'#8B5CF6',title:'Perbandingan Unit',          desc: 'Bandingkan antar unit sekolah' },
-    { id: 'compare-month', icon: 'arrow-left-right',color: '#3B82F6', title: 'Perbandingan Bulan',        desc: 'Tren kehadiran antar bulan' },
-    { id: 'compare-year',  icon: 'bar-chart-3',     color: '#14B88A', title: 'Perbandingan Tahun',        desc: 'Tren kehadiran antar tahun' },
-    { id: 'top-discipline',icon: 'trophy',           color: '#EAB308', title: 'Pegawai Terdisiplin',       desc: 'Ranking kedisiplinan' },
-    { id: 'attention',     icon: 'alert-triangle',  color: '#EF4444', title: 'Perlu Perhatian',           desc: 'Pegawai indisipliner' },
-    { id: 'executive',     icon: 'briefcase',       color: '#1E293B', title: 'Laporan Eksekutif',         desc: 'Ringkasan untuk pimpinan' },
-    { id: 'foundation',    icon: 'building',        color: '#14B88A', title: 'Dashboard Yayasan',         desc: 'Overview seluruh yayasan' },
+    { id: 'daily',         icon: 'calendar-check', color: '#14B88A', title: 'Laporan Harian',            desc: 'Rekap absensi per hari',           route: 'report-daily' },
+    { id: 'weekly',        icon: 'calendar-range',  color: '#3B82F6', title: 'Laporan Mingguan',          desc: 'Rekap absensi per minggu',         route: 'report-weekly' },
+    { id: 'monthly',       icon: 'calendar',        color: '#8B5CF6', title: 'Laporan Bulanan',           desc: 'Rekap lengkap per bulan',          route: 'report-monthly', featured: true },
+    { id: 'yearly',        icon: 'calendar-clock',  color: '#EC4899', title: 'Laporan Tahunan',           desc: 'Ringkasan absensi tahunan',        route: 'report-yearly' },
+    { id: 'emp-history',   icon: 'user-search',     color: '#F59E0B', title: 'Riwayat Karyawan',          desc: 'Detail per individu karyawan',     route: 'report-emp-history' },
+    { id: 'teacher-history',icon: 'graduation-cap', color: '#14B88A', title: 'Riwayat Guru',              desc: 'Detail per individu guru',         route: 'report-teacher-history' },
+    { id: 'late',          icon: 'alarm-clock',     color: '#EF4444', title: 'Laporan Keterlambatan',     desc: 'Analisis jam datang terlambat',    route: 'report-late' },
+    { id: 'absent',        icon: 'user-x',          color: '#DC2626', title: 'Laporan Ketidakhadiran',    desc: 'Pegawai yang tidak masuk',         route: 'report-absent' },
+    { id: 'permission',    icon: 'clipboard-list',  color: '#F59E0B', title: 'Laporan Izin',              desc: 'Rekap pengajuan izin',             route: 'report-permission' },
+    { id: 'sick',          icon: 'heart-pulse',     color: '#06B6D4', title: 'Laporan Sakit',             desc: 'Rekap absen sakit',                route: 'report-sick' },
+    { id: 'performance',   icon: 'trending-up',     color: '#22C55E', title: 'Performa Kehadiran',        desc: 'Skor disiplin kehadiran',          route: 'report-performance' },
+    { id: 'compare-unit',  icon: 'git-compare-arrows',color:'#8B5CF6',title:'Perbandingan Unit',          desc: 'Bandingkan antar unit sekolah',    route: 'report-compare-unit' },
+    { id: 'compare-month', icon: 'arrow-left-right',color: '#3B82F6', title: 'Perbandingan Bulan',        desc: 'Tren kehadiran antar bulan',       route: 'report-compare-month' },
+    { id: 'compare-year',  icon: 'bar-chart-3',     color: '#14B88A', title: 'Perbandingan Tahun',        desc: 'Tren kehadiran antar tahun',       route: 'report-compare-year' },
+    { id: 'top-discipline',icon: 'trophy',           color: '#EAB308', title: 'Pegawai Terdisiplin',       desc: 'Ranking kedisiplinan',             route: 'report-top-discipline' },
+    { id: 'attention',     icon: 'alert-triangle',  color: '#EF4444', title: 'Perlu Perhatian',           desc: 'Pegawai indisipliner',             route: 'report-attention' },
+    { id: 'executive',     icon: 'briefcase',       color: '#1E293B', title: 'Laporan Eksekutif',         desc: 'Ringkasan untuk pimpinan',         route: 'report-executive' },
+    { id: 'foundation',    icon: 'building',        color: '#14B88A', title: 'Dashboard Yayasan',         desc: 'Overview seluruh yayasan',         route: 'report-foundation' },
   ];
 
   return `
@@ -70,7 +70,7 @@ window.pages.renderReportCenter = function() {
       <!-- Report Cards Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 stagger-children">
         ${reports.map(r => `
-          <div onclick="${r.id === 'monthly' ? "window.router.navigateTo('report-monthly')" : `window.ui.showToast('📊', 'Laporan ${r.title} sedang dikembangkan', true)`}" 
+          <div onclick="window.router.navigateTo('${r.route}')" 
                class="glass-card p-5 cursor-pointer group hover:border-white/[0.12] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden ${r.featured ? 'ring-1 ring-[#14B88A]/30' : ''}">
             ${r.featured ? '<div class="absolute top-3 right-3"><span class="badge badge-primary text-[8px]">Tersedia</span></div>' : ''}
             <div class="flex items-start gap-4">
