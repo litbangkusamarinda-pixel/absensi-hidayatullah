@@ -614,6 +614,9 @@
     border: 1px solid #cbd5e1 !important;
     color: #334155 !important;
   }
+  [class*="text-white"] {
+    color: #1e293b !important;
+  }
   @page {
     size: A4 landscape;
     margin: 15mm;

@@ -515,22 +515,109 @@ window.pages.initReportMonthly = function() {
         return logYear === filterYear && logMonth === filterMonth;
       });
       
-      // Calculate stats for Top Discipline and Unit Stats
+      // Calculate stats for Executive Summary, Top Discipline and Unit Stats
       const guruStats = {};
       const unitStats = {};
       
+      let totalHadir = 0;
+      let totalTerlambat = 0;
+      let totalIzin = 0;
+      let totalSakit = 0;
+      let totalPulang = 0;
+      const uniqueDates = new Set();
+      
       filteredLaporan.forEach(r => {
-        if(r.jenis === "Masuk") {
+        const datePart = String(r.waktu).split(' ')[0];
+        if (datePart) uniqueDates.add(datePart);
+        
+        if (r.jenis === "Masuk") {
+          totalHadir++;
           if(!unitStats[r.unit]) unitStats[r.unit] = { hadir: 0, pegawai: new Set() };
           unitStats[r.unit].hadir++;
           unitStats[r.unit].pegawai.add(r.nama);
+        } else if (r.jenis === "Pulang") {
+          totalPulang++;
+        } else if (r.jenis === "Izin" || r.status === "Izin") {
+          totalIzin++;
+        } else if (r.jenis === "Sakit" || r.status === "Sakit") {
+          totalSakit++;
         }
         
         if(!guruStats[r.nama]) guruStats[r.nama] = { unit: r.unit, tepat: 0, lambat: 0, hadir: 0 };
         if(r.jenis === "Masuk") guruStats[r.nama].hadir++;
         if(r.status === "Tepat Waktu") guruStats[r.nama].tepat++;
-        if(r.status === "Terlambat" || r.status === "Pulang Cepat") guruStats[r.nama].lambat++;
+        if(r.status === "Terlambat" || r.status === "Pulang Cepat") {
+          guruStats[r.nama].lambat++;
+          if (r.jenis === "Masuk") totalTerlambat++;
+        }
       });
+      
+      // Render Executive Summary
+      const execSummaryEl = document.getElementById('exec-summary-cards');
+      if (execSummaryEl) {
+        const totalPegawai = employees.length;
+        const hariKerja = uniqueDates.size > 0 ? uniqueDates.size : 22;
+        const totalPossible = totalPegawai * hariKerja;
+        const belumPulang = Math.max(0, totalHadir - totalPulang);
+        const tidakHadir = Math.max(0, totalPossible - totalHadir - totalIzin - totalSakit);
+        const pctKehadiran = totalPossible > 0 ? Math.round((totalHadir / totalPossible) * 100) : 0;
+        const skorDisiplin = totalHadir > 0 ? Math.round(((totalHadir - totalTerlambat) / totalHadir) * 100) : 0;
+        
+        // Calculate vs Bulan Lalu
+        const prevMonth = filterMonth === "0" ? "11" : (parseInt(filterMonth) - 1).toString();
+        const prevYear = filterMonth === "0" ? (parseInt(filterYear) - 1).toString() : filterYear;
+        
+        const prevLaporan = rawLaporan.filter(r => {
+          if (!r.waktu) return false;
+          const w = String(r.waktu).split(' ')[0];
+          if (!w) return false;
+          const parts = w.split('-');
+          if (parts.length < 3) return false;
+          return parts[0] === prevYear && (parseInt(parts[1], 10) - 1).toString() === prevMonth;
+        });
+        
+        let prevHadir = 0;
+        const prevDates = new Set();
+        prevLaporan.forEach(r => {
+          const datePart = String(r.waktu).split(' ')[0];
+          if(datePart) prevDates.add(datePart);
+          if(r.jenis === "Masuk") prevHadir++;
+        });
+        
+        const prevHariKerja = prevDates.size > 0 ? prevDates.size : 22;
+        const prevPossible = totalPegawai * prevHariKerja;
+        const prevPct = prevPossible > 0 ? Math.round((prevHadir / prevPossible) * 100) : 0;
+        
+        const diff = pctKehadiran - prevPct;
+        const diffStr = diff > 0 ? `+${diff}%` : `${diff}%`;
+        const diffColor = diff >= 0 ? '#22C55E' : '#EF4444';
+        const diffIcon = diff >= 0 ? 'trending-up' : 'trending-down';
+        
+        const execCards = [
+          { label:'Total Pegawai', value: totalPegawai, icon:'users', color:'#3B82F6' },
+          { label:'Hari Kerja', value: hariKerja, icon:'calendar', color:'#8B5CF6' },
+          { label:'Kehadiran', value: pctKehadiran + '%', icon:'user-check', color:'#14B88A' },
+          { label:'Terlambat', value: totalTerlambat, icon:'clock', color:'#F59E0B' },
+          { label:'Izin', value: totalIzin, icon:'clipboard-list', color:'#3B82F6' },
+          { label:'Sakit', value: totalSakit, icon:'heart-pulse', color:'#06B6D4' },
+          { label:'Tidak Hadir', value: tidakHadir, icon:'user-x', color:'#EF4444' },
+          { label:'Belum Pulang', value: belumPulang, icon:'log-out', color:'#F97316' },
+          { label:'vs Bulan Lalu', value: diffStr, icon: diffIcon, color: diffColor },
+          { label:'Skor Disiplin', value: skorDisiplin, icon:'award', color:'#EAB308' }
+        ];
+        
+        execSummaryEl.innerHTML = execCards.map(c => `
+          <div class="stat-card">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:${c.color}15;">
+                <i data-lucide="${c.icon}" class="w-4 h-4" style="color:${c.color}"></i>
+              </div>
+            </div>
+            <div class="stat-label">${c.label}</div>
+            <div class="stat-value text-xl">${c.value}</div>
+          </div>
+        `).join('');
+      }
       
       // Render Unit Stats
       const unitStatsEl = document.getElementById('rpt-unit-stats');
