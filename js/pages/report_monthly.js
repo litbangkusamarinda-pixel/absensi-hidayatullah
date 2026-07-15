@@ -557,12 +557,23 @@ window.pages.initReportMonthly = function() {
           totalSakit++;
         }
         
-        if(!guruStats[r.nama]) guruStats[r.nama] = { unit: r.unit, tepat: 0, lambat: 0, hadir: 0 };
-        if(r.jenis === "Masuk") guruStats[r.nama].hadir++;
-        if(r.status === "Tepat Waktu") guruStats[r.nama].tepat++;
-        if(r.status === "Terlambat" || r.status === "Pulang Cepat") {
-          guruStats[r.nama].lambat++;
-          if (r.jenis === "Masuk") totalTerlambat++;
+        if(!guruStats[r.nama]) guruStats[r.nama] = { unit: r.unit, tepat: 0, lambat: 0, hadir: 0, izin: 0, sakit: 0 };
+        
+        if (r.jenis === "Masuk") {
+          guruStats[r.nama].hadir++;
+          if (r.status === "Tepat Waktu") guruStats[r.nama].tepat++;
+          if (r.status === "Terlambat" || r.status === "Pulang Cepat") {
+            guruStats[r.nama].lambat++;
+            totalTerlambat++;
+          }
+        } else if (r.jenis === "Izin" || r.jenis === "Sakit") {
+          // Jenis dari Log_Izin
+          if (r.jenis === "Izin") guruStats[r.nama].izin++;
+          if (r.jenis === "Sakit") guruStats[r.nama].sakit++;
+        } else {
+          // Fallback untuk Log_Absen yang memiliki status Izin/Sakit (jika ada)
+          if (r.status === "Izin") guruStats[r.nama].izin++;
+          if (r.status === "Sakit") guruStats[r.nama].sakit++;
         }
       });
       
@@ -719,12 +730,12 @@ window.pages.initReportMonthly = function() {
                     <div class="text-[8px] font-bold text-white/20 uppercase">Telat</div>
                   </div>
                   <div class="text-center p-2 bg-[#F59E0B]/10 rounded-lg">
-                    <div class="text-sm font-black text-[#FBBF24]">0</div>
+                    <div class="text-sm font-black text-[#FBBF24]">${Math.max(0, (uniqueDates.size > 0 ? uniqueDates.size : 22) - e.hadir - e.izin - e.sakit)}</div>
                     <div class="text-[8px] font-bold text-white/20 uppercase">Absen</div>
                   </div>
                   <div class="text-center p-2 bg-[#3B82F6]/10 rounded-lg">
-                    <div class="text-sm font-black text-[#60A5FA]">0</div>
-                    <div class="text-[8px] font-bold text-white/20 uppercase">Sakit</div>
+                    <div class="text-sm font-black text-[#60A5FA]">${e.sakit + e.izin}</div>
+                    <div class="text-[8px] font-bold text-white/20 uppercase">Izin/Sakit</div>
                   </div>
                 </div>
                 <div class="text-[10px] font-bold" style="color:${color}">${badge}</div>
@@ -734,13 +745,15 @@ window.pages.initReportMonthly = function() {
         }
       }
 
+      const actualHariKerja = uniqueDates.size > 0 ? uniqueDates.size : 22;
       window._reportData = filteredEmployees.map((e, i) => {
-        const hadir = guruStats[e.nama]?.hadir || 0;
-        const telat = guruStats[e.nama]?.lambat || 0;
-        const izin = 0; // TBD if needed
-        const sakit = 0; // TBD if needed
-        const absen = 22 - hadir - izin - sakit;
-        const pct = Math.round((hadir/22)*100);
+        const stats = guruStats[e.nama] || {};
+        const hadir = stats.hadir || 0;
+        const telat = stats.lambat || 0;
+        const izin = stats.izin || 0;
+        const sakit = stats.sakit || 0;
+        const absen = actualHariKerja - hadir - izin - sakit;
+        const pct = Math.round((hadir / actualHariKerja) * 100) || 0;
         return { ...e, hadir, telat, izin, sakit, absen: Math.max(0,absen), pct, idx: i+1 };
       });
 
