@@ -147,9 +147,14 @@ window.pages.renderDashboard = function() {
                 <p class="text-[10px] text-white/30">Auto-refresh 30 detik</p>
               </div>
             </div>
-            <button onclick="window.pages.downloadCSV()" id="btnDl" class="btn-secondary text-xs py-2 px-3 no-print">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i> Ekspor CSV
-            </button>
+            <div class="flex items-center gap-2">
+              <button onclick="window.ui.openBypassModal()" class="btn-primary text-xs py-2 px-3 no-print bg-[#14B88A]/20 text-[#14B88A] hover:bg-[#14B88A]/30 border-[#14B88A]/30">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Bypass Absen
+              </button>
+              <button onclick="window.pages.downloadCSV()" id="btnDl" class="btn-secondary text-xs py-2 px-3 no-print">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Ekspor CSV
+              </button>
+            </div>
           </div>
           
           <div class="flex-1 overflow-auto rounded-xl bg-black/20 border border-white/[0.04]">

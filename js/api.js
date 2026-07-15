@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbx3Gt5JpJVTFtcaBI2cOpkcO5md5-yy6qXE4Q_9bJ1WwX2Dftwen2eRo65liShMD1nf/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxgca897Wnd78haKxGfa44mJnM8i1xOSHgdabGWfbf5oB2kKvn1ZOTabt5enPbsLnXztA/exec";
 
 window.apiCall = async function(action, payload = {}) {
   payload.action = action;
@@ -29,5 +29,6 @@ window.api = {
   getLaporanLengkapAdmin: () => apiCall('getLaporanLengkapAdmin'),
   prosesIzin: (data) => apiCall('prosesIzin', data),
   getAllLogAdmin: (adminEmail) => apiCall('getAllLogAdmin', { adminEmail }),
-  saveUnitAdmin: (data) => apiCall('saveUnitAdmin', data)
+  saveUnitAdmin: (data) => apiCall('saveUnitAdmin', data),
+  adminBypassAttendance: (data) => apiCall('adminBypassAttendance', data)
 };

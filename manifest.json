@@ -1,6 +1,6 @@
 {
-  "name": "HRMS Hidayatullah",
-  "short_name": "HRMS",
+  "name": "Presensi HRMS",
+  "short_name": "Presensi HRMS",
   "description": "Enterprise Human Resource Management System — Yayasan Pondok Pesantren Hidayatullah Samarinda",
   "start_url": "./",
   "display": "standalone",
