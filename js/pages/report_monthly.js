@@ -41,11 +41,11 @@ window.pages.renderReportMonthly = function() {
           </div>
           <div>
             <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tanggal Mulai</label>
-            <input type="date" id="rpt-start-date" class="hrms-input text-sm" value="${new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]}">
+            <input type="date" id="rpt-start-date" class="hrms-input text-sm" value="${new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0]}">
           </div>
           <div>
             <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tanggal Akhir</label>
-            <input type="date" id="rpt-end-date" class="hrms-input text-sm" value="${new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]}">
+            <input type="date" id="rpt-end-date" class="hrms-input text-sm" value="${new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0]}">
           </div>
           <div>
             <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tipe Pegawai</label>
