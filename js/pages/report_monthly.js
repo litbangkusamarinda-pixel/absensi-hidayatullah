@@ -15,13 +15,15 @@ window.pages.renderReportMonthly = function() {
     <div class="space-y-6 pb-10 animate-fade-in-up" id="report-monthly-root">
       
       <!-- ═══ HEADER ═══ -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 no-print">
-        <div>
-          <button onclick="window.router.navigateTo('reports')" class="flex items-center gap-1 text-xs text-white/30 hover:text-white/60 transition-colors mb-2 group">
-            <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i> Kembali ke Pusat Laporan
-          </button>
-          <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Laporan Kehadiran Bulanan</h1>
-          <p class="text-sm text-white/40 mt-1">Enterprise Monthly Attendance Report</p>
+      <div class="mb-2">
+        <button onclick="window.router.navigateTo('reports')" class="flex items-center gap-1 text-xs text-white/30 hover:text-white/60 transition-colors mb-4 group no-print">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i> Kembali ke Pusat Laporan
+        </button>
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 id="rpt-main-title" class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Laporan Kinerja Kehadiran & Disiplin Pegawai</h1>
+            <p id="rpt-main-subtitle" class="text-sm text-white/40 mt-1">Yayasan Hidayatullah Samarinda</p>
+          </div>
         </div>
       </div>
 
@@ -376,27 +378,27 @@ window.pages.renderReportMonthly = function() {
         <div class="glass-card p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="text-center">
-              <div class="text-xs text-white/30 mb-2">Mengetahui,</div>
-              <div class="text-sm font-bold text-white mb-1">Kepala Sekolah / Pimpinan Unit</div>
+              <div class="text-xs text-white/30 mb-2" id="sig-left-title-1">Mengetahui,</div>
+              <div class="text-sm font-bold text-white mb-1" id="sig-left-title-2">Kepala Sekolah / Pimpinan Unit</div>
               <div class="h-24 border border-dashed border-white/10 rounded-xl flex items-center justify-center my-4">
                 <span class="text-xs text-white/20">Area Tanda Tangan</span>
               </div>
-              <div class="text-sm font-bold text-white">____________________</div>
-              <div class="text-[10px] text-white/30 mt-1">NIP: ______________</div>
+              <div class="text-sm font-bold text-white" id="sig-left-name">____________________</div>
+              <div class="text-[10px] text-white/30 mt-1" id="sig-left-nip">NIP: ______________</div>
             </div>
             <div class="text-center">
-              <div class="text-xs text-white/30 mb-2">Disetujui,</div>
-              <div class="text-sm font-bold text-white mb-1">Ketua Yayasan</div>
+              <div class="text-xs text-white/30 mb-2" id="sig-right-title-1">Disetujui,</div>
+              <div class="text-sm font-bold text-white mb-1" id="sig-right-title-2">Ketua Yayasan</div>
               <div class="h-24 border border-dashed border-white/10 rounded-xl flex items-center justify-center my-4">
                 <span class="text-xs text-white/20">Area Tanda Tangan</span>
               </div>
-              <div class="text-sm font-bold text-white">____________________</div>
-              <div class="text-[10px] text-white/30 mt-1">NIP: ______________</div>
+              <div class="text-sm font-bold text-white" id="sig-right-name">____________________</div>
+              <div class="text-[10px] text-white/30 mt-1" id="sig-right-nip">NIP: ______________</div>
             </div>
           </div>
           <div class="mt-6 pt-4 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="text-[10px] text-white/20">
-              Dicetak pada: ${new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'})} — ${new Date().toLocaleTimeString('id-ID')} WITA
+              Dicetak pada: ${new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'})} / ${(function(){try{return new Intl.DateTimeFormat('id-ID', {calendar:'islamic', day:'numeric', month:'long', year:'numeric'}).format(new Date()).replace(/ AH| H/g, '') + ' H'}catch(e){return ''}})()} — ${new Date().toLocaleTimeString('id-ID')} WITA
             </div>
             <div class="flex items-center gap-2">
               <div class="w-10 h-10 bg-white/[0.04] rounded-lg border border-white/[0.06] flex items-center justify-center">
@@ -496,6 +498,31 @@ window.pages.initReportMonthly = function() {
         }
         return dataUnit === filter;
       };
+      // Update dynamic titles
+      const titleEl = document.getElementById('rpt-main-title');
+      const subtitleEl = document.getElementById('rpt-main-subtitle');
+      if (titleEl && subtitleEl) {
+        const unitText = filterUnit === 'all' ? 'Yayasan Hidayatullah Samarinda' : filterUnit;
+        const optMasehi = { day: 'numeric', month: 'long', year: 'numeric' };
+        let formatterHijri;
+        try {
+          formatterHijri = new Intl.DateTimeFormat('id-ID', { calendar: 'islamic', day: 'numeric', month: 'long', year: 'numeric' });
+        } catch(e) {
+          formatterHijri = { format: (d) => '' }; // Fallback jika browser tidak dukung
+        }
+        
+        const masehiStart = startDate.toLocaleDateString('id-ID', optMasehi);
+        const masehiEnd = endDate.toLocaleDateString('id-ID', optMasehi);
+        
+        let hijriStart = formatterHijri.format(startDate);
+        let hijriEnd = formatterHijri.format(endDate);
+        
+        // Bersihkan H/AH jika ada agar lebih rapi
+        hijriStart = hijriStart ? `(${hijriStart.replace(/ AH| H/g, '')} H)` : '';
+        hijriEnd = hijriEnd ? `(${hijriEnd.replace(/ AH| H/g, '')} H)` : '';
+
+        subtitleEl.textContent = `${unitText} — Periode: ${masehiStart} ${hijriStart} s/d ${masehiEnd} ${hijriEnd}`;
+      }
 
       const [employees, rawLaporan] = await Promise.all([
         window.api.getPegawaiListAdmin(adminEmail),
@@ -765,6 +792,87 @@ window.pages.initReportMonthly = function() {
         const pct = Math.round((hadir / actualHariKerja) * 100) || 0;
         return { ...e, hadir, telat, izin, sakit, absen: Math.max(0,absen), pct, idx: i+1 };
       });
+
+      // === GENERATE REKAP HARIAN (DAILY SUMMARY) ===
+      const dailyStats = {};
+      const sortedDates = Array.from(uniqueDates).sort((a, b) => {
+        // Handle dd/mm/yyyy or yyyy-mm-dd
+        const parseDate = (dStr) => {
+          if (dStr.includes('/')) {
+            const p = dStr.split('/');
+            return new Date(p[2], p[1]-1, p[0]).getTime();
+          }
+          return new Date(dStr).getTime();
+        };
+        return parseDate(a) - parseDate(b);
+      });
+
+      sortedDates.forEach(dateKey => {
+        dailyStats[dateKey] = { hadir: 0, telat: 0, izin: 0, sakit: 0, total: filteredEmployees.length };
+      });
+
+      filteredLaporan.forEach(r => {
+        const dateKey = r.waktu.split(' ')[0];
+        if (dailyStats[dateKey]) {
+          const s = r.status ? r.status.toLowerCase() : '';
+          if (s.includes('hadir')) dailyStats[dateKey].hadir++;
+          else if (s.includes('terlambat')) dailyStats[dateKey].telat++;
+          else if (s.includes('izin')) dailyStats[dateKey].izin++;
+          else if (s.includes('sakit')) dailyStats[dateKey].sakit++;
+        }
+      });
+
+      const dailyTableBody = document.getElementById('rpt-daily-table');
+      if (dailyTableBody) {
+        if (sortedDates.length === 0) {
+          dailyTableBody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-white/30 text-xs">Tidak ada data hari kerja di periode ini</td></tr>';
+        } else {
+          dailyTableBody.innerHTML = sortedDates.map(dateKey => {
+            const st = dailyStats[dateKey];
+            const absen = Math.max(0, st.total - st.hadir - st.telat - st.izin - st.sakit);
+            const pct = st.total > 0 ? Math.round(((st.hadir + st.telat) / st.total) * 100) : 0;
+            return `<tr>
+              <td class="text-xs font-semibold">${dateKey}</td>
+              <td><span class="badge badge-success">${st.hadir}</span></td>
+              <td><span class="badge badge-warning">${st.telat}</span></td>
+              <td>${st.izin}</td>
+              <td>${st.sakit}</td>
+              <td><span class="${absen > 0 ? 'badge badge-danger' : 'text-xs text-white/30'}">${absen}</span></td>
+              <td>
+                <div class="flex items-center gap-2">
+                  <div class="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-[#14B88A] to-[#0D9B73]" style="width:${pct}%"></div>
+                  </div>
+                  <span class="text-[10px] font-bold text-white">${pct}%</span>
+                </div>
+              </td>
+            </tr>`;
+          }).join('');
+        }
+      }
+
+      // Update signature dynamically
+      if (filterUnit === 'all') {
+        document.getElementById('sig-left-title-1').textContent = 'Mengetahui,';
+        document.getElementById('sig-left-title-2').textContent = 'Kepala Bidang 1 Tarbiyah & Dakwah';
+        document.getElementById('sig-left-name').textContent = 'Jumain.S.H.I., M.Pd.I';
+        document.getElementById('sig-left-nip').textContent = 'NIP: -';
+        
+        document.getElementById('sig-right-title-1').textContent = 'Disetujui,';
+        document.getElementById('sig-right-title-2').textContent = 'Kepala Litbang & SDI';
+        document.getElementById('sig-right-name').textContent = 'Syukur Halim, S.Kom, M.Kom';
+        document.getElementById('sig-right-nip').textContent = 'NIP: -';
+      } else {
+        document.getElementById('sig-left-title-1').textContent = 'Mengetahui,';
+        document.getElementById('sig-left-title-2').textContent = 'Ketua Bidang Tarbiyah & Dakwah';
+        document.getElementById('sig-left-name').textContent = '____________________';
+        document.getElementById('sig-left-nip').textContent = 'NIP: ______________';
+        
+        document.getElementById('sig-right-title-1').textContent = 'Disetujui,';
+        document.getElementById('sig-right-title-2').textContent = 'Kepala Sekolah / Pimpinan Unit';
+        document.getElementById('sig-right-name').textContent = '____________________';
+        document.getElementById('sig-right-nip').textContent = 'NIP: ______________';
+      }
 
       window.pages.renderDetailTable(window._reportData);
       if (window.lucide) window.lucide.createIcons();
