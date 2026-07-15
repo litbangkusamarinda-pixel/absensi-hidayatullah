@@ -21,8 +21,8 @@ window.pages.renderReportMonthly = function() {
         </button>
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 id="rpt-main-title" class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Laporan Kinerja Kehadiran & Disiplin Pegawai</h1>
-            <p id="rpt-main-subtitle" class="text-sm text-white/40 mt-1">Yayasan Hidayatullah Samarinda</p>
+            <h1 id="rpt-main-title" class="text-2xl md:text-3xl font-extrabold text-[#14B88A] tracking-tight uppercase">LAPORAN KINERJA KEHADIRAN & DISIPLIN PEGAWAI</h1>
+            <p id="rpt-main-subtitle" class="text-sm text-white/40 mt-1 leading-relaxed">Yayasan Pondok Pesantren Hidayatullah Samarinda</p>
           </div>
         </div>
       </div>
@@ -376,7 +376,7 @@ window.pages.renderReportMonthly = function() {
           </div>
         </div>
         <div class="glass-card p-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="grid grid-cols-2 gap-4 md:gap-8">
             <div class="text-center">
               <div class="text-xs text-white/30 mb-2" id="sig-left-title-1">Mengetahui,</div>
               <div class="text-sm font-bold text-white mb-1" id="sig-left-title-2">Kepala Sekolah / Pimpinan Unit</div>
@@ -502,7 +502,7 @@ window.pages.initReportMonthly = function() {
       const titleEl = document.getElementById('rpt-main-title');
       const subtitleEl = document.getElementById('rpt-main-subtitle');
       if (titleEl && subtitleEl) {
-        const unitText = filterUnit === 'all' ? 'Yayasan Hidayatullah Samarinda' : filterUnit;
+        const unitText = filterUnit === 'all' ? 'Yayasan Pondok Pesantren Hidayatullah Samarinda' : filterUnit;
         const optMasehi = { day: 'numeric', month: 'long', year: 'numeric' };
         let formatterHijri;
         try {
@@ -517,11 +517,11 @@ window.pages.initReportMonthly = function() {
         let hijriStart = formatterHijri.format(startDate);
         let hijriEnd = formatterHijri.format(endDate);
         
-        // Bersihkan H/AH jika ada agar lebih rapi
-        hijriStart = hijriStart ? `(${hijriStart.replace(/ AH| H/g, '')} H)` : '';
-        hijriEnd = hijriEnd ? `(${hijriEnd.replace(/ AH| H/g, '')} H)` : '';
+        // Bersihkan H/AH jika ada agar lebih rapi, ganti dengan /
+        hijriStart = hijriStart ? `/${hijriStart.replace(/ AH| H/g, '')} H` : '';
+        hijriEnd = hijriEnd ? `/${hijriEnd.replace(/ AH| H/g, '')} H` : '';
 
-        subtitleEl.textContent = `${unitText} — Periode: ${masehiStart} ${hijriStart} s/d ${masehiEnd} ${hijriEnd}`;
+        subtitleEl.innerHTML = `${unitText}<br>Periode: ${masehiStart}${hijriStart} s/d ${masehiEnd}${hijriEnd}`;
       }
 
       const [employees, rawLaporan] = await Promise.all([

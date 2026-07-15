@@ -581,81 +581,28 @@
 
 @media print {
   body {
-    background: white !important;
-    color: #1e293b !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  
   #sidebar, #topnav, #right-sidebar, .no-print {
     display: none !important;
   }
+  
   #content-area {
     margin: 0 !important;
     padding: 0 !important;
-  }
-  .glass-card, .stat-card, .chart-container, .rank-card {
-    background: white !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    color: #1e293b !important;
-  }
-  .stat-card .stat-value { color: #1e293b !important; }
-  .stat-card .stat-label { color: #64748b !important; }
-  .hrms-table thead th {
-    background: #f1f5f9 !important;
-    color: #475569 !important;
-  }
-  .hrms-table tbody td {
-    color: #1e293b !important;
-    border-bottom-color: #e2e8f0 !important;
-  }
-  
-  /* Keep full color for badges but darken the text/border for readability on white paper */
-  .badge-success { color: #16a34a !important; border-color: rgba(22,163,74,0.3) !important; }
-  .badge-warning { color: #d97706 !important; border-color: rgba(217,119,6,0.3) !important; }
-  .badge-danger { color: #dc2626 !important; border-color: rgba(220,38,38,0.3) !important; }
-  .badge-info { color: #2563eb !important; border-color: rgba(37,99,235,0.3) !important; }
-  .badge-primary { color: #0f766e !important; border-color: rgba(15,118,110,0.3) !important; }
-  .badge-neutral { color: #475569 !important; border-color: rgba(71,85,105,0.3) !important; background: #f1f5f9 !important; }
-
-  [class*="text-white"] {
-    color: #1e293b !important;
-  }
-  /* Preserve white text for avatars with dark backgrounds */
-  .rounded-full[class*="bg-gradient-"] {
-    color: white !important;
-  }
-
-  [class*="text-[#4ADE80]"] { color: #16a34a !important; }
-  [class*="text-[#FBBF24]"] { color: #d97706 !important; }
-  [class*="text-[#F87171]"] { color: #dc2626 !important; }
-  [class*="text-[#60A5FA]"] { color: #2563eb !important; }
-  [class*="text-[#EAB308]"] { color: #b45309 !important; }
-  [class*="text-[#3B82F6]"] { color: #1d4ed8 !important; }
-  [class*="text-[#14B88A]"] { color: #0f766e !important; }
-  [class*="text-[#06B6D4]"] { color: #0e7490 !important; }
-  [class*="text-[#8B5CF6]"] { color: #6d28d9 !important; }
-  [class*="text-[#EF4444]"] { color: #b91c1c !important; }
-  [class*="text-[#F97316]"] { color: #c2410c !important; }
-  [class*="text-[#22C55E]"] { color: #15803d !important; }
-  .rank-card .rank-name,
-  .rank-card .rank-position,
-  .rank-card .rank-score-label,
-  .section-title,
-  .section-subtitle,
-  .chart-title,
-  .chart-subtitle {
-    color: #1e293b !important;
-  }
-  canvas {
-    filter: invert(1) hue-rotate(180deg);
   }
   /* Table scrolling constraints shouldn't apply in print */
   .overflow-x-auto, .overflow-y-auto, .overflow-hidden {
     overflow: visible !important;
     max-height: none !important;
     height: auto !important;
+  }
+  
+  /* Hide toasts and notifications when printing */
+  #global-toast, .toast {
+    display: none !important;
   }
   
   .page-break {
