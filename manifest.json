@@ -8,14 +8,14 @@
   "theme_color": "#14B88A",
   "icons": [
     {
-      "src": "https://i.postimg.cc/0ygkP4z7/icon-PWA.jpg",
+      "src": "./Logo_hidayatullah.webp",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/webp"
     },
     {
-      "src": "https://i.postimg.cc/0ygkP4z7/icon-PWA.jpg",
+      "src": "./Logo_hidayatullah.webp",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/webp"
     }
   ]
 }
