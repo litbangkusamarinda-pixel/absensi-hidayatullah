@@ -13,7 +13,7 @@ window.pages.renderAttendance = function() {
           <div class="w-14 h-14 mx-auto mb-2 bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 shadow-lg">
              <img src="Logo_hidayatullah.webp" alt="Logo Hidayatullah" class="w-10 h-10 object-contain drop-shadow-md" onerror="this.outerHTML='<i data-lucide=\\'building-2\\' class=\\'w-7 h-7 text-white\\'></i>'">
           </div>
-          <h1 class="text-2xl font-bold text-white mb-1 tracking-tight">Absensi <span class="text-[#14B88A]">Digital</span></h1>
+          <h1 class="text-2xl font-bold text-white mb-1 tracking-tight">Absensi <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#14B88A] to-[#A3E635] drop-shadow-[0_0_10px_rgba(163,230,53,0.4)]">Digital</span></h1>
           <p class="text-xs text-white/60">Yayasan Pondok Pesantren Hidayatullah Samarinda</p>
         </div>
 
@@ -27,7 +27,7 @@ window.pages.renderAttendance = function() {
               <h2 class="text-lg font-bold text-white truncate">${user.name}</h2>
               <p class="text-xs text-white/70 truncate">${user.unit}</p>
             </div>
-            <div class="px-4 py-1.5 rounded-full bg-[#14B88A]/20 border border-[#14B88A]/30 text-[#14B88A] text-xs font-bold shrink-0">
+            <div class="px-4 py-1.5 rounded-full bg-[#A3E635]/10 border border-[#A3E635]/30 text-[#A3E635] shadow-[0_0_10px_rgba(163,230,53,0.2)] text-xs font-bold shrink-0">
               Aktif
             </div>
           </div>
@@ -36,7 +36,7 @@ window.pages.renderAttendance = function() {
         <!-- Clock & Location -->
         <div class="bg-white/5 backdrop-blur-md rounded-3xl p-6 md:p-8 text-center space-y-3 border border-white/10 shadow-lg mt-2">
           <div>
-            <div id="att-clock" class="text-6xl font-bold tracking-tight text-white drop-shadow-md">
+            <div id="att-clock" class="text-6xl font-bold tracking-tight text-white drop-shadow-[0_0_15px_rgba(163,230,53,0.4)]">
               00:00:00
             </div>
             <div id="att-date" class="text-sm font-medium text-white/80 mt-2">Memuat tanggal...</div>
@@ -59,7 +59,8 @@ window.pages.renderAttendance = function() {
         <!-- Action Buttons -->
         <div class="grid grid-cols-2 gap-4">
           <!-- Absen Masuk -->
-          <button onclick="handleAbsen('Masuk')" class="flex flex-col items-center justify-center gap-5 p-6 rounded-3xl bg-gradient-to-tr from-[#14B88A] to-[#0D9B73] text-white shadow-lg shadow-[#14B88A]/30 hover:scale-105 transition-transform active:scale-95 group border border-[#14B88A]/20">
+          <button onclick="handleAbsen('Masuk')" class="relative overflow-hidden flex flex-col items-center justify-center gap-5 p-6 rounded-3xl bg-gradient-to-tr from-[#14B88A] to-[#A3E635] text-white shadow-lg shadow-[#A3E635]/30 hover:shadow-[0_0_25px_rgba(163,230,53,0.4)] hover:scale-105 transition-all duration-300 active:scale-95 group border border-[#A3E635]/40">
+            <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative w-14 h-14 flex items-center justify-center mt-2">
               <div class="absolute inset-0 rounded-full border border-white/20 scale-[1.3] transition-transform group-hover:scale-[1.4]"></div>
               <div class="absolute inset-0 rounded-full border border-white/10 scale-[1.6] transition-transform group-hover:scale-[1.7]"></div>
