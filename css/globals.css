@@ -593,7 +593,7 @@
     margin: 0 !important;
     padding: 0 !important;
   }
-  .glass-card, .stat-card, .chart-container {
+  .glass-card, .stat-card, .chart-container, .rank-card {
     background: white !important;
     border: 1px solid #e2e8f0 !important;
     box-shadow: none !important;
@@ -617,9 +617,25 @@
   [class*="text-white"] {
     color: #1e293b !important;
   }
+  [class*="text-[#4ADE80]"] { color: #16a34a !important; }
+  [class*="text-[#FBBF24]"] { color: #d97706 !important; }
+  [class*="text-[#F87171]"] { color: #dc2626 !important; }
+  [class*="text-[#60A5FA]"] { color: #2563eb !important; }
+  [class*="text-[#EAB308]"] { color: #b45309 !important; }
+  [class*="text-[#3B82F6]"] { color: #1d4ed8 !important; }
+  [class*="text-[#14B88A]"] { color: #0f766e !important; }
+  [class*="text-[#06B6D4]"] { color: #0e7490 !important; }
+  [class*="text-[#8B5CF6]"] { color: #6d28d9 !important; }
+  [class*="text-[#EF4444]"] { color: #b91c1c !important; }
+  [class*="text-[#F97316]"] { color: #c2410c !important; }
+  [class*="text-[#22C55E]"] { color: #15803d !important; }
   .rank-card .rank-name,
   .rank-card .rank-position,
-  .rank-card .rank-score-label {
+  .rank-card .rank-score-label,
+  .section-title,
+  .section-subtitle,
+  .chart-title,
+  .chart-subtitle {
     color: #1e293b !important;
   }
   canvas {
