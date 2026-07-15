@@ -75,8 +75,6 @@ window.router = {
       if(rightSidebar) rightSidebar.classList.add('!hidden');
       const mc = document.getElementById('main-container');
       if(mc) mc.classList.remove('md:ml-[260px]');
-      const ca = document.getElementById('content-area');
-      if(ca) ca.classList.remove('xl:mr-[300px]');
     } else {
       if(sidebar) sidebar.classList.remove('!hidden');
       if(topnav) topnav.classList.remove('!hidden');
@@ -84,13 +82,10 @@ window.router = {
       const mc = document.getElementById('main-container');
       if(mc) mc.classList.add('md:ml-[260px]');
 
-      const ca = document.getElementById('content-area');
       if (layoutType === 'admin') {
         if(rightSidebar) rightSidebar.classList.remove('!hidden');
-        if(ca) ca.classList.add('xl:mr-[300px]');
       } else {
         if(rightSidebar) rightSidebar.classList.add('!hidden');
-        if(ca) ca.classList.remove('xl:mr-[300px]');
       }
 
       this.renderSidebarItems(layoutType);

@@ -68,7 +68,7 @@ window.pages.renderReportCenter = function() {
       </div>
 
       <!-- Report Cards Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 stagger-children">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 stagger-children">
         ${reports.map(r => `
           <div onclick="${r.id === 'monthly' ? "window.router.navigateTo('report-monthly')" : `window.ui.showToast('📊', 'Laporan ${r.title} sedang dikembangkan', true)`}" 
                class="glass-card p-5 cursor-pointer group hover:border-white/[0.12] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden ${r.featured ? 'ring-1 ring-[#14B88A]/30' : ''}">
