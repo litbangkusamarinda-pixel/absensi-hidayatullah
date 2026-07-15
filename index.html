@@ -149,94 +149,9 @@
     </header>
 
     <!-- ═══════════════════════════════════════════════ -->
-    <!-- RIGHT SIDEBAR                                   -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <aside id="right-sidebar" class="fixed top-[72px] right-0 w-[300px] h-[calc(100vh-72px)] bg-[#102B22]/90 backdrop-blur-2xl border-l border-white/[0.04] z-20 hidden xl:block overflow-y-auto p-5 shadow-2xl shadow-black/20">
-      <div class="space-y-7">
-
-        <!-- Today's Date Widget -->
-        <div>
-          <div class="glass-card p-4 text-center">
-            <div class="text-[10px] font-bold tracking-[0.2em] text-white/30 uppercase mb-2">Hari Ini</div>
-            <div id="rs-clock" class="text-3xl font-black text-white tracking-tight">--:--</div>
-            <div id="rs-date" class="text-xs text-white/50 mt-1">Memuat...</div>
-          </div>
-        </div>
-
-        <!-- Live Attendance Summary -->
-        <div>
-          <h3 class="sidebar-section-label flex items-center gap-2 !px-0"><i data-lucide="activity" class="w-3 h-3"></i> Absensi Live</h3>
-          <div id="rs-live-summary" class="space-y-2">
-            <div class="flex items-center justify-between p-3 glass-surface rounded-xl">
-              <span class="text-xs text-white/50">Hadir</span>
-              <span class="text-sm font-bold text-[#22C55E]" id="rs-hadir">-</span>
-            </div>
-            <div class="flex items-center justify-between p-3 glass-surface rounded-xl">
-              <span class="text-xs text-white/50">Terlambat</span>
-              <span class="text-sm font-bold text-[#F59E0B]" id="rs-telat">-</span>
-            </div>
-            <div class="flex items-center justify-between p-3 glass-surface rounded-xl">
-              <span class="text-xs text-white/50">Izin / Sakit</span>
-              <span class="text-sm font-bold text-[#60A5FA]" id="rs-izin">-</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Announcements -->
-        <div>
-          <h3 class="sidebar-section-label flex items-center gap-2 !px-0"><i data-lucide="megaphone" class="w-3 h-3"></i> Pengumuman</h3>
-          <div class="space-y-2">
-            <div class="glass-surface p-3.5 rounded-xl hover:border-[#14B88A]/20 transition-all cursor-pointer group">
-              <div class="flex items-center gap-2 mb-1.5">
-                <div class="w-1.5 h-1.5 rounded-full bg-[#14B88A] shadow-[0_0_6px_rgba(20,184,138,0.5)]"></div>
-                <div class="text-[11px] font-bold text-[#14B88A]">Rapat Yayasan</div>
-              </div>
-              <div class="text-[10px] text-white/40 leading-relaxed">Jumat, 14:00 WITA. Wajib hadir untuk seluruh unit.</div>
-            </div>
-            <div class="glass-surface p-3.5 rounded-xl hover:border-[#F59E0B]/20 transition-all cursor-pointer group">
-              <div class="flex items-center gap-2 mb-1.5">
-                <div class="w-1.5 h-1.5 rounded-full bg-[#F59E0B] shadow-[0_0_6px_rgba(245,158,11,0.5)]"></div>
-                <div class="text-[11px] font-bold text-[#F59E0B]">Pelatihan Guru</div>
-              </div>
-              <div class="text-[10px] text-white/40 leading-relaxed">Workshop peningkatan kompetensi pedagogik.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Unit Sekolah -->
-        <div>
-          <h3 class="sidebar-section-label flex items-center gap-2 !px-0"><i data-lucide="school" class="w-3 h-3"></i> Unit Sekolah</h3>
-          <div class="space-y-1" id="rs-unit-list">
-            <div class="flex items-center justify-between text-xs p-2.5 hover:bg-white/[0.03] rounded-lg cursor-pointer transition-all group">
-              <span class="font-bold text-white/60 group-hover:text-white transition-colors">SD Integral Hidayatullah</span>
-              <span class="badge badge-primary text-[8px]">Aktif</span>
-            </div>
-            <div class="flex items-center justify-between text-xs p-2.5 hover:bg-white/[0.03] rounded-lg cursor-pointer transition-all group">
-              <span class="font-bold text-white/60 group-hover:text-white transition-colors">MTS-MA Putra</span>
-              <span class="badge badge-primary text-[8px]">Aktif</span>
-            </div>
-            <div class="flex items-center justify-between text-xs p-2.5 hover:bg-white/[0.03] rounded-lg cursor-pointer transition-all group">
-              <span class="font-bold text-white/60 group-hover:text-white transition-colors">MTS-MA Putri</span>
-              <span class="badge badge-primary text-[8px]">Aktif</span>
-            </div>
-            <div class="flex items-center justify-between text-xs p-2.5 hover:bg-white/[0.03] rounded-lg cursor-pointer transition-all group">
-              <span class="font-bold text-white/60 group-hover:text-white transition-colors">TK & TPA</span>
-              <span class="badge badge-primary text-[8px]">Aktif</span>
-            </div>
-            <div class="flex items-center justify-between text-xs p-2.5 hover:bg-white/[0.03] rounded-lg cursor-pointer transition-all group">
-              <span class="font-bold text-white/60 group-hover:text-white transition-colors">STIT HISAM</span>
-              <span class="badge badge-primary text-[8px]">Aktif</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </aside>
-
-    <!-- ═══════════════════════════════════════════════ -->
     <!-- MAIN CONTENT AREA                               -->
     <!-- ═══════════════════════════════════════════════ -->
-    <main id="content-area" class="flex-1 w-full min-h-screen transition-all duration-300 flex flex-col xl:mr-[300px]">
+    <main id="content-area" class="flex-1 w-full min-h-screen transition-all duration-300 flex flex-col">
       <div id="app-content" class="flex-1 p-4 md:p-6 lg:p-8 mt-[72px] w-full max-w-[1400px] mx-auto relative z-10">
         <!-- JS renders pages here -->
       </div>

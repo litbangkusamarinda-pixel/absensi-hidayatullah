@@ -40,18 +40,12 @@ window.pages.renderReportMonthly = function() {
             </select>
           </div>
           <div>
-            <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Bulan</label>
-            <select id="rpt-month" class="hrms-input hrms-select text-sm">
-              ${months.map((m, i) => `<option value="${i}" ${i === now.getMonth() ? 'selected' : ''}>${m}</option>`).join('')}
-            </select>
+            <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tanggal Mulai</label>
+            <input type="date" id="rpt-start-date" class="hrms-input text-sm" value="${new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]}">
           </div>
           <div>
-            <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tahun</label>
-            <select id="rpt-year" class="hrms-input hrms-select text-sm">
-              <option>2024</option>
-              <option>2025</option>
-              <option selected>2026</option>
-            </select>
+            <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tanggal Akhir</label>
+            <input type="date" id="rpt-end-date" class="hrms-input text-sm" value="${new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]}">
           </div>
           <div>
             <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tipe Pegawai</label>
@@ -86,7 +80,7 @@ window.pages.renderReportMonthly = function() {
           </div>
           <div>
             <div class="section-title">Ringkasan Eksekutif</div>
-            <div class="section-subtitle">Executive Summary — ${months[now.getMonth()]} ${now.getFullYear()}</div>
+            <div class="section-subtitle" id="rpt-exec-subtitle">Executive Summary — ${months[now.getMonth()]} ${now.getFullYear()}</div>
           </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 stagger-children" id="exec-summary-cards">
@@ -483,10 +477,26 @@ window.pages.initReportMonthly = function() {
     try {
       const adminEmail = window.auth.currentUser.email;
       
-      const filterMonth = document.getElementById('rpt-month').value;
-      const filterYear = document.getElementById('rpt-year').value;
+      const startDateVal = document.getElementById('rpt-start-date').value;
+      const endDateVal = document.getElementById('rpt-end-date').value;
       const filterUnit = document.getElementById('rpt-unit').value;
       
+      const startDate = new Date(startDateVal);
+      startDate.setHours(0,0,0,0);
+      const endDate = new Date(endDateVal);
+      endDate.setHours(23,59,59,999);
+      
+      const checkUnitMatch = (dataUnit, filter) => {
+        if (filter === 'all') return true;
+        if (filter === 'SD Integral Hidayatullah') {
+          return dataUnit === 'SD Integral Hidayatullah' || dataUnit === 'SD Integral Hidayatullah 2';
+        }
+        if (filter === 'TK Islam Qurrata Ayun & TPA') {
+          return dataUnit === "TK Islam Qurrata 'Ayun" || dataUnit === "TPA YAA BUNAYYA -PAGI" || dataUnit === "TPA YAA BUNAYYA - SIANG";
+        }
+        return dataUnit === filter;
+      };
+
       const [employees, rawLaporan] = await Promise.all([
         window.api.getPegawaiListAdmin(adminEmail),
         window.api.getLaporanLengkapAdmin()
@@ -495,24 +505,28 @@ window.pages.initReportMonthly = function() {
       const tbody = document.getElementById('rpt-detail-body');
       if (!tbody) { window.ui.hideLoading(); return; }
 
-      if (!employees.length) {
+      const filteredEmployees = employees.filter(e => checkUnitMatch(e.unit, filterUnit));
+
+      if (!filteredEmployees.length) {
         tbody.innerHTML = '<tr><td colspan="12" class="text-center py-10 text-white/30 text-xs">Tidak ada data pegawai</td></tr>';
         window.ui.hideLoading();
         return;
       }
       
-      // Filter laporan by selected month and year
+      // Filter laporan by selected date range and unit
       const filteredLaporan = rawLaporan.filter(r => {
         if (!r.waktu) return false;
-        const w = String(r.waktu).split(' ')[0];
-        if (!w) return false;
-        const parts = w.split('-');
+        
+        // Parse "YYYY-MM-DD HH:mm:ss" string to Date object
+        const parts = String(r.waktu).split(/[- T:]/);
         if (parts.length < 3) return false;
         
-        const logYear = parts[0];
-        const logMonth = (parseInt(parts[1], 10) - 1).toString();
+        // Default to 00:00:00 if time is missing
+        const logDate = new Date(parts[0], parts[1]-1, parts[2], parts[3]||0, parts[4]||0, parts[5]||0);
         
-        return logYear === filterYear && logMonth === filterMonth;
+        const isTimeMatch = logDate >= startDate && logDate <= endDate;
+        const isUnitMatch = checkUnitMatch(r.unit, filterUnit);
+        return isTimeMatch && isUnitMatch;
       });
       
       // Calculate stats for Executive Summary, Top Discipline and Unit Stats
@@ -555,7 +569,7 @@ window.pages.initReportMonthly = function() {
       // Render Executive Summary
       const execSummaryEl = document.getElementById('exec-summary-cards');
       if (execSummaryEl) {
-        const totalPegawai = employees.length;
+        const totalPegawai = filteredEmployees.length;
         const hariKerja = uniqueDates.size > 0 ? uniqueDates.size : 22;
         const totalPossible = totalPegawai * hariKerja;
         const belumPulang = Math.max(0, totalHadir - totalPulang);
@@ -563,17 +577,20 @@ window.pages.initReportMonthly = function() {
         const pctKehadiran = totalPossible > 0 ? Math.round((totalHadir / totalPossible) * 100) : 0;
         const skorDisiplin = totalHadir > 0 ? Math.round(((totalHadir - totalTerlambat) / totalHadir) * 100) : 0;
         
-        // Calculate vs Bulan Lalu
-        const prevMonth = filterMonth === "0" ? "11" : (parseInt(filterMonth) - 1).toString();
-        const prevYear = filterMonth === "0" ? (parseInt(filterYear) - 1).toString() : filterYear;
+        // Calculate vs Periode Sebelumnya (same number of days prior)
+        const durationMs = endDate.getTime() - startDate.getTime();
+        const prevEndDate = new Date(startDate.getTime() - 1);
+        const prevStartDate = new Date(prevEndDate.getTime() - durationMs);
         
         const prevLaporan = rawLaporan.filter(r => {
           if (!r.waktu) return false;
-          const w = String(r.waktu).split(' ')[0];
-          if (!w) return false;
-          const parts = w.split('-');
+          const parts = String(r.waktu).split(/[- T:]/);
           if (parts.length < 3) return false;
-          return parts[0] === prevYear && (parseInt(parts[1], 10) - 1).toString() === prevMonth;
+          const logDate = new Date(parts[0], parts[1]-1, parts[2], parts[3]||0, parts[4]||0, parts[5]||0);
+          
+          const isTimeMatch = logDate >= prevStartDate && logDate <= prevEndDate;
+          const isUnitMatch = checkUnitMatch(r.unit, filterUnit);
+          return isTimeMatch && isUnitMatch;
         });
         
         let prevHadir = 0;
@@ -602,7 +619,7 @@ window.pages.initReportMonthly = function() {
           { label:'Sakit', value: totalSakit, icon:'heart-pulse', color:'#06B6D4' },
           { label:'Tidak Hadir', value: tidakHadir, icon:'user-x', color:'#EF4444' },
           { label:'Belum Pulang', value: belumPulang, icon:'log-out', color:'#F97316' },
-          { label:'vs Bulan Lalu', value: diffStr, icon: diffIcon, color: diffColor },
+          { label:'vs Periode Lalu', value: diffStr, icon: diffIcon, color: diffColor },
           { label:'Skor Disiplin', value: skorDisiplin, icon:'award', color:'#EAB308' }
         ];
         
@@ -617,6 +634,11 @@ window.pages.initReportMonthly = function() {
             <div class="stat-value text-xl">${c.value}</div>
           </div>
         `).join('');
+      }
+      
+      const execSubtitle = document.getElementById('rpt-exec-subtitle');
+      if (execSubtitle) {
+        execSubtitle.textContent = `Periode: ${startDate.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'})} - ${endDate.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'})}`;
       }
       
       // Render Unit Stats
@@ -712,7 +734,7 @@ window.pages.initReportMonthly = function() {
         }
       }
 
-      window._reportData = employees.map((e, i) => {
+      window._reportData = filteredEmployees.map((e, i) => {
         const hadir = guruStats[e.nama]?.hadir || 0;
         const telat = guruStats[e.nama]?.lambat || 0;
         const izin = 0; // TBD if needed
@@ -720,7 +742,7 @@ window.pages.initReportMonthly = function() {
         const absen = 22 - hadir - izin - sakit;
         const pct = Math.round((hadir/22)*100);
         return { ...e, hadir, telat, izin, sakit, absen: Math.max(0,absen), pct, idx: i+1 };
-      }).filter(e => filterUnit === 'all' || e.unit === filterUnit);
+      });
 
       window.pages.renderDetailTable(window._reportData);
       if (window.lucide) window.lucide.createIcons();
