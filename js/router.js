@@ -70,23 +70,27 @@ window.router = {
     const rightSidebar = document.getElementById('right-sidebar');
     
     if (layoutType === 'none') {
-      sidebar.classList.add('!hidden');
-      topnav.classList.add('!hidden');
-      rightSidebar.classList.add('!hidden');
-      document.getElementById('main-container').classList.remove('md:ml-[260px]');
-      document.getElementById('content-area').classList.remove('xl:mr-[300px]');
+      if(sidebar) sidebar.classList.add('!hidden');
+      if(topnav) topnav.classList.add('!hidden');
+      if(rightSidebar) rightSidebar.classList.add('!hidden');
+      const mc = document.getElementById('main-container');
+      if(mc) mc.classList.remove('md:ml-[260px]');
+      const ca = document.getElementById('content-area');
+      if(ca) ca.classList.remove('xl:mr-[300px]');
     } else {
-      sidebar.classList.remove('!hidden');
-      topnav.classList.remove('!hidden');
+      if(sidebar) sidebar.classList.remove('!hidden');
+      if(topnav) topnav.classList.remove('!hidden');
       
-      document.getElementById('main-container').classList.add('md:ml-[260px]');
+      const mc = document.getElementById('main-container');
+      if(mc) mc.classList.add('md:ml-[260px]');
 
+      const ca = document.getElementById('content-area');
       if (layoutType === 'admin') {
-        rightSidebar.classList.remove('!hidden');
-        document.getElementById('content-area').classList.add('xl:mr-[300px]');
+        if(rightSidebar) rightSidebar.classList.remove('!hidden');
+        if(ca) ca.classList.add('xl:mr-[300px]');
       } else {
-        rightSidebar.classList.add('!hidden');
-        document.getElementById('content-area').classList.remove('xl:mr-[300px]');
+        if(rightSidebar) rightSidebar.classList.add('!hidden');
+        if(ca) ca.classList.remove('xl:mr-[300px]');
       }
 
       this.renderSidebarItems(layoutType);
