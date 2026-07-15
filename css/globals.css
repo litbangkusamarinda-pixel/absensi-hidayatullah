@@ -617,6 +617,14 @@
   [class*="text-white"] {
     color: #1e293b !important;
   }
+  .rank-card .rank-name,
+  .rank-card .rank-position,
+  .rank-card .rank-score-label {
+    color: #1e293b !important;
+  }
+  canvas {
+    filter: invert(1) hue-rotate(180deg);
+  }
   @page {
     size: A4 landscape;
     margin: 15mm;
