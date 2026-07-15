@@ -517,12 +517,21 @@ window.pages.initReportMonthly = function() {
       const filteredLaporan = rawLaporan.filter(r => {
         if (!r.waktu) return false;
         
-        // Parse "YYYY-MM-DD HH:mm:ss" string to Date object
-        const parts = String(r.waktu).split(/[- T:]/);
-        if (parts.length < 3) return false;
+        let logDate = new Date(r.waktu);
+        if (isNaN(logDate.getTime())) {
+          // Parse "YYYY-MM-DD HH:mm:ss" string to Date object
+          const parts = String(r.waktu).split(/[- T:/]/);
+          if (parts.length >= 3) {
+            // handle DD/MM/YYYY or YYYY-MM-DD gracefully if possible, but assume YYYY-MM-DD
+            if (parts[0].length === 4) {
+              logDate = new Date(parts[0], parts[1]-1, parts[2], parts[3]||0, parts[4]||0, parts[5]||0);
+            } else {
+              logDate = new Date(parts[2], parts[1]-1, parts[0], parts[3]||0, parts[4]||0, parts[5]||0);
+            }
+          }
+        }
         
-        // Default to 00:00:00 if time is missing
-        const logDate = new Date(parts[0], parts[1]-1, parts[2], parts[3]||0, parts[4]||0, parts[5]||0);
+        if (isNaN(logDate.getTime())) return false;
         
         const isTimeMatch = logDate >= startDate && logDate <= endDate;
         const isUnitMatch = checkUnitMatch(r.unit, filterUnit);
