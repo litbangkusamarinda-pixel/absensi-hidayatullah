@@ -26,6 +26,7 @@ window.api = {
   getIzinAllAdmin: (adminEmail) => apiCall('getIzinAllAdmin', { adminEmail }),
   getUnitListAdmin: (adminEmail) => apiCall('getUnitListAdmin', { adminEmail }),
   getPegawaiListAdmin: (adminEmail) => apiCall('getPegawaiListAdmin', { adminEmail }),
+  getLaporanLengkapAdmin: () => apiCall('getLaporanLengkapAdmin'),
   prosesIzin: (data) => apiCall('prosesIzin', data),
   getAllLogAdmin: (adminEmail) => apiCall('getAllLogAdmin', { adminEmail }),
   saveUnitAdmin: (data) => apiCall('saveUnitAdmin', data)

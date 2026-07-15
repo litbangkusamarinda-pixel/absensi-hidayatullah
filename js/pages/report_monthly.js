@@ -151,23 +151,8 @@ window.pages.renderReportMonthly = function() {
             <div class="section-subtitle">Breakdown berdasarkan unit</div>
           </div>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          ${[
-            { unit:'SD Integral', pct:'96%', count:25, color:'#14B88A' },
-            { unit:'MTS-MA Putra', pct:'93%', count:18, color:'#3B82F6' },
-            { unit:'MTS-MA Putri', pct:'95%', count:15, color:'#22C55E' },
-            { unit:'TK & TPA', pct:'91%', count:8, color:'#F59E0B' },
-            { unit:'STIT HISAM', pct:'94%', count:12, color:'#8B5CF6' },
-          ].map(p => `
-            <div class="glass-card p-4 text-center hover:-translate-y-1 transition-all">
-              <div class="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center" style="background:${p.color}15; border:1px solid ${p.color}25;">
-                <i data-lucide="users" class="w-4 h-4" style="color:${p.color}"></i>
-              </div>
-              <div class="text-xs font-bold text-white/50 mb-1">${p.unit}</div>
-              <div class="text-2xl font-black text-white">${p.pct}</div>
-              <div class="text-[10px] text-white/30 mt-1">${p.count} orang</div>
-            </div>
-          `).join('')}
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" id="rpt-unit-stats">
+          <!-- Populated by generateReport() -->
         </div>
       </div>
 
@@ -183,22 +168,7 @@ window.pages.renderReportMonthly = function() {
           </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" id="rpt-top-discipline">
-          ${[
-            { name:'Ahmad Fauzi', unit:'STIT HISAM', pct:'100%', rank:1, medal:'🥇' },
-            { name:'Siti Aminah', unit:'SD Integral', pct:'98%', rank:2, medal:'🥈' },
-            { name:'M. Ridwan', unit:'MTS-MA Putra', pct:'97%', rank:3, medal:'🥉' },
-            { name:'Nur Hasanah', unit:'MTS-MA Putri', pct:'96%', rank:4, medal:'⭐' },
-            { name:'Hasan Basri', unit:'TK & TPA', pct:'95%', rank:5, medal:'⭐' },
-          ].map(e => `
-            <div class="rank-card">
-              <div class="rank-badge bg-[#EAB308]/20 text-[#EAB308]">${e.medal}</div>
-              <div class="rank-avatar">${e.name.charAt(0)}</div>
-              <div class="rank-name">${e.name}</div>
-              <div class="rank-position">${e.unit}</div>
-              <div class="rank-score">${e.pct}</div>
-              <div class="rank-score-label">Kehadiran</div>
-            </div>
-          `).join('')}
+          <!-- Populated by generateReport() -->
         </div>
       </div>
 
@@ -214,38 +184,7 @@ window.pages.renderReportMonthly = function() {
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="rpt-attention">
-          ${[
-            { name:'Budi Santoso', unit:'SD Integral', late:8, absent:3, sick:2, badge:'⚠️ Perlu Pembinaan', color:'#EF4444' },
-            { name:'Dewi Lestari', unit:'STIT HISAM', late:5, absent:2, sick:1, badge:'🔶 Pantau', color:'#F59E0B' },
-            { name:'Rizki Pratama', unit:'MTS-MA Putra', late:4, absent:1, sick:3, badge:'🔶 Pantau', color:'#F59E0B' },
-          ].map(e => `
-            <div class="glass-card p-4 border-l-2 hover:-translate-y-1 transition-all" style="border-left-color:${e.color}">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#EF4444]/20 to-[#F97316]/20 flex items-center justify-center text-white font-bold text-sm border border-[#EF4444]/20">
-                  ${e.name.charAt(0)}
-                </div>
-                <div>
-                  <div class="text-sm font-bold text-white">${e.name}</div>
-                  <div class="text-[10px] text-white/30">${e.unit}</div>
-                </div>
-              </div>
-              <div class="grid grid-cols-3 gap-2 mb-3">
-                <div class="text-center p-2 bg-[#EF4444]/10 rounded-lg">
-                  <div class="text-sm font-black text-[#F87171]">${e.late}</div>
-                  <div class="text-[8px] font-bold text-white/20 uppercase">Telat</div>
-                </div>
-                <div class="text-center p-2 bg-[#F59E0B]/10 rounded-lg">
-                  <div class="text-sm font-black text-[#FBBF24]">${e.absent}</div>
-                  <div class="text-[8px] font-bold text-white/20 uppercase">Absen</div>
-                </div>
-                <div class="text-center p-2 bg-[#3B82F6]/10 rounded-lg">
-                  <div class="text-sm font-black text-[#60A5FA]">${e.sick}</div>
-                  <div class="text-[8px] font-bold text-white/20 uppercase">Sakit</div>
-                </div>
-              </div>
-              <div class="text-[10px] font-bold" style="color:${e.color}">${e.badge}</div>
-            </div>
-          `).join('')}
+          <!-- Populated by generateReport() -->
         </div>
       </div>
 
@@ -543,7 +482,15 @@ window.pages.initReportMonthly = function() {
     window.ui.showLoading('Generating laporan...');
     try {
       const adminEmail = window.auth.currentUser.email;
-      const employees = await window.api.getPegawaiListAdmin(adminEmail);
+      
+      const filterMonth = document.getElementById('rpt-month').value;
+      const filterYear = document.getElementById('rpt-year').value;
+      const filterUnit = document.getElementById('rpt-unit').value;
+      
+      const [employees, rawLaporan] = await Promise.all([
+        window.api.getPegawaiListAdmin(adminEmail),
+        window.api.getLaporanLengkapAdmin()
+      ]);
       
       const tbody = document.getElementById('rpt-detail-body');
       if (!tbody) { window.ui.hideLoading(); return; }
@@ -553,18 +500,143 @@ window.pages.initReportMonthly = function() {
         window.ui.hideLoading();
         return;
       }
+      
+      // Filter laporan by selected month and year
+      const filteredLaporan = rawLaporan.filter(r => {
+        if (!r.waktu) return false;
+        const w = String(r.waktu).split(' ')[0];
+        if (!w) return false;
+        const parts = w.split('-');
+        if (parts.length < 3) return false;
+        
+        const logYear = parts[0];
+        const logMonth = (parseInt(parts[1], 10) - 1).toString();
+        
+        return logYear === filterYear && logMonth === filterMonth;
+      });
+      
+      // Calculate stats for Top Discipline and Unit Stats
+      const guruStats = {};
+      const unitStats = {};
+      
+      filteredLaporan.forEach(r => {
+        if(r.jenis === "Masuk") {
+          if(!unitStats[r.unit]) unitStats[r.unit] = { hadir: 0, pegawai: new Set() };
+          unitStats[r.unit].hadir++;
+          unitStats[r.unit].pegawai.add(r.nama);
+        }
+        
+        if(!guruStats[r.nama]) guruStats[r.nama] = { unit: r.unit, tepat: 0, lambat: 0, hadir: 0 };
+        if(r.jenis === "Masuk") guruStats[r.nama].hadir++;
+        if(r.status === "Tepat Waktu") guruStats[r.nama].tepat++;
+        if(r.status === "Terlambat" || r.status === "Pulang Cepat") guruStats[r.nama].lambat++;
+      });
+      
+      // Render Unit Stats
+      const unitStatsEl = document.getElementById('rpt-unit-stats');
+      if (unitStatsEl) {
+        const unitColors = ['#14B88A', '#3B82F6', '#22C55E', '#F59E0B', '#8B5CF6'];
+        const unitArray = Object.keys(unitStats).map((k, i) => {
+          const color = unitColors[i % unitColors.length];
+          const stat = unitStats[k];
+          return { unit: k, hadir: stat.hadir, count: stat.pegawai.size, color };
+        });
+        
+        if (unitArray.length === 0) {
+          unitStatsEl.innerHTML = '<div class="col-span-full text-center py-4 text-xs text-white/40">Belum ada data kehadiran unit bulan ini</div>';
+        } else {
+          unitStatsEl.innerHTML = unitArray.map(p => `
+            <div class="glass-card p-4 text-center hover:-translate-y-1 transition-all">
+              <div class="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center" style="background:${p.color}15; border:1px solid ${p.color}25;">
+                <i data-lucide="users" class="w-4 h-4" style="color:${p.color}"></i>
+              </div>
+              <div class="text-xs font-bold text-white/50 mb-1">${p.unit}</div>
+              <div class="text-2xl font-black text-white">${p.hadir} <span class="text-sm">Hadir</span></div>
+              <div class="text-[10px] text-white/30 mt-1">${p.count} orang aktif</div>
+            </div>
+          `).join('');
+        }
+      }
+      
+      // Render Top Discipline
+      const disciplineEl = document.getElementById('rpt-top-discipline');
+      const arrGuru = Object.keys(guruStats).map(k => ({ nama: k, ...guruStats[k] }));
+      
+      if (disciplineEl) {
+        const arrTerdisiplin = arrGuru.filter(g => g.tepat > 0).sort((a,b) => b.tepat - a.tepat).slice(0, 5);
+        
+        if (arrTerdisiplin.length === 0) {
+          disciplineEl.innerHTML = '<div class="col-span-full text-center py-4 text-xs text-white/40">Belum ada data kedisiplinan bulan ini</div>';
+        } else {
+          const medals = ['🥇','🥈','🥉','⭐','⭐'];
+          disciplineEl.innerHTML = arrTerdisiplin.map((e, i) => `
+            <div class="rank-card">
+              <div class="rank-badge bg-[#EAB308]/20 text-[#EAB308]">${medals[i] || '⭐'}</div>
+              <div class="rank-avatar">${e.nama.charAt(0)}</div>
+              <div class="rank-name">${e.nama}</div>
+              <div class="rank-position">${e.unit}</div>
+              <div class="rank-score">${e.tepat}x</div>
+              <div class="rank-score-label">Tepat Waktu</div>
+            </div>
+          `).join('');
+        }
+      }
+
+      // Render Need Attention
+      const attentionEl = document.getElementById('rpt-attention');
+      if (attentionEl) {
+        const arrPerhatian = arrGuru.filter(g => g.lambat > 0).sort((a,b) => b.lambat - a.lambat).slice(0, 3);
+        
+        if (arrPerhatian.length === 0) {
+          attentionEl.innerHTML = '<div class="col-span-full text-center py-4 text-xs text-white/40">Semua pegawai disiplin bulan ini!</div>';
+        } else {
+          attentionEl.innerHTML = arrPerhatian.map(e => {
+            const badge = e.lambat > 5 ? '⚠️ Perlu Pembinaan' : '🔶 Pantau';
+            const color = e.lambat > 5 ? '#EF4444' : '#F59E0B';
+            return `
+              <div class="glass-card p-4 border-l-2 hover:-translate-y-1 transition-all" style="border-left-color:${color}">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#EF4444]/20 to-[#F97316]/20 flex items-center justify-center text-white font-bold text-sm border border-[#EF4444]/20">
+                    ${e.nama.charAt(0)}
+                  </div>
+                  <div>
+                    <div class="text-sm font-bold text-white">${e.nama}</div>
+                    <div class="text-[10px] text-white/30">${e.unit}</div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                  <div class="text-center p-2 bg-[#EF4444]/10 rounded-lg">
+                    <div class="text-sm font-black text-[#F87171]">${e.lambat}</div>
+                    <div class="text-[8px] font-bold text-white/20 uppercase">Telat</div>
+                  </div>
+                  <div class="text-center p-2 bg-[#F59E0B]/10 rounded-lg">
+                    <div class="text-sm font-black text-[#FBBF24]">0</div>
+                    <div class="text-[8px] font-bold text-white/20 uppercase">Absen</div>
+                  </div>
+                  <div class="text-center p-2 bg-[#3B82F6]/10 rounded-lg">
+                    <div class="text-sm font-black text-[#60A5FA]">0</div>
+                    <div class="text-[8px] font-bold text-white/20 uppercase">Sakit</div>
+                  </div>
+                </div>
+                <div class="text-[10px] font-bold" style="color:${color}">${badge}</div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
 
       window._reportData = employees.map((e, i) => {
-        const hadir = 18 + Math.floor(Math.random()*4);
-        const telat = Math.floor(Math.random()*4);
-        const izin = Math.floor(Math.random()*2);
-        const sakit = Math.floor(Math.random()*2);
+        const hadir = guruStats[e.nama]?.hadir || 0;
+        const telat = guruStats[e.nama]?.lambat || 0;
+        const izin = 0; // TBD if needed
+        const sakit = 0; // TBD if needed
         const absen = 22 - hadir - izin - sakit;
         const pct = Math.round((hadir/22)*100);
         return { ...e, hadir, telat, izin, sakit, absen: Math.max(0,absen), pct, idx: i+1 };
-      });
+      }).filter(e => filterUnit === 'all' || e.unit === filterUnit);
 
       window.pages.renderDetailTable(window._reportData);
+      if (window.lucide) window.lucide.createIcons();
       window.ui.hideLoading();
       window.ui.showToast('✅', 'Laporan berhasil di-generate!', true);
     } catch(err) {
