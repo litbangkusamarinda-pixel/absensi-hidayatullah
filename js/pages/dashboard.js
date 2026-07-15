@@ -344,15 +344,47 @@ window.pages.initDashboard = function() {
   }
 
   // ═══ Charts ═══
-  function initWeeklyChart() {
+  async function initWeeklyChart() {
     const ctx = document.getElementById('chart-weekly');
     if (!ctx) return;
     
-    const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-    const today = new Date().getDay();
-    const labels = [];
+    const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    
+    // Build last 7 days date keys
+    const last7 = [];
     for (let i = 6; i >= 0; i--) {
-      labels.push(days[(today - i + 7) % 7] || days[0]);
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      last7.push({
+        key: d.toISOString().split('T')[0], // YYYY-MM-DD
+        label: dayNames[d.getDay()] + ' ' + d.getDate()
+      });
+    }
+    
+    const labels = last7.map(d => d.label);
+    let hadirData = new Array(7).fill(0);
+    let telatData = new Array(7).fill(0);
+    
+    // Try to fetch real data
+    try {
+      const rawLaporan = await window.api.getLaporanLengkapAdmin();
+      const dateMap = {};
+      last7.forEach((d, i) => { dateMap[d.key] = i; });
+      
+      rawLaporan.forEach(r => {
+        if (!r.waktu) return;
+        const datePart = String(r.waktu).split(' ')[0];
+        if (dateMap[datePart] !== undefined) {
+          if (r.jenis === 'Masuk') {
+            hadirData[dateMap[datePart]]++;
+            if (r.status === 'Terlambat' || r.status === 'Pulang Cepat') {
+              telatData[dateMap[datePart]]++;
+            }
+          }
+        }
+      });
+    } catch(e) {
+      console.error('Weekly chart data error:', e);
     }
     
     chartWeekly = new Chart(ctx, {
@@ -362,7 +394,7 @@ window.pages.initDashboard = function() {
         datasets: [
           {
             label: 'Hadir',
-            data: [28, 32, 30, 35, 33, 15, 0],
+            data: hadirData,
             borderColor: '#14B88A',
             backgroundColor: 'rgba(20,184,138,0.1)',
             borderWidth: 2.5,
@@ -376,7 +408,7 @@ window.pages.initDashboard = function() {
           },
           {
             label: 'Terlambat',
-            data: [3, 5, 2, 4, 6, 1, 0],
+            data: telatData,
             borderColor: '#F59E0B',
             backgroundColor: 'rgba(245,158,11,0.05)',
             borderWidth: 2,

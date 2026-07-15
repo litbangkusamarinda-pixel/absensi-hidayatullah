@@ -291,7 +291,7 @@ window.pages.renderReportMonthly = function() {
             <thead>
               <tr><th>Unit</th><th>% Kehadiran</th><th>Terlambat</th><th>Absen</th><th>Skor</th></tr>
             </thead>
-            <tbody>
+            <tbody id="rpt-unit-comparison">
               ${[
                 { unit:'SD Integral Hidayatullah', pct:96, late:12, absent:4, score:'A' },
                 { unit:'MTS-MA Putra', pct:93, late:18, absent:7, score:'A-' },
@@ -420,7 +420,7 @@ window.pages.initReportMonthly = function() {
   // ═══ Charts ═══
   const trendCtx = document.getElementById('rpt-chart-trend');
   if (trendCtx) {
-    new Chart(trendCtx, {
+    window.rptChartTrend = new Chart(trendCtx, {
       type: 'line',
       data: {
         labels: Array.from({length:22}, (_, i) => i+1),
@@ -449,7 +449,7 @@ window.pages.initReportMonthly = function() {
 
   const lateCtx = document.getElementById('rpt-chart-late');
   if (lateCtx) {
-    new Chart(lateCtx, {
+    window.rptChartLate = new Chart(lateCtx, {
       type: 'bar',
       data: {
         labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
@@ -580,17 +580,23 @@ window.pages.initReportMonthly = function() {
         const datePart = String(r.waktu).split(' ')[0];
         if (datePart) uniqueDates.add(datePart);
         
+        if(!unitStats[r.unit]) unitStats[r.unit] = { hadir: 0, lambat: 0, absen: 0, izin: 0, sakit: 0, total: 0, pegawai: new Set() };
+
         if (r.jenis === "Masuk") {
           totalHadir++;
-          if(!unitStats[r.unit]) unitStats[r.unit] = { hadir: 0, pegawai: new Set() };
           unitStats[r.unit].hadir++;
           unitStats[r.unit].pegawai.add(r.nama);
+          if (r.status === "Terlambat" || r.status === "Pulang Cepat") {
+            unitStats[r.unit].lambat++;
+          }
         } else if (r.jenis === "Pulang") {
           totalPulang++;
         } else if (r.jenis === "Izin" || r.status === "Izin") {
           totalIzin++;
+          unitStats[r.unit].izin++;
         } else if (r.jenis === "Sakit" || r.status === "Sakit") {
           totalSakit++;
+          unitStats[r.unit].sakit++;
         }
         
         if(!guruStats[r.nama]) guruStats[r.nama] = { unit: r.unit, tepat: 0, lambat: 0, hadir: 0, izin: 0, sakit: 0 };
@@ -688,29 +694,75 @@ window.pages.initReportMonthly = function() {
         execSubtitle.textContent = `Periode: ${startDate.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'})} - ${endDate.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'})}`;
       }
       
-      // Render Unit Stats
+      // Render Unit Stats & Unit Comparison Table
       const unitStatsEl = document.getElementById('rpt-unit-stats');
-      if (unitStatsEl) {
+      const unitComparisonEl = document.getElementById('rpt-unit-comparison');
+      
+      if (unitStatsEl || unitComparisonEl) {
         const unitColors = ['#14B88A', '#3B82F6', '#22C55E', '#F59E0B', '#8B5CF6'];
+        const actualHariKerja = uniqueDates.size > 0 ? uniqueDates.size : 22;
+        
+        // Count total employees per unit from the filteredEmployees array to get accurate absent calculation
+        const empCountPerUnit = {};
+        filteredEmployees.forEach(e => { empCountPerUnit[e.unit] = (empCountPerUnit[e.unit] || 0) + 1; });
+
         const unitArray = Object.keys(unitStats).map((k, i) => {
           const color = unitColors[i % unitColors.length];
           const stat = unitStats[k];
-          return { unit: k, hadir: stat.hadir, count: stat.pegawai.size, color };
+          const unitTotalEmp = empCountPerUnit[k] || stat.pegawai.size;
+          const totalPossible = unitTotalEmp * actualHariKerja;
+          const pct = totalPossible > 0 ? Math.round((stat.hadir / totalPossible) * 100) : 0;
+          const absent = Math.max(0, totalPossible - stat.hadir - stat.izin - stat.sakit);
+          
+          let score = 'A';
+          if (pct < 75) score = 'C';
+          else if (pct < 85) score = 'B';
+          else if (pct < 90) score = 'B+';
+          else if (pct < 95) score = 'A-';
+          
+          return { unit: k, hadir: stat.hadir, count: unitTotalEmp, late: stat.lambat, absent, pct, score, color };
         });
         
-        if (unitArray.length === 0) {
-          unitStatsEl.innerHTML = '<div class="col-span-full text-center py-4 text-xs text-white/40">Belum ada data kehadiran unit bulan ini</div>';
-        } else {
-          unitStatsEl.innerHTML = unitArray.map(p => `
-            <div class="glass-card p-4 text-center hover:-translate-y-1 transition-all">
-              <div class="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center" style="background:${p.color}15; border:1px solid ${p.color}25;">
-                <i data-lucide="users" class="w-4 h-4" style="color:${p.color}"></i>
+        if (unitStatsEl) {
+          if (unitArray.length === 0) {
+            unitStatsEl.innerHTML = '<div class="col-span-full text-center py-4 text-xs text-white/40">Belum ada data kehadiran unit bulan ini</div>';
+          } else {
+            unitStatsEl.innerHTML = unitArray.map(p => `
+              <div class="glass-card p-4 text-center hover:-translate-y-1 transition-all">
+                <div class="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center" style="background:${p.color}15; border:1px solid ${p.color}25;">
+                  <i data-lucide="users" class="w-4 h-4" style="color:${p.color}"></i>
+                </div>
+                <div class="text-xs font-bold text-white/50 mb-1">${p.unit}</div>
+                <div class="text-2xl font-black text-white">${p.hadir} <span class="text-sm">Hadir</span></div>
+                <div class="text-[10px] text-white/30 mt-1">${p.count} orang aktif</div>
               </div>
-              <div class="text-xs font-bold text-white/50 mb-1">${p.unit}</div>
-              <div class="text-2xl font-black text-white">${p.hadir} <span class="text-sm">Hadir</span></div>
-              <div class="text-[10px] text-white/30 mt-1">${p.count} orang aktif</div>
-            </div>
-          `).join('');
+            `).join('');
+          }
+        }
+        
+        if (unitComparisonEl) {
+          if (unitArray.length === 0) {
+            unitComparisonEl.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-xs text-white/40">Belum ada data perbandingan unit bulan ini</td></tr>';
+          } else {
+            // Sort unitArray by pct descending
+            const sortedArray = [...unitArray].sort((a,b) => b.pct - a.pct);
+            unitComparisonEl.innerHTML = sortedArray.map(u => `
+              <tr>
+                <td class="font-semibold text-white">${u.unit}</td>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1 h-2 bg-white/[0.06] rounded-full overflow-hidden max-w-[100px]">
+                      <div class="h-full rounded-full ${u.pct >= 90 ? 'bg-[#14B88A]' : u.pct >= 75 ? 'bg-[#F59E0B]' : 'bg-[#EF4444]'}" style="width:${u.pct}%"></div>
+                    </div>
+                    <span class="text-xs font-bold ${u.pct >= 90 ? 'text-[#14B88A]' : u.pct >= 75 ? 'text-[#F59E0B]' : 'text-[#EF4444]'}">${u.pct}%</span>
+                  </div>
+                </td>
+                <td><span class="badge ${u.late > 0 ? 'badge-warning' : 'badge-success'}">${u.late}</span></td>
+                <td><span class="badge ${u.absent > 0 ? 'badge-danger' : 'badge-success'}">${u.absent}</span></td>
+                <td><span class="text-sm font-black ${u.score.startsWith('A') ? 'text-[#22C55E]' : u.score.startsWith('B') ? 'text-[#F59E0B]' : 'text-[#EF4444]'}">${u.score}</span></td>
+              </tr>
+            `).join('');
+          }
         }
       }
       
@@ -849,6 +901,117 @@ window.pages.initReportMonthly = function() {
             </tr>`;
           }).join('');
         }
+      }
+      
+      // Update charts based on real daily data
+      if (window.rptChartTrend) {
+        window.rptChartTrend.data.labels = sortedDates;
+        window.rptChartTrend.data.datasets[0].data = sortedDates.map(dateKey => dailyStats[dateKey].hadir);
+        window.rptChartTrend.update();
+      }
+      
+      if (window.rptChartLate) {
+        window.rptChartLate.data.labels = sortedDates;
+        window.rptChartLate.data.datasets[0].data = sortedDates.map(dateKey => dailyStats[dateKey].telat);
+        
+        const bgColors = ['rgba(245,158,11,0.3)', 'rgba(239,68,68,0.3)', 'rgba(59,130,246,0.3)', 'rgba(245,158,11,0.3)'];
+        const borderColors = ['#F59E0B', '#EF4444', '#3B82F6', '#F59E0B'];
+        window.rptChartLate.data.datasets[0].backgroundColor = sortedDates.map((_, i) => bgColors[i % bgColors.length]);
+        window.rptChartLate.data.datasets[0].borderColor = sortedDates.map((_, i) => borderColors[i % borderColors.length]);
+        window.rptChartLate.update();
+      }
+
+      // === GENERATE AI INSIGHTS ===
+      const aiInsightsEl = document.getElementById('rpt-ai-insights');
+      if (aiInsightsEl) {
+        // 1. Kehadiran Trend
+        const totalPegawai = filteredEmployees.length;
+        const hariKerja = uniqueDates.size > 0 ? uniqueDates.size : 22;
+        const totalPossible = totalPegawai * hariKerja;
+        const pctKehadiran = totalPossible > 0 ? Math.round((totalHadir / totalPossible) * 100) : 0;
+        
+        let insightKehadiran = '';
+        if (pctKehadiran >= 95) {
+          insightKehadiran = '<div class="text-xs text-white/50 mt-0.5">Tingkat kehadiran sangat prima mencapai '+pctKehadiran+'%. Pertahankan performa ini.</div>';
+        } else if (pctKehadiran >= 85) {
+          insightKehadiran = '<div class="text-xs text-white/50 mt-0.5">Kehadiran stabil di angka '+pctKehadiran+'%. Masih ada ruang untuk peningkatan kedisiplinan.</div>';
+        } else {
+          insightKehadiran = '<div class="text-xs text-white/50 mt-0.5">Kehadiran menurun ke angka '+pctKehadiran+'%. Perlu evaluasi menyeluruh.</div>';
+        }
+
+        // 2. Pola Keterlambatan
+        let maxLateDay = '', maxLateCount = -1;
+        const hariNama = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        const lateByDay = {0:0,1:0,2:0,3:0,4:0,5:0,6:0};
+        
+        Object.keys(dailyStats).forEach(dateKey => {
+           const parts = dateKey.split(/[-/]/);
+           let d;
+           if (parts.length >= 3) {
+             if (parts[0].length === 4) d = new Date(parts[0], parts[1]-1, parts[2]);
+             else d = new Date(parts[2], parts[1]-1, parts[0]);
+             if (!isNaN(d.getTime())) lateByDay[d.getDay()] += dailyStats[dateKey].telat;
+           }
+        });
+        
+        for (let i=0; i<7; i++) {
+          if (lateByDay[i] > maxLateCount) { maxLateCount = lateByDay[i]; maxLateDay = hariNama[i]; }
+        }
+        
+        let insightPola = '';
+        if (maxLateCount > 0 && totalTerlambat > 0) {
+           const pctLateDay = Math.round((maxLateCount/totalTerlambat)*100);
+           insightPola = '<div class="text-xs text-white/50 mt-0.5">Hari <strong>'+maxLateDay+'</strong> menjadi hari dengan keterlambatan tertinggi ('+pctLateDay+'% dari total keterlambatan). Pertimbangkan evaluasi jam masuk.</div>';
+        } else {
+           insightPola = '<div class="text-xs text-white/50 mt-0.5">Tidak terdeteksi pola keterlambatan yang signifikan. Ketepatan waktu sangat baik.</div>';
+        }
+
+        // 3. Perlu Pembinaan
+        let perluBinaan = 0;
+        Object.keys(guruStats).forEach(k => { if (guruStats[k].lambat > 3) perluBinaan++; });
+        let insightBinaan = '';
+        if (perluBinaan > 0) {
+           insightBinaan = '<div class="text-xs text-white/50 mt-0.5"><strong>'+perluBinaan+' pegawai</strong> memiliki catatan keterlambatan berulang (>3x/periode). Disarankan coaching individual.</div>';
+        } else {
+           insightBinaan = '<div class="text-xs text-white/50 mt-0.5">Seluruh pegawai menunjukkan tingkat kedisiplinan yang memadai. Tidak ada yang sering terlambat.</div>';
+        }
+
+        // 4. Overall Assessment
+        let overallGrade = 'Sangat Baik (A)';
+        let overallColor = '#14B88A'; // green
+        if (pctKehadiran < 75) { overallGrade = 'Perlu Perhatian (C)'; overallColor = '#EF4444'; }
+        else if (pctKehadiran < 90) { overallGrade = 'Baik (B)'; overallColor = '#F59E0B'; }
+        
+        aiInsightsEl.innerHTML = `
+          <div class="flex items-start gap-3 p-3 rounded-xl border" style="background:${overallColor}10; border-color:${overallColor}15;">
+            <span class="text-lg mt-0.5">📈</span>
+            <div>
+              <div class="text-sm font-bold" style="color:${overallColor}">Tren Kehadiran</div>
+              ${insightKehadiran}
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3 bg-[#F59E0B]/10 rounded-xl border border-[#F59E0B]/15">
+            <span class="text-lg mt-0.5">⏰</span>
+            <div>
+              <div class="text-sm font-bold text-[#FBBF24]">Pola Keterlambatan</div>
+              ${insightPola}
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3 bg-[#EF4444]/10 rounded-xl border border-[#EF4444]/15">
+            <span class="text-lg mt-0.5">⚠️</span>
+            <div>
+              <div class="text-sm font-bold text-[#F87171]">Perlu Pembinaan</div>
+              ${insightBinaan}
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3 rounded-xl border" style="background:${overallColor}10; border-color:${overallColor}15;">
+            <span class="text-lg mt-0.5">✅</span>
+            <div>
+              <div class="text-sm font-bold" style="color:${overallColor}">Overall Assessment</div>
+              <div class="text-xs text-white/50 mt-0.5">Performa kehadiran keseluruhan: <strong style="color:${overallColor}">${overallGrade}</strong>.</div>
+            </div>
+          </div>
+        `;
       }
 
       // Update signature dynamically

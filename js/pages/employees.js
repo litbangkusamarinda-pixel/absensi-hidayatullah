@@ -111,14 +111,31 @@ async function loadEmployeeData() {
     
     const totalEl = document.getElementById('emp-total');
     const activeEl = document.getElementById('emp-active');
+    const unitsEl = document.getElementById('emp-units');
     if (totalEl) totalEl.innerText = employees.length;
     if (activeEl) activeEl.innerText = employees.length;
+    
+    // Calculate unique units from real data
+    const uniqueUnits = [...new Set(employees.map(e => e.unit))];
+    if (unitsEl) unitsEl.innerText = uniqueUnits.length;
     
     // Populate unit filter
     const unitFilter = document.getElementById('emp-unit-filter');
     if (unitFilter) {
-      const units = [...new Set(employees.map(e => e.unit))];
-      unitFilter.innerHTML = '<option value="all">Semua Unit</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+      unitFilter.innerHTML = '<option value="all">Semua Unit</option>' + uniqueUnits.map(u => `<option value="${u}">${u}</option>`).join('');
+    }
+    
+    // Fetch today's attendance log to populate "Hadir Hari Ini"
+    try {
+      const todayLog = await window.api.getTodayLogAdmin(adminEmail);
+      const presentEl = document.getElementById('emp-present');
+      if (presentEl && Array.isArray(todayLog)) {
+        const hadirSet = new Set();
+        todayLog.forEach(r => { if (r.jenis === 'Masuk') hadirSet.add(r.nama); });
+        presentEl.innerText = hadirSet.size;
+      }
+    } catch(e2) {
+      console.error('Error loading today attendance for employees:', e2);
     }
     
     renderEmployeeTable(employees);
