@@ -49,6 +49,10 @@ window.pages.renderAttendance = function() {
             <div id="att-loc-dot" class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></div>
             <span id="att-loc-text">Mendapatkan lokasi GPS...</span>
           </div>
+          
+          <button onclick="window.refreshLocation()" class="mt-3 mx-auto px-4 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 text-xs font-medium flex items-center justify-center gap-2 transition-colors">
+            <i data-lucide="refresh-cw" class="w-3 h-3"></i> Perbarui Lokasi
+          </button>
         </div>
 
         <!-- Title PILIH JENIS ABSENSI -->
@@ -58,8 +62,8 @@ window.pages.renderAttendance = function() {
 
         <!-- Status & Action Buttons -->
         <div id="att-status-message" class="text-center p-6 rounded-3xl bg-white/5 border border-white/10 text-white/80 text-sm shadow-lg">
-          <i data-lucide="map-pin" class="w-8 h-8 mx-auto mb-3 opacity-50 animate-bounce"></i>
-          <div class="font-bold">Mencari Lokasi...</div>
+          <i data-lucide="satellite" class="w-8 h-8 mx-auto mb-3 opacity-50 animate-bounce"></i>
+          <div class="font-bold">Sedang Mencari GPS...</div>
           <div class="text-xs text-white/50 mt-1">Pastikan GPS Anda aktif dan akurat</div>
         </div>
 
@@ -155,6 +159,9 @@ window.pages.initAttendance = function() {
   window.targetLat = null;
   window.targetLon = null;
   window.maxRadius = 35; // Fallback
+  
+  window.gpsSamples = [];
+  window.ignoredFirstGps = false;
 
   function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3;
@@ -166,7 +173,31 @@ window.pages.initAttendance = function() {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
   }
-  
+  window.refreshLocation = function() {
+    window.ui.showToast('🔄', 'Memperbarui lokasi...', true);
+    window.gpsSamples = [];
+    window.ignoredFirstGps = false;
+    
+    // Tampilkan pesan loading secara instan pada UI
+    const textEl = document.getElementById('att-loc-text');
+    if(textEl) textEl.textContent = 'Mendapatkan lokasi GPS...';
+    
+    const dotEl = document.getElementById('att-loc-dot');
+    if(dotEl) dotEl.classList.replace('bg-emerald-400', 'bg-red-400');
+    
+    const msgEl = document.getElementById('att-status-message');
+    if(msgEl) {
+        msgEl.classList.remove('hidden');
+        msgEl.innerHTML = '<i data-lucide="satellite" class="w-8 h-8 mx-auto mb-3 opacity-50 animate-bounce"></i><div class="font-bold">Sedang Mencari GPS...</div><div class="text-xs text-white/50 mt-1">Pastikan GPS Anda aktif dan akurat</div>';
+        if(window.lucide) window.lucide.createIcons();
+    }
+    
+    const buttonsEl = document.getElementById('att-action-buttons');
+    if(buttonsEl) buttonsEl.classList.add('hidden');
+
+    getLocation();
+  };
+
   function getLocation() {
     if (!navigator.geolocation) { 
       window.ui.showToast('⚠️','Browser tidak mendukung GPS.',false); 
@@ -177,22 +208,91 @@ window.pages.initAttendance = function() {
 
     window.watchId = navigator.geolocation.watchPosition(
       pos => {
-        window.userLat = pos.coords.latitude; 
-        window.userLon = pos.coords.longitude;
-        const accuracy = Math.round(pos.coords.accuracy);
-        const distance = Math.round(calculateDistance(window.userLat, window.userLon, window.targetLat, window.targetLon));
-        
-        const textEl = document.getElementById('att-loc-text');
-        if(textEl) textEl.textContent = 'Akurasi ' + accuracy + 'm · Jarak ' + distance + 'm';
-        const dotEl = document.getElementById('att-loc-dot');
-        if(dotEl) dotEl.classList.replace('bg-red-400', 'bg-emerald-400');
+        // Abaikan koordinat pertama karena biasanya dari cache
+        if (!window.ignoredFirstGps) {
+           window.ignoredFirstGps = true;
+           
+           const textEl = document.getElementById('att-loc-text');
+           const msgEl = document.getElementById('att-status-message');
+           
+           if(textEl) textEl.textContent = 'Menemukan sinyal awal...';
+           if(msgEl) {
+               msgEl.innerHTML = '<i data-lucide="satellite" class="w-8 h-8 mx-auto mb-3 text-blue-300 opacity-80 animate-pulse"></i><div class="font-bold text-blue-300">Sedang Mencari GPS...</div><div class="text-xs text-white/50 mt-1">Menghubungkan ke satelit terdekat...</div>';
+               if(window.lucide) window.lucide.createIcons();
+           }
+           return;
+        }
 
+        const accuracy = Math.round(pos.coords.accuracy);
+        // Menggunakan radius dari database sebagai batas akurasi
+        const MIN_ACCURACY = window.maxRadius || 35;
+
+        const textEl = document.getElementById('att-loc-text');
+        const dotEl = document.getElementById('att-loc-dot');
         const buttonsEl = document.getElementById('att-action-buttons');
         const msgEl = document.getElementById('att-status-message');
 
         // Jika koordinat target belum dapat, tunggu dulu
         if (window.targetLat === null || window.targetLon === null) return;
 
+        // Cek akurasi terlebih dahulu
+        if (accuracy > MIN_ACCURACY) {
+            window.gpsSamples = []; // Reset array jika akurasi memburuk tiba-tiba
+            
+            if(textEl) textEl.textContent = `Akurasi ${accuracy}m · Sedang mengkalibrasi...`;
+            if(dotEl) {
+                dotEl.classList.remove('bg-emerald-400', 'bg-blue-400', 'bg-red-400');
+                dotEl.classList.add('bg-amber-400');
+            }
+
+            if(buttonsEl) buttonsEl.classList.add('hidden');
+            if(msgEl) {
+                msgEl.classList.remove('hidden');
+                msgEl.innerHTML = `<i data-lucide="crosshair" class="w-8 h-8 mx-auto mb-3 text-amber-400/80 animate-pulse"></i><div class="font-bold text-amber-400">Meningkatkan Akurasi GPS...</div><div class="text-xs text-white/60 mt-1">Akurasi saat ini: ${accuracy}m (Target: &le;${MIN_ACCURACY}m)</div>`;
+                if(window.lucide) window.lucide.createIcons();
+            }
+            return;
+        }
+
+        // Kumpulkan sampel (Rolling window of 5)
+        window.gpsSamples.push({lat: pos.coords.latitude, lon: pos.coords.longitude});
+        if (window.gpsSamples.length > 5) {
+            window.gpsSamples.shift(); // Buang yang paling lama
+        }
+
+        if (window.gpsSamples.length < 5) {
+            if(textEl) textEl.textContent = `Akurasi ${accuracy}m · Mengambil sampel (${window.gpsSamples.length}/5)`;
+            if(dotEl) {
+                dotEl.classList.remove('bg-emerald-400', 'bg-amber-400', 'bg-red-400');
+                dotEl.classList.add('bg-blue-400');
+            }
+
+            if(buttonsEl) buttonsEl.classList.add('hidden');
+            if(msgEl) {
+                msgEl.classList.remove('hidden');
+                msgEl.innerHTML = `<i data-lucide="satellite" class="w-8 h-8 mx-auto mb-3 text-blue-400/80 animate-pulse"></i><div class="font-bold text-blue-400">Mengkalibrasi Lokasi...</div><div class="text-xs text-white/60 mt-1">Mengambil data titik koordinat ke-${window.gpsSamples.length}</div>`;
+                if(window.lucide) window.lucide.createIcons();
+            }
+            return; // Tunggu sampai 5 sampel penuh
+        }
+
+        // Kalau sudah mencapai 5 sampel, hitung rata-rata
+        let avgLat = window.gpsSamples.reduce((sum, val) => sum + val.lat, 0) / 5;
+        let avgLon = window.gpsSamples.reduce((sum, val) => sum + val.lon, 0) / 5;
+        
+        window.userLat = avgLat; 
+        window.userLon = avgLon;
+
+        // Hitung jarak berdasarkan titik rata-rata
+        const distance = Math.round(calculateDistance(window.userLat, window.userLon, window.targetLat, window.targetLon));
+        
+        if(textEl) textEl.textContent = `Akurasi ${accuracy}m · Jarak ${distance}m`;
+        if(dotEl) {
+            dotEl.classList.remove('bg-red-400', 'bg-amber-400', 'bg-blue-400');
+            dotEl.classList.add('bg-emerald-400');
+        }
+
+        // Cek radius
         if (distance <= window.maxRadius) {
             if(buttonsEl) buttonsEl.classList.remove('hidden');
             if(msgEl) msgEl.classList.add('hidden');
