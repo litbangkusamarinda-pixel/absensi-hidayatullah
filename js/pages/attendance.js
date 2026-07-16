@@ -105,6 +105,13 @@ window.pages.renderAttendance = function() {
           Ajukan Izin / Sakit
         </button>
 
+        ${(user.jabatan && user.jabatan.toLowerCase().includes('kepala sekolah')) ? `
+        <button onclick="window.ui.openModal('modal-persetujuan-izin'); window.pages.loadIzinPendingKepsek();" class="w-full py-4 mt-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold hover:opacity-90 transition-all shadow-lg flex items-center justify-center gap-2 border border-amber-400/30">
+          <i data-lucide="check-circle" class="w-5 h-5"></i>
+          Persetujuan Izin (Kepsek)
+        </button>
+        ` : ''}
+
         <!-- History Mini -->
         <div class="bg-white/5 backdrop-blur-md rounded-3xl p-6 border border-white/10 mt-4 mb-8">
           <h3 class="text-[10px] font-bold tracking-widest text-white/40 uppercase mb-4">Riwayat Terakhir</h3>
@@ -416,6 +423,70 @@ window.pages.initAttendance = function() {
   
   renderRiwayatLokal();
   
+  // ═══ Logic Persetujuan Kepala Sekolah ═══
+  window.pages.loadIzinPendingKepsek = async function() {
+    const listEl = document.getElementById('list-persetujuan-izin');
+    if(!listEl) return;
+    
+    listEl.innerHTML = '<div class="text-center text-sm text-white/50 py-4">Memuat data...</div>';
+    
+    try {
+      const emailKepsek = window.auth.currentUser.email;
+      // Using admin API because it fetches the data. If the backend needs adjustment for Kepala Sekolah, it should be done there.
+      const d = await window.api.getIzinPendingAdmin(emailKepsek); 
+      
+      if (!d || !d.length) { 
+        listEl.innerHTML = `
+          <div class="empty-state py-8 text-center">
+            <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-white/20"></i>
+            <div class="text-xs text-white/50">Tidak ada pengajuan izin menunggu</div>
+          </div>`;
+        if (window.lucide) window.lucide.createIcons();
+        return; 
+      }
+      
+      listEl.innerHTML = d.map(r => `
+        <div class="bg-white/5 hover:bg-white/10 rounded-2xl p-4 border border-white/10 transition-all text-sm group relative overflow-hidden">
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <div class="font-bold text-white text-[14px]">${r.nama}</div>
+              <div class="text-[11px] text-white/50">${r.waktu} • ${r.unit}</div>
+            </div>
+            <span class="px-2 py-1 rounded-md bg-amber-400/10 text-amber-400 text-[10px] font-bold border border-amber-400/20">${r.jenis}</span>
+          </div>
+          <div class="text-[12px] text-white/70 bg-black/20 p-3 rounded-xl mb-4 italic border border-white/5">"${r.ket || '-'}"</div>
+          <div class="flex gap-2">
+            <button onclick="window.pages.prosesIzinKepsek(${r.rowIndex}, 'Disetujui')" class="flex-1 py-2.5 bg-[#22C55E]/10 hover:bg-[#22C55E]/20 text-[#4ADE80] border border-[#22C55E]/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Setujui</button>
+            <button onclick="window.pages.prosesIzinKepsek(${r.rowIndex}, 'Ditolak')" class="flex-1 py-2.5 bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#F87171] border border-[#EF4444]/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1"><i data-lucide="x" class="w-3.5 h-3.5"></i> Tolak</button>
+          </div>
+        </div>
+      `).join('');
+      if (window.lucide) window.lucide.createIcons();
+    } catch(e) {
+      console.error(e);
+      listEl.innerHTML = '<div class="text-center text-sm text-red-400 py-4">Gagal memuat data</div>';
+    }
+  };
+
+  window.pages.prosesIzinKepsek = async function(rowIndex, status) {
+    if (!confirm(`Apakah Anda yakin ingin memberikan status "${status}" pada pengajuan ini?`)) return;
+    
+    window.ui.showLoading("Memproses...");
+    try {
+      const payload = { rowIndex, status, adminEmail: window.auth.currentUser.email };
+      const res = await window.api.prosesIzin(payload);
+      window.ui.hideLoading();
+      window.ui.showToast(res.success ? '✅' : '⚠️', res.message, res.success);
+      
+      if(res.success) {
+        window.pages.loadIzinPendingKepsek();
+      }
+    } catch(e) {
+      window.ui.hideLoading();
+      window.ui.showToast('❌', e.message, false);
+    }
+  };
+
   if (window.lucide) window.lucide.createIcons();
 };
 

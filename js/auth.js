@@ -15,7 +15,7 @@ window.auth = {
           const res = await window.api.checkUserRegistration(savedEmail);
           ui.hideLoading();
           if (res.registered) {
-            this.currentUser = { email: savedEmail, role: 'employee', name: res.nama, unit: res.unit };
+            this.currentUser = { email: savedEmail, role: 'employee', name: res.nama, unit: res.unit, jabatan: res.jabatan };
             window.router.navigateTo('attendance');
           } else {
             this.logout();
@@ -39,7 +39,7 @@ window.auth = {
       if (res.registered) {
         localStorage.setItem('hrms_email', email);
         localStorage.setItem('hrms_role', 'employee');
-        this.currentUser = { email, role: 'employee', name: res.nama, unit: res.unit };
+        this.currentUser = { email, role: 'employee', name: res.nama, unit: res.unit, jabatan: res.jabatan };
         ui.showToast('✅', 'Berhasil login!', true);
         window.router.navigateTo('attendance');
       } else {
