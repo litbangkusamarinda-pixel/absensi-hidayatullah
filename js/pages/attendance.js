@@ -56,8 +56,14 @@ window.pages.renderAttendance = function() {
           <span class="text-[10px] font-bold tracking-widest text-white/40 uppercase">Pilih Jenis Absensi</span>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="grid grid-cols-2 gap-4">
+        <!-- Status & Action Buttons -->
+        <div id="att-status-message" class="text-center p-6 rounded-3xl bg-white/5 border border-white/10 text-white/80 text-sm shadow-lg">
+          <i data-lucide="map-pin" class="w-8 h-8 mx-auto mb-3 opacity-50 animate-bounce"></i>
+          <div class="font-bold">Mencari Lokasi...</div>
+          <div class="text-xs text-white/50 mt-1">Pastikan GPS Anda aktif dan akurat</div>
+        </div>
+
+        <div id="att-action-buttons" class="grid grid-cols-2 gap-4 hidden">
           <!-- Absen Masuk -->
           <button onclick="handleAbsen('Masuk')" class="relative overflow-hidden flex flex-col items-center justify-center gap-5 p-6 rounded-3xl bg-gradient-to-tr from-[#14B88A] to-[#A3E635] text-white shadow-lg shadow-[#A3E635]/30 hover:shadow-[0_0_25px_rgba(163,230,53,0.4)] hover:scale-105 transition-all duration-300 active:scale-95 group border border-[#A3E635]/40">
             <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -117,6 +123,7 @@ window.pages.initAttendance = function() {
   let clockInterval = setInterval(() => {
     if(window.router && window.router.currentRoute !== 'attendance') {
       clearInterval(clockInterval);
+      if (window.watchId) navigator.geolocation.clearWatch(window.watchId);
       return;
     }
     const now = new Date();
@@ -143,26 +150,73 @@ window.pages.initAttendance = function() {
   // GPS Location
   window.userLat = null;
   window.userLon = null;
+  window.watchId = null;
+  
+  // Koordinat Tujuan (Harus Disesuaikan dengan lokasi sekolah/pesantren)
+  const TARGET_LAT = -0.463583; // Contoh Latitude
+  const TARGET_LON = 117.155823; // Contoh Longitude
+  const MAX_RADIUS = 50; // Radius maksimal dalam meter untuk bisa absen
+
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
   
   function getLocation() {
     if (!navigator.geolocation) { 
       window.ui.showToast('⚠️','Browser tidak mendukung GPS.',false); 
       return; 
     }
-    navigator.geolocation.getCurrentPosition(
+    
+    if (window.watchId) navigator.geolocation.clearWatch(window.watchId);
+
+    window.watchId = navigator.geolocation.watchPosition(
       pos => {
         window.userLat = pos.coords.latitude; 
         window.userLon = pos.coords.longitude;
+        const accuracy = Math.round(pos.coords.accuracy);
+        const distance = Math.round(calculateDistance(window.userLat, window.userLon, TARGET_LAT, TARGET_LON));
+        
         const textEl = document.getElementById('att-loc-text');
-        if(textEl) textEl.textContent = 'GPS aktif · Akurasi ' + Math.round(pos.coords.accuracy) + 'm';
+        if(textEl) textEl.textContent = 'Akurasi ' + accuracy + 'm · Jarak ' + distance + 'm';
         const dotEl = document.getElementById('att-loc-dot');
         if(dotEl) dotEl.classList.replace('bg-red-400', 'bg-emerald-400');
+
+        const buttonsEl = document.getElementById('att-action-buttons');
+        const msgEl = document.getElementById('att-status-message');
+
+        if (distance <= MAX_RADIUS) {
+            if(buttonsEl) buttonsEl.classList.remove('hidden');
+            if(msgEl) msgEl.classList.add('hidden');
+        } else {
+            if(buttonsEl) buttonsEl.classList.add('hidden');
+            if(msgEl) {
+                msgEl.classList.remove('hidden');
+                msgEl.innerHTML = '<i data-lucide="map-pin-off" class="w-8 h-8 mx-auto mb-3 text-red-400/80"></i><div class="font-bold text-red-400">Di Luar Area Absen</div><div class="text-xs text-white/60 mt-1">Jarak Anda: ' + distance + 'm (Maks: ' + MAX_RADIUS + 'm)</div>';
+                if(window.lucide) window.lucide.createIcons();
+            }
+        }
       }, 
       err => {
         const textEl = document.getElementById('att-loc-text');
-        if(textEl) textEl.textContent = 'GPS ditolak — aktifkan lokasi!';
+        if(textEl) textEl.textContent = 'GPS error — aktifkan & izinkan lokasi!';
         const dotEl = document.getElementById('att-loc-dot');
         if(dotEl) dotEl.classList.replace('bg-emerald-400', 'bg-red-400');
+
+        const buttonsEl = document.getElementById('att-action-buttons');
+        const msgEl = document.getElementById('att-status-message');
+        if(buttonsEl) buttonsEl.classList.add('hidden');
+        if(msgEl) {
+            msgEl.classList.remove('hidden');
+            msgEl.innerHTML = '<i data-lucide="alert-circle" class="w-8 h-8 mx-auto mb-3 text-red-400/80"></i><div class="font-bold text-red-400">Gagal Membaca GPS</div><div class="text-xs text-white/60 mt-1">Pastikan izin lokasi diberikan</div>';
+            if(window.lucide) window.lucide.createIcons();
+        }
       }, 
       {enableHighAccuracy:true, maximumAge:0, timeout:15000}
     );
