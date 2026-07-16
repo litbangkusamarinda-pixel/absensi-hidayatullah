@@ -243,6 +243,28 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════ -->
+  <!-- Modal Persetujuan Izin (Kepsek)                 -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div id="modal-persetujuan-izin" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[90] hidden items-end sm:items-center justify-center p-4">
+    <div class="modal-content w-full max-w-md bg-[#132F24] backdrop-blur-xl border border-white/10 shadow-2xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 transform scale-95 opacity-0 transition-all duration-300">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-extrabold text-white tracking-tight">Persetujuan Izin</h2>
+          <p class="text-xs font-medium text-white/40 mt-1">Daftar pengajuan menunggu persetujuan</p>
+        </div>
+        <button onclick="window.ui.closeModal('modal-persetujuan-izin')" class="btn-icon text-white/40 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div id="list-persetujuan-izin" class="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+        <!-- JS renders pending requests here -->
+        <div class="text-center text-sm text-white/50 py-4">Memuat data...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
   <!-- MODAL BYPASS ABSEN (ADMIN) -->
   <div id="modal-bypass-absen" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[90] hidden items-end sm:items-center justify-center p-4">
     <div class="modal-content w-full max-w-md bg-[#132F24] backdrop-blur-xl border border-white/10 shadow-2xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 transform scale-95 opacity-0 transition-all duration-300">
