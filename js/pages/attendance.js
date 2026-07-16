@@ -152,10 +152,9 @@ window.pages.initAttendance = function() {
   window.userLon = null;
   window.watchId = null;
   
-  // Koordinat Tujuan (Harus Disesuaikan dengan lokasi sekolah/pesantren)
-  const TARGET_LAT = -0.463583; // Contoh Latitude
-  const TARGET_LON = 117.155823; // Contoh Longitude
-  const MAX_RADIUS = 50; // Radius maksimal dalam meter untuk bisa absen
+  window.targetLat = null;
+  window.targetLon = null;
+  window.maxRadius = 35; // Fallback
 
   function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3;
@@ -181,7 +180,7 @@ window.pages.initAttendance = function() {
         window.userLat = pos.coords.latitude; 
         window.userLon = pos.coords.longitude;
         const accuracy = Math.round(pos.coords.accuracy);
-        const distance = Math.round(calculateDistance(window.userLat, window.userLon, TARGET_LAT, TARGET_LON));
+        const distance = Math.round(calculateDistance(window.userLat, window.userLon, window.targetLat, window.targetLon));
         
         const textEl = document.getElementById('att-loc-text');
         if(textEl) textEl.textContent = 'Akurasi ' + accuracy + 'm · Jarak ' + distance + 'm';
@@ -191,14 +190,17 @@ window.pages.initAttendance = function() {
         const buttonsEl = document.getElementById('att-action-buttons');
         const msgEl = document.getElementById('att-status-message');
 
-        if (distance <= MAX_RADIUS) {
+        // Jika koordinat target belum dapat, tunggu dulu
+        if (window.targetLat === null || window.targetLon === null) return;
+
+        if (distance <= window.maxRadius) {
             if(buttonsEl) buttonsEl.classList.remove('hidden');
             if(msgEl) msgEl.classList.add('hidden');
         } else {
             if(buttonsEl) buttonsEl.classList.add('hidden');
             if(msgEl) {
                 msgEl.classList.remove('hidden');
-                msgEl.innerHTML = '<i data-lucide="map-pin-off" class="w-8 h-8 mx-auto mb-3 text-red-400/80"></i><div class="font-bold text-red-400">Di Luar Area Absen</div><div class="text-xs text-white/60 mt-1">Jarak Anda: ' + distance + 'm (Maks: ' + MAX_RADIUS + 'm)</div>';
+                msgEl.innerHTML = '<i data-lucide="map-pin-off" class="w-8 h-8 mx-auto mb-3 text-red-400/80"></i><div class="font-bold text-red-400">Di Luar Area Absen</div><div class="text-xs text-white/60 mt-1">Jarak Anda: ' + distance + 'm (Maks: ' + window.maxRadius + 'm)</div>';
                 if(window.lucide) window.lucide.createIcons();
             }
         }
@@ -221,7 +223,23 @@ window.pages.initAttendance = function() {
       {enableHighAccuracy:true, maximumAge:0, timeout:15000}
     );
   }
-  getLocation();
+  
+  async function initLocationTracker() {
+    try {
+      const units = await window.api.getUnitListAdmin(''); // Fetch unit data
+      const myUnit = units.find(u => u.unit === window.auth.currentUser.unit);
+      if (myUnit) {
+        window.targetLat = parseFloat(myUnit.lat);
+        window.targetLon = parseFloat(myUnit.lon);
+        window.maxRadius = parseFloat(myUnit.radius) || 35;
+      }
+      getLocation();
+    } catch(e) {
+      console.error("Gagal load data unit", e);
+      getLocation(); // Tetap panggil walau gagal, nanti jaraknya error (NaN) tapi gps jalan
+    }
+  }
+  initLocationTracker();
 
   // Absen Logic
   window.handleAbsen = async function(jenis) {
