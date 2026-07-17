@@ -55,7 +55,7 @@
     .form-row{display:flex;gap:12px;margin-bottom:12px;}
     .form-group{flex:1;}
     .form-group label{font-size:12px;font-weight:600;color:var(--g7);display:block;margin-bottom:6px;}
-    .form-group input{width:100%;padding:10px;border:1.5px solid rgba(16,185,129,.2);border-radius:10px;font-family:'Inter',sans-serif;outline:none;}
+    .form-group input, .form-group select{width:100%;padding:10px;border:1.5px solid rgba(16,185,129,.2);border-radius:10px;font-family:'Inter',sans-serif;outline:none;}
     .btn-save{width:100%;padding:14px;background:linear-gradient(135deg,var(--g6) 0%,#4d7c0f 100%);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;box-shadow:0 4px 12px rgba(5,150,105,.3);margin-top:6px;}
     .btn-download{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;border:none;padding:9px 14px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .15s;}
     .btn-download:hover{transform:translateY(-1px);}
@@ -139,30 +139,66 @@
           <div class="table-wrap"><table id="tabelUnit"><thead><tr><th>Unit</th><th>Masuk</th><th>Pulang</th><th>Koordinat</th><th>Radius</th></tr></thead><tbody><tr><td colspan="5" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody></table></div>
         </div>
         <div class="card">
-          <div class="card-title"><div class="icon icon-purple">📅</div><div>Pengaturan Hari Kerja Khusus</div></div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label>Pilih Unit</label>
-              <select id="jUnit" style="width:100%;padding:10px;border:1.5px solid rgba(16,185,129,.2);border-radius:10px;font-family:'Inter',sans-serif;outline:none;">
-                <option value="">Pilih Unit...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Hari</label>
-              <select id="jHari" style="width:100%;padding:10px;border:1.5px solid rgba(16,185,129,.2);border-radius:10px;font-family:'Inter',sans-serif;outline:none;">
-                 <option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option><option value="Kamis">Kamis</option><option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option><option value="Minggu">Minggu</option>
-              </select>
-            </div>
+          <div class="card-title"><div class="icon icon-purple">👥</div><div>Guru & Karyawan Terdaftar</div></div>
+          <div class="table-wrap"><table id="tabelPegawai"><thead><tr><th>Nama</th><th>Email</th><th>Unit</th><th>Tgl Daftar</th></tr></thead><tbody><tr><td colspan="4" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ROW 4: JADWAL KERJA KHUSUS -->
+    <div class="grid-bottom" style="margin-top:24px;">
+      <div class="col-left card">
+        <div class="card-title"><div class="icon icon-yellow">🗓️</div><div>Atur Hari Kerja Khusus<div class="subtitle">Contoh: Jadwal khusus hari Jumat</div></div></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pilih Unit</label>
+            <select id="jUnit">
+              <option value="">Pilih Unit Aktif...</option>
+            </select>
           </div>
-          <div class="form-row">
-            <div class="form-group"><label>Masuk</label><input type="time" id="jMasuk" value="07:00"></div>
-            <div class="form-group"><label>Pulang</label><input type="time" id="jPulang" value="15:00"></div>
-            <div class="form-group"><label>Libur?</label><select id="jLibur" style="width:100%;padding:10px;border:1.5px solid rgba(16,185,129,.2);border-radius:10px;font-family:'Inter',sans-serif;outline:none;"><option value="TIDAK">TIDAK</option><option value="YA">YA</option></select></div>
+          <div class="form-group">
+            <label>Pilih Hari</label>
+            <select id="jHari">
+              <option value="Senin">Senin</option>
+              <option value="Selasa">Selasa</option>
+              <option value="Rabu">Rabu</option>
+              <option value="Kamis">Kamis</option>
+              <option value="Jumat">Jumat</option>
+              <option value="Sabtu">Sabtu</option>
+              <option value="Minggu">Minggu</option>
+            </select>
           </div>
-          <button class="btn-save" style="margin-bottom: 12px; background: linear-gradient(135deg, var(--g6), var(--g4));" onclick="simpanJadwalKhusus()" id="btnSimpanJadwal">Simpan Jadwal Khusus</button>
-
-          <div class="table-wrap"><table id="tabelJadwal"><thead><tr><th>Unit</th><th>Hari</th><th>Masuk/Pulang</th><th>Libur</th><th>Aksi</th></tr></thead><tbody><tr><td colspan="5" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody></table></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Jam Masuk</label>
+            <input type="time" id="jMasuk" value="07:00">
+          </div>
+          <div class="form-group">
+            <label>Jam Pulang</label>
+            <input type="time" id="jPulang" value="11:30">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Jadikan Hari Libur?</label>
+            <select id="jLibur">
+              <option value="Tidak">Tidak</option>
+              <option value="Ya">Ya, Libur</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-save" onclick="simpanJadwalHari()" id="btnSimpanJadwal">Simpan Jadwal Khusus</button>
+      </div>
+      <div class="col-right">
+        <div class="card">
+          <div class="card-title"><div class="icon icon-purple">📅</div><div>Daftar Jadwal Khusus Terdaftar</div></div>
+          <div class="table-wrap" style="max-height:280px;">
+            <table id="tabelJadwal">
+              <thead><tr><th>Unit</th><th>Hari</th><th>Masuk</th><th>Pulang</th><th>Status Libur</th><th>Aksi</th></tr></thead>
+              <tbody><tr><td colspan="6" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -170,7 +206,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyMnILtEEfQU0k_Y7FLZlDJG-yMqpItTURR_eeVUBkrizDZd2cZ0_l_24bREFicglKdPw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyinS5BMAANWqAu0HL00spOQNGxiXb-KzY3zxKWCvx804bBXdZXJSgTf635g5EJOcCOFQ/exec";
     
     async function apiCall(action, payload = {}) {
       payload.action = action;
@@ -237,48 +273,20 @@
     function loadTableUnit(){
       apiCall('getUnitListAdmin', {adminEmail: adminEmail}).then(function(d){
         var tb=document.querySelector('#tabelUnit tbody'); tb.innerHTML='';
-        var jUnitSelect = document.getElementById('jUnit'); jUnitSelect.innerHTML = '<option value="">Pilih Unit...</option>';
+        var jSel=document.getElementById('jUnit'); if(jSel) jSel.innerHTML='<option value="">Pilih Unit Aktif...</option>';
         if(!d.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Belum ada unit</td></tr>'; return; }
         d.forEach(function(r){ 
           tb.innerHTML+='<tr><td><strong>'+r.unit+'</strong></td><td>'+r.masuk+'</td><td>'+r.pulang+'</td><td style="font-size:12px;color:#64748b;">'+r.lat+', '+r.lon+'</td><td><span class="badge b-unit">'+r.radius+'M</span></td></tr>'; 
-          jUnitSelect.innerHTML += '<option value="'+r.unit+'">'+r.unit+'</option>';
+          if(jSel) jSel.innerHTML+='<option value="'+r.unit+'">'+r.unit+'</option>';
         });
       });
     }
 
-    function loadTableJadwal(){
-      apiCall('getJadwalHariAdmin', {adminEmail: adminEmail}).then(function(d){
-        var tb=document.querySelector('#tabelJadwal tbody'); tb.innerHTML='';
-        if(!d.length){ tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:#94a3b8;">Belum ada jadwal khusus</td></tr>'; return; }
-        d.forEach(function(r){ 
-          var statusLibur = r.libur === "YA" ? '<span class="badge b-tolak">LIBUR</span>' : '<span class="badge b-setuju">AKTIF</span>';
-          tb.innerHTML+='<tr><td><strong>'+r.unit+'</strong></td><td>'+r.hari+'</td><td>'+r.masuk+' - '+r.pulang+'</td><td>'+statusLibur+'</td><td><button class="btn-aksi btn-tolak" onclick="hapusJadwalKhusus('+r.rowIndex+')">Hapus</button></td></tr>'; 
-        });
-      });
-    }
-
-    function simpanJadwalKhusus(){
-      var d = {
-        unit: document.getElementById('jUnit').value,
-        hari: document.getElementById('jHari').value,
-        masuk: document.getElementById('jMasuk').value,
-        pulang: document.getElementById('jPulang').value,
-        libur: document.getElementById('jLibur').value
-      };
-      if(!d.unit) { alert('Pilih unit terlebih dahulu!'); return; }
-      document.getElementById('btnSimpanJadwal').innerText = 'Menyimpan...';
-      apiCall('saveJadwalHariAdmin', {adminEmail: adminEmail, jadwalData: d}).then(function(res){
-        alert(res.message);
-        document.getElementById('btnSimpanJadwal').innerText = 'Simpan Jadwal Khusus';
-        loadTableJadwal();
-      });
-    }
-
-    function hapusJadwalKhusus(rowIndex){
-      if(!confirm("Yakin ingin menghapus jadwal ini?")) return;
-      apiCall('deleteJadwalHariAdmin', {adminEmail: adminEmail, rowIndex: rowIndex}).then(function(res){
-        alert(res.message);
-        loadTableJadwal();
+    function loadTablePegawai(){
+      apiCall('getPegawaiListAdmin', {adminEmail: adminEmail}).then(function(d){
+        var tb=document.querySelector('#tabelPegawai tbody'); tb.innerHTML='';
+        if(!d.length){ tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:#94a3b8;">Belum ada guru</td></tr>'; return; }
+        d.forEach(function(r){ tb.innerHTML+='<tr><td><strong>'+r.nama+'</strong></td><td style="font-size:13px;">'+r.email+'</td><td><span class="badge b-unit">'+r.unit+'</span></td><td style="font-size:13px;">'+r.tgl+'</td></tr>'; });
       });
     }
 
@@ -303,8 +311,45 @@
       apiCall('saveUnitAdmin', {adminEmail: adminEmail, unitData: d}).then(function(res){ alert(res.message); document.getElementById('btnSimpan').innerText='Simpan Unit Sekolah'; document.getElementById('modalUnit').style.display='none'; loadTableUnit(); });
     }
 
+    function loadJadwalHari(){
+      apiCall('getJadwalHari').then(function(d){
+        var tb=document.querySelector('#tabelJadwal tbody'); tb.innerHTML='';
+        if(!d.length){ tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:#94a3b8;">Belum ada jadwal khusus</td></tr>'; return; }
+        d.forEach(function(r){
+          var stat = r.libur === "Ya" ? '<span class="badge b-tolak">Libur</span>' : '<span class="badge b-setuju">Masuk</span>';
+          tb.innerHTML+='<tr><td><strong>'+r.unit+'</strong></td><td>'+r.hari+'</td><td>'+r.masuk+'</td><td>'+r.pulang+'</td><td>'+stat+'</td><td><button class="btn-aksi btn-tolak" onclick="hapusJadwalHari('+r.rowIndex+')">Hapus</button></td></tr>';
+        });
+      });
+    }
+
+    function simpanJadwalHari(){
+      var d = {
+        unit: document.getElementById('jUnit').value,
+        hari: document.getElementById('jHari').value,
+        masuk: document.getElementById('jMasuk').value,
+        pulang: document.getElementById('jPulang').value,
+        libur: document.getElementById('jLibur').value
+      };
+      if(!d.unit) { alert('Silakan pilih unit terlebih dahulu!'); return; }
+      document.getElementById('btnSimpanJadwal').innerText = 'Menyimpan...';
+      apiCall('saveJadwalHari', {jadwalData: d}).then(function(res){
+        alert(res.message);
+        document.getElementById('btnSimpanJadwal').innerText = 'Simpan Jadwal Khusus';
+        loadJadwalHari();
+      });
+    }
+
+    function hapusJadwalHari(rowIndex){
+      if(confirm('Yakin ingin menghapus jadwal khusus ini?')){
+        apiCall('deleteJadwalHari', {rowIndex: rowIndex}).then(function(res){
+          alert(res.message);
+          loadJadwalHari();
+        });
+      }
+    }
+
     // INIT
-    loadTableUnit(); loadTableJadwal(); loadTableLog(); loadIzinPending(); loadIzinAll();
+    loadTableUnit(); loadTablePegawai(); loadTableLog(); loadIzinPending(); loadIzinAll(); loadJadwalHari();
     setInterval(function(){ loadTableLog(); loadIzinPending(); }, 30000);
   document.getElementById('adminEmailDisplay').innerText = adminEmail;
   </script>
