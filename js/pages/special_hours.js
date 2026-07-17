@@ -124,7 +124,7 @@ window.pages.initSpecialHours = function() {
       jSel.innerHTML = '<option value="">Pilih Unit Aktif...</option>';
       if (d.length > 0) {
         d.forEach(r => {
-          jSel.innerHTML += \`<option value="\${r.unit}">\${r.unit}</option>\`;
+          jSel.innerHTML += `<option value="${r.unit}">${r.unit}</option>`;
         });
       }
     } catch(e) {
@@ -152,20 +152,20 @@ window.pages.initSpecialHours = function() {
           ? '<span class="badge badge-danger text-[9px]">Libur</span>' 
           : '<span class="badge badge-success text-[9px]">Masuk</span>';
         
-        return \`
+        return `
           <tr>
-            <td class="font-semibold text-white text-xs">\${r.unit}</td>
-            <td class="font-bold text-white text-xs">\${r.hari}</td>
-            <td class="text-xs">\${r.masuk}</td>
-            <td class="text-xs">\${r.pulang}</td>
-            <td>\${stat}</td>
+            <td class="font-semibold text-white text-xs">${r.unit}</td>
+            <td class="font-bold text-white text-xs">${r.hari}</td>
+            <td class="text-xs">${r.masuk}</td>
+            <td class="text-xs">${r.pulang}</td>
+            <td>${stat}</td>
             <td>
-              <button onclick="window.pages.hapusJadwalHari(\${r.rowIndex})" class="bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg p-1.5 transition-colors">
+              <button onclick="window.pages.hapusJadwalHari(${r.rowIndex})" class="bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg p-1.5 transition-colors">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </td>
           </tr>
-        \`;
+        `;
       }).join('');
       
       if (window.lucide) window.lucide.createIcons();
