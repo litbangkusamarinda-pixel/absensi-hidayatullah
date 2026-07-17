@@ -30,5 +30,8 @@ window.api = {
   prosesIzin: (data) => apiCall('prosesIzin', data),
   getAllLogAdmin: (adminEmail) => apiCall('getAllLogAdmin', { adminEmail }),
   saveUnitAdmin: (data) => apiCall('saveUnitAdmin', data),
-  adminBypassAttendance: (data) => apiCall('adminBypassAttendance', data)
+  adminBypassAttendance: (data) => apiCall('adminBypassAttendance', data),
+  getJadwalHari: () => apiCall('getJadwalHari'),
+  saveJadwalHari: (data) => apiCall('saveJadwalHari', data),
+  deleteJadwalHari: (data) => apiCall('deleteJadwalHari', data)
 };
