@@ -15,7 +15,7 @@ window.router = {
     'dashboard':  { render: () => window.pages.renderDashboard(),   layout: 'admin',    title: 'Dashboard' },
     'attendance': { render: () => window.pages.renderAttendance(),  layout: 'employee', title: 'Absensi' },
     'teachers':   { render: () => window.pages.renderEmployees('guru'),  layout: 'admin', title: 'Manajemen Guru' },
-    'employees':  { render: () => window.pages.renderEmployees('karyawan'), layout: 'admin', title: 'Manajemen Karyawan' },
+    'special-hours': { render: () => window.pages.renderUnits(), layout: 'admin', title: 'Jam Kerja Khusus' },
     'units':      { render: () => window.pages.renderUnits(),       layout: 'admin',    title: 'Manajemen Unit' },
     'reports':    { render: () => window.pages.renderReportCenter(),layout: 'admin',    title: 'Pusat Laporan' },
     'report-monthly': { render: () => window.pages.renderReportMonthly(), layout: 'admin', title: 'Laporan Bulanan' },
@@ -125,7 +125,7 @@ window.router = {
           label: 'Manajemen',
           items: [
             { id: 'teachers',  icon: 'graduation-cap', label: 'Guru' },
-            { id: 'employees', icon: 'users',           label: 'Karyawan' },
+            { id: 'special-hours', icon: 'clock',           label: 'Jam Kerja Khusus' },
             { id: 'units',     icon: 'building-2',      label: 'Unit Sekolah' },
           ]
         },
