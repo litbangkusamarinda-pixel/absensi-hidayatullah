@@ -120,10 +120,7 @@
             <tbody><tr><td colspan="5" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody>
           </table>
         </div>
-      </div>
-    </div>
-
-    <!-- ROW 3: MAP + TABLES -->
+      </div>    <!-- ROW 3: MAP + JADWAL KHUSUS -->
     <div class="grid-bottom">
       <div class="col-left card">
         <div class="card-title"><div class="icon icon-green">📍</div><div>Tambah Unit Sekolah<div class="subtitle">Klik peta untuk titik lokasi</div></div></div>
@@ -132,22 +129,9 @@
         <div class="form-row"><div class="form-group"><label>Jam Masuk</label><input type="time" id="masuk" value="07:00"></div><div class="form-group"><label>Jam Pulang</label><input type="time" id="pulang" value="15:00"></div></div>
         <div class="form-row"><div class="form-group"><label>Latitude</label><input type="text" id="lat" readonly></div><div class="form-group"><label>Longitude</label><input type="text" id="lon" readonly></div></div>
         <button class="btn-save" onclick="simpanUnit()" id="btnSimpan">Simpan Unit Sekolah</button>
-      </div>
-      <div class="col-right">
-        <div class="card">
-          <div class="card-title"><div class="icon icon-blue">🏢</div><div>Daftar Unit Aktif</div></div>
-          <div class="table-wrap"><table id="tabelUnit"><thead><tr><th>Unit</th><th>Masuk</th><th>Pulang</th><th>Koordinat</th><th>Radius</th></tr></thead><tbody><tr><td colspan="5" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody></table></div>
-        </div>
-        <div class="card">
-          <div class="card-title"><div class="icon icon-purple">👥</div><div>Guru & Karyawan Terdaftar</div></div>
-          <div class="table-wrap"><table id="tabelPegawai"><thead><tr><th>Nama</th><th>Email</th><th>Unit</th><th>Tgl Daftar</th></tr></thead><tbody><tr><td colspan="4" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody></table></div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- ROW 4: JADWAL KERJA KHUSUS -->
-    <div class="grid-bottom" style="margin-top:24px;">
-      <div class="col-left card">
+        
+        <hr style="margin:24px 0; border:none; border-top:1px solid rgba(16,185,129,.2);">
+        
         <div class="card-title"><div class="icon icon-yellow">🗓️</div><div>Atur Hari Kerja Khusus<div class="subtitle">Contoh: Jadwal khusus hari Jumat</div></div></div>
         <div class="form-row">
           <div class="form-group">
@@ -192,6 +176,10 @@
       </div>
       <div class="col-right">
         <div class="card">
+          <div class="card-title"><div class="icon icon-blue">🏢</div><div>Daftar Unit Aktif</div></div>
+          <div class="table-wrap"><table id="tabelUnit"><thead><tr><th>Unit</th><th>Masuk</th><th>Pulang</th><th>Koordinat</th><th>Radius</th></tr></thead><tbody><tr><td colspan="5" style="text-align:center;color:#94a3b8;">Memuat...</td></tr></tbody></table></div>
+        </div>
+        <div class="card">
           <div class="card-title"><div class="icon icon-purple">📅</div><div>Daftar Jadwal Khusus Terdaftar</div></div>
           <div class="table-wrap" style="max-height:280px;">
             <table id="tabelJadwal">
@@ -202,7 +190,6 @@
         </div>
       </div>
     </div>
-
   </div>
 
   <script>
