@@ -169,6 +169,7 @@ window.pages.initAttendance = function() {
   
   window.gpsSamples = [];
   window.ignoredFirstGps = false;
+  window.isHoliday = false;
 
   function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3;
@@ -180,7 +181,31 @@ window.pages.initAttendance = function() {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
   }
+  window.showHolidayMessage = function() {
+    const textEl = document.getElementById('att-loc-text');
+    const dotEl = document.getElementById('att-loc-dot');
+    const msgEl = document.getElementById('att-status-message');
+    const buttonsEl = document.getElementById('att-action-buttons');
+    
+    if(textEl) textEl.textContent = 'Hari Libur';
+    if(dotEl) {
+        dotEl.classList.remove('bg-emerald-400', 'bg-blue-400', 'bg-amber-400');
+        dotEl.classList.add('bg-red-400');
+    }
+    if(buttonsEl) buttonsEl.classList.add('hidden');
+    if(msgEl) {
+        msgEl.classList.remove('hidden');
+        msgEl.innerHTML = '<i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-3 text-red-400/80"></i><div class="font-bold text-red-400">Hari Libur</div><div class="text-xs text-white/60 mt-1">Jadwal unit Anda hari ini adalah libur.</div>';
+        if(window.lucide) window.lucide.createIcons();
+    }
+  };
+
   window.refreshLocation = function() {
+    if (window.isHoliday) {
+      window.showHolidayMessage();
+      return;
+    }
+
     window.ui.showToast('🔄', 'Memperbarui lokasi...', true);
     window.gpsSamples = [];
     window.ignoredFirstGps = false;
@@ -333,8 +358,27 @@ window.pages.initAttendance = function() {
   
   async function initLocationTracker() {
     try {
+      const days = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+      const currentDay = days[new Date().getDay()];
+      const currentUserUnit = window.auth.currentUser.unit;
+      
+      try {
+        const specialHours = await window.api.getJadwalHari();
+        const todaySpecial = specialHours.find(h => h.unit === currentUserUnit && h.hari === currentDay);
+        if (todaySpecial && todaySpecial.libur === 'Ya') {
+            window.isHoliday = true;
+        }
+      } catch (err) {
+        console.error("Gagal load jadwal khusus", err);
+      }
+
+      if (window.isHoliday) {
+        window.showHolidayMessage();
+        return;
+      }
+
       const units = await window.api.getUnitListAdmin(''); // Fetch unit data
-      const myUnit = units.find(u => u.unit === window.auth.currentUser.unit);
+      const myUnit = units.find(u => u.unit === currentUserUnit);
       if (myUnit) {
         window.targetLat = parseFloat(myUnit.lat);
         window.targetLon = parseFloat(myUnit.lon);
@@ -352,6 +396,11 @@ window.pages.initAttendance = function() {
   window.isSubmittingAbsen = false;
   window.handleAbsen = async function(jenis) {
     if (window.isSubmittingAbsen) return;
+
+    if (window.isHoliday) {
+      window.ui.showToast('⚠️', 'Hari ini libur, absen dinonaktifkan.', false);
+      return;
+    }
     
     if(!window.userLat) { 
       window.ui.showToast('📍','GPS belum siap. Tunggu sebentar.',false); 
