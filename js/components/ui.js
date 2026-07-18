@@ -1,4 +1,4 @@
-window.ui = {
+window.ui = Object.assign(window.ui || {}, {
   showToast: function(icon, message, isSuccess) {
     const toast = document.getElementById('global-toast');
     const toastIcon = document.getElementById('toast-icon');
@@ -56,4 +56,4 @@ window.ui = {
       }, 200);
     }
   }
-};
+});
