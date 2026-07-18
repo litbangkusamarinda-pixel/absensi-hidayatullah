@@ -280,6 +280,13 @@
       
       <div class="space-y-4 mb-6">
         <div>
+          <label class="block text-[10px] font-black tracking-[0.2em] text-white/30 uppercase mb-2">Pilih Unit</label>
+          <select id="bypass-unit" class="hrms-input rounded-2xl cursor-pointer" onchange="window.ui.filterBypassGuru()">
+            <option value="">Pilih Unit...</option>
+          </select>
+        </div>
+        
+        <div>
           <label class="block text-[10px] font-black tracking-[0.2em] text-white/30 uppercase mb-2">Pilih Guru</label>
           <select id="bypass-guru" class="hrms-input rounded-2xl cursor-pointer">
             <option value="">Pilih Guru...</option>
@@ -377,22 +384,47 @@
       }
     }
 
+    window.ui.bypassPegawaiList = [];
+    
     window.ui.openBypassModal = async function() {
-      // Fetch pegawai list and populate select
-      const select = document.getElementById('bypass-guru');
-      select.innerHTML = '<option value="">Memuat...</option>';
+      const selectUnit = document.getElementById('bypass-unit');
+      const selectGuru = document.getElementById('bypass-guru');
+      
+      selectUnit.innerHTML = '<option value="">Memuat...</option>';
+      selectGuru.innerHTML = '<option value="">Memuat...</option>';
       window.ui.openModal('modal-bypass-absen');
       
       try {
         const adminEmail = window.auth.currentUser.email;
         const p = await window.api.getPegawaiListAdmin(adminEmail);
-        select.innerHTML = '<option value="">Pilih Guru...</option>';
-        p.forEach(g => {
-          select.innerHTML += `<option value="${g.email}">${g.nama} (${g.unit})</option>`;
+        window.ui.bypassPegawaiList = p;
+        
+        const units = [...new Set(p.map(g => g.unit).filter(Boolean))].sort();
+        selectUnit.innerHTML = '<option value="">Semua Unit</option>';
+        units.forEach(u => {
+          selectUnit.innerHTML += `<option value="${u}">${u}</option>`;
         });
+        
+        window.ui.filterBypassGuru();
       } catch(e) {
-        select.innerHTML = '<option value="">Gagal memuat guru</option>';
+        selectUnit.innerHTML = '<option value="">Gagal memuat unit</option>';
+        selectGuru.innerHTML = '<option value="">Gagal memuat guru</option>';
       }
+    };
+
+    window.ui.filterBypassGuru = function() {
+      const selectedUnit = document.getElementById('bypass-unit').value;
+      const selectGuru = document.getElementById('bypass-guru');
+      
+      selectGuru.innerHTML = '<option value="">Pilih Guru...</option>';
+      
+      const filtered = selectedUnit 
+        ? window.ui.bypassPegawaiList.filter(g => g.unit === selectedUnit)
+        : window.ui.bypassPegawaiList;
+        
+      filtered.forEach(g => {
+        selectGuru.innerHTML += `<option value="${g.email}">${g.nama} (${g.unit})</option>`;
+      });
     };
 
     async function submitBypassAbsen() {
