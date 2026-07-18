@@ -202,9 +202,34 @@ window.pages.initAttendance = function() {
     }
   };
 
+  window.showBypassMessage = function(type) {
+    const textEl = document.getElementById('att-loc-text');
+    const dotEl = document.getElementById('att-loc-dot');
+    const msgEl = document.getElementById('att-status-message');
+    const buttonsEl = document.getElementById('att-action-buttons');
+    const btnIzin = document.getElementById('att-btn-izin');
+    
+    if(textEl) textEl.textContent = 'Status: ' + type;
+    if(dotEl) {
+        dotEl.classList.remove('bg-emerald-400', 'bg-blue-400', 'bg-red-400');
+        dotEl.classList.add('bg-amber-400');
+    }
+    if(buttonsEl) buttonsEl.classList.add('hidden');
+    if(btnIzin) btnIzin.classList.add('hidden');
+    if(msgEl) {
+        msgEl.classList.remove('hidden');
+        msgEl.innerHTML = `<i data-lucide="info" class="w-8 h-8 mx-auto mb-3 text-amber-400/80"></i><div class="font-bold text-amber-400">Status: ${type}</div><div class="text-xs text-white/60 mt-1">Anda saat ini tercatat sedang ${type}. Absensi lokasi dinonaktifkan hari ini.</div>`;
+        if(window.lucide) window.lucide.createIcons();
+    }
+  };
+
   window.refreshLocation = function() {
     if (window.isHoliday) {
       window.showHolidayMessage();
+      return;
+    }
+    if (window.isBypassed) {
+      window.showBypassMessage(window.bypassType);
       return;
     }
 
@@ -377,6 +402,18 @@ window.pages.initAttendance = function() {
       if (window.isHoliday) {
         window.showHolidayMessage();
         return;
+      }
+      
+      try {
+        const bypassCheck = await window.api.checkTodayBypass(window.auth.currentUser.email);
+        if (bypassCheck && bypassCheck.isBypassed) {
+            window.isBypassed = true;
+            window.bypassType = bypassCheck.type;
+            window.showBypassMessage(window.bypassType);
+            return;
+        }
+      } catch (err) {
+        console.error("Gagal load status bypass", err);
       }
 
       const units = await window.api.getUnitListAdmin(''); // Fetch unit data

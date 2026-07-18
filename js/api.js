@@ -34,5 +34,6 @@ window.api = {
   adminBypassAttendance: (data) => apiCall('adminBypassAttendance', data),
   getJadwalHari: () => apiCall('getJadwalHari'),
   saveJadwalHari: (data) => apiCall('saveJadwalHari', data),
-  deleteJadwalHari: (data) => apiCall('deleteJadwalHari', data)
+  deleteJadwalHari: (data) => apiCall('deleteJadwalHari', data),
+  checkTodayBypass: (email) => apiCall('checkTodayBypass', { email })
 };

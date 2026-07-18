@@ -148,7 +148,7 @@ window.pages.renderDashboard = function() {
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="window.ui.openBypassModal()" class="btn-primary text-xs py-2 px-3 no-print bg-[#14B88A]/20 text-[#14B88A] hover:bg-[#14B88A]/30 border-[#14B88A]/30">
+              <button onclick="window.ui.openBypassModal()" class="btn-primary text-xs py-2 px-3 no-print">
                 <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Bypass Absen
               </button>
               <button onclick="window.pages.downloadCSV()" id="btnDl" class="btn-secondary text-xs py-2 px-3 no-print">
