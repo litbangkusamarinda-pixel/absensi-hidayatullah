@@ -217,135 +217,157 @@ window.pages.initDashboard = function() {
   Chart.defaults.plugins.legend.labels.padding = 16;
   Chart.defaults.plugins.legend.labels.font = { size: 11, weight: 600 };
 
-  // ═══ Load Live Log ═══
-  async function loadTableLog() {
+  // ═══ Unified Data Loader (Fixes Race Conditions) ═══
+  async function refreshDashboardData() {
     try {
-      const d = await window.api.getTodayLogAdmin(adminEmail);
+      // Fetch in parallel
+      const [dLog, dPegawai, dIzin] = await Promise.all([
+        window.api.getTodayLogAdmin(adminEmail).catch(() => []),
+        window.api.getPegawaiListAdmin(adminEmail).catch(() => []),
+        window.api.getIzinPendingAdmin(adminEmail).catch(() => [])
+      ]);
+      
+      // --- 1. Process Pegawai Stats ---
+      const totalPegawai = dPegawai.length || 0;
+      let totalGuru = 0;
+      let totalKaryawan = 0;
+      
+      // Try to differentiate by role/jabatan if the API provides it
+      if (dPegawai && dPegawai.length) {
+        dPegawai.forEach(p => {
+          const role = (p.jabatan || p.unit || p.role || p.posisi || '').toLowerCase();
+          if (role.includes('guru') || role.includes('pengajar') || role.includes('ustadz')) {
+            totalGuru++;
+          } else {
+            totalKaryawan++;
+          }
+        });
+      }
+      
+      // Fallback: If we couldn't differentiate at all, display total for both
+      if (totalGuru === 0 && totalKaryawan > 0) {
+        totalGuru = totalPegawai;
+        totalKaryawan = totalPegawai;
+      }
+      
+      const totalEl = document.getElementById('stat-total');
+      const guruEl = document.getElementById('stat-guru');
+      // If we managed to split them, display the split. Otherwise, show totals.
+      if (totalEl) totalEl.innerText = (totalKaryawan > 0 && totalGuru !== totalKaryawan) ? totalKaryawan : totalPegawai;
+      if (guruEl) guruEl.innerText = (totalGuru > 0 && totalGuru !== totalKaryawan) ? totalGuru : totalPegawai;
+
+      // --- 2. Process Live Log ---
       const tb = document.getElementById('tabelLog');
-      if (!tb) return;
-      
-      if (d.success === false) { 
-        tb.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-400 text-xs">Gagal memuat log</td></tr>';
-        return; 
-      }
-      if (!d.length) { 
-        tb.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-white/30 text-xs">Belum ada data hari ini</td></tr>'; 
-        return; 
-      }
-      
       let hadirCount = 0, telatCount = 0, masukSet = new Set(), pulangSet = new Set();
       
-      tb.innerHTML = d.map(r => {
-        if (r.jenis === 'Masuk') { masukSet.add(r.nama); hadirCount++; }
-        if (r.jenis === 'Pulang') pulangSet.add(r.nama);
-        if (r.status === 'Terlambat') telatCount++;
-        
-        const bc = (r.status === 'Terlambat' || r.status === 'Pulang Cepat') 
-          ? 'badge badge-danger' : 'badge badge-success';
-        const jc = r.jenis === 'Masuk' ? 'badge badge-neutral' : 'badge badge-info';
+      if (tb) {
+        if (dLog.success === false) { 
+          tb.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-400 text-xs">Gagal memuat log</td></tr>';
+        } else if (!dLog.length) { 
+          tb.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-white/30 text-xs">Belum ada data hari ini</td></tr>'; 
+        } else {
+          tb.innerHTML = dLog.map(r => {
+            if (r.jenis === 'Masuk') { masukSet.add(r.nama); hadirCount++; }
+            if (r.jenis === 'Pulang') pulangSet.add(r.nama);
+            if (r.status === 'Terlambat') telatCount++;
             
-        return `
-          <tr class="hover:bg-white/[0.02] transition-colors">
-            <td class="whitespace-nowrap text-xs text-white/50">${r.waktu}</td>
-            <td>
-              <div class="font-semibold text-white text-sm">${r.nama}</div>
-              <div class="text-[10px] text-white/30 truncate max-w-[140px]">${r.unit}</div>
-            </td>
-            <td><span class="${jc}">${r.jenis}</span></td>
-            <td><span class="${bc}">${r.status}</span></td>
-          </tr>
-        `;
-      }).join('');
+            const bc = (r.status === 'Terlambat' || r.status === 'Pulang Cepat') 
+              ? 'badge badge-danger' : 'badge badge-success';
+            const jc = r.jenis === 'Masuk' ? 'badge badge-neutral' : 'badge badge-info';
+                
+            return `
+              <tr class="hover:bg-white/[0.02] transition-colors">
+                <td class="whitespace-nowrap text-xs text-white/50">${r.waktu}</td>
+                <td>
+                  <div class="font-semibold text-white text-sm">${r.nama}</div>
+                  <div class="text-[10px] text-white/30 truncate max-w-[140px]">${r.unit}</div>
+                </td>
+                <td><span class="${jc}">${r.jenis}</span></td>
+                <td><span class="${bc}">${r.status}</span></td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+      
+      // Calculate attendance metrics based on unique check-ins (masukSet)
+      const hadir = masukSet.size;
+      const belumPulang = Math.max(0, hadir - pulangSet.size);
       
       const hadirEl = document.getElementById('stat-hadir');
       const telatEl = document.getElementById('stat-telat');
       const belumPulangEl = document.getElementById('stat-belum-pulang');
-      if (hadirEl) hadirEl.innerText = masukSet.size;
-      if (telatEl) telatEl.innerText = telatCount;
       
-      const belumPulang = masukSet.size - pulangSet.size;
-      if (belumPulangEl) belumPulangEl.innerText = belumPulang > 0 ? belumPulang : 0;
-
-      // Update right sidebar
+      if (hadirEl) hadirEl.innerText = hadir;
+      if (telatEl) telatEl.innerText = telatCount;
+      if (belumPulangEl) belumPulangEl.innerText = belumPulang;
+      
+      // Update sidebar if exists
       const rsHadir = document.getElementById('rs-hadir');
       const rsTelat = document.getElementById('rs-telat');
-      if (rsHadir) rsHadir.textContent = masukSet.size;
+      if (rsHadir) rsHadir.textContent = hadir;
       if (rsTelat) rsTelat.textContent = telatCount;
-      
-      // Update attendance status chart
-      updateStatusChart(masukSet.size - telatCount, telatCount);
-      
-    } catch(e) {
-      console.error(e);
-    }
-  }
 
-  // ═══ Load Izin Pending ═══
-  async function loadIzinPending() {
-    try {
-      const d = await window.api.getIzinPendingAdmin(adminEmail);
-      const tb = document.getElementById('tabelPending');
-      if (!tb) return;
-      
+      // --- 3. Process Izin Pending ---
+      const tbIzin = document.getElementById('tabelPending');
       const countEl = document.getElementById('pendingCount');
-      const statEl = document.getElementById('stat-izin');
+      const statIzinEl = document.getElementById('stat-izin');
       const rsIzin = document.getElementById('rs-izin');
-      if (countEl) countEl.textContent = d.length + ' menunggu';
-      if (statEl) statEl.innerText = d.length;
-      if (rsIzin) rsIzin.textContent = d.length;
       
-      if (!d.length) { 
-        tb.innerHTML = `
-          <div class="empty-state py-8">
-            <div class="empty-icon w-12 h-12"><i data-lucide="inbox" class="w-5 h-5"></i></div>
-            <div class="empty-title text-xs">Tidak ada pengajuan</div>
-          </div>`;
-        if (window.lucide) window.lucide.createIcons();
-        return; 
+      const izinCount = dIzin.length || 0;
+      
+      if (countEl) countEl.textContent = izinCount + ' menunggu';
+      if (statIzinEl) statIzinEl.innerText = izinCount;
+      if (rsIzin) rsIzin.textContent = izinCount;
+      
+      if (tbIzin) {
+        if (!izinCount) { 
+          tbIzin.innerHTML = `
+            <div class="empty-state py-8">
+              <div class="empty-icon w-12 h-12"><i data-lucide="inbox" class="w-5 h-5"></i></div>
+              <div class="empty-title text-xs">Tidak ada pengajuan</div>
+            </div>`;
+        } else {
+          tbIzin.innerHTML = dIzin.map(r => `
+            <div class="bg-black/20 hover:bg-black/30 rounded-xl p-3.5 border border-white/[0.04] hover:border-white/[0.08] transition-all text-sm group">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <div class="font-bold text-white text-[13px] group-hover:text-[#FBBF24] transition-colors">${r.nama}</div>
+                  <div class="text-[10px] text-white/30">${r.waktu} • ${r.unit}</div>
+                </div>
+                <span class="badge badge-warning text-[8px]">${r.jenis}</span>
+              </div>
+              <p class="text-xs text-white/50 bg-white/[0.03] p-2.5 rounded-lg mb-2.5 italic">"${r.ket || '-'}"</p>
+              <div class="flex gap-2">
+                <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Disetujui')" class="flex-1 py-2 bg-[#22C55E]/15 hover:bg-[#22C55E]/25 text-[#4ADE80] border border-[#22C55E]/20 rounded-lg text-[10px] font-bold transition-all">Setujui</button>
+                <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Ditolak')" class="flex-1 py-2 bg-[#EF4444]/15 hover:bg-[#EF4444]/25 text-[#F87171] border border-[#EF4444]/20 rounded-lg text-[10px] font-bold transition-all">Tolak</button>
+              </div>
+            </div>
+          `).join('');
+        }
       }
       
-      tb.innerHTML = d.map(r => `
-        <div class="bg-black/20 hover:bg-black/30 rounded-xl p-3.5 border border-white/[0.04] hover:border-white/[0.08] transition-all text-sm group">
-          <div class="flex justify-between items-start mb-2">
-            <div>
-              <div class="font-bold text-white text-[13px] group-hover:text-[#FBBF24] transition-colors">${r.nama}</div>
-              <div class="text-[10px] text-white/30">${r.waktu} • ${r.unit}</div>
-            </div>
-            <span class="badge badge-warning text-[8px]">${r.jenis}</span>
-          </div>
-          <p class="text-xs text-white/50 bg-white/[0.03] p-2.5 rounded-lg mb-2.5 italic">"${r.ket || '-'}"</p>
-          <div class="flex gap-2">
-            <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Disetujui')" class="flex-1 py-2 bg-[#22C55E]/15 hover:bg-[#22C55E]/25 text-[#4ADE80] border border-[#22C55E]/20 rounded-lg text-[10px] font-bold transition-all">Setujui</button>
-            <button onclick="window.pages.prosesIzin(${r.rowIndex}, 'Ditolak')" class="flex-1 py-2 bg-[#EF4444]/15 hover:bg-[#EF4444]/25 text-[#F87171] border border-[#EF4444]/20 rounded-lg text-[10px] font-bold transition-all">Tolak</button>
-          </div>
-        </div>
-      `).join('');
-    } catch(e) {
-      console.error(e);
-    }
-  }
-  
-  // ═══ Load Stats ═══
-  async function loadStats() {
-    try {
-      const p = await window.api.getPegawaiListAdmin(adminEmail);
-      const total = p.length || 0;
-      const totalEl = document.getElementById('stat-total');
-      const guruEl = document.getElementById('stat-guru');
-      if (totalEl) totalEl.innerText = total;
-      if (guruEl) guruEl.innerText = total; // Will be differentiated once we have role data
-      
-      // Calculate attendance percentage
-      const hadirEl = document.getElementById('stat-hadir');
+      // --- 4. Final Percentage Math ---
       const persenEl = document.getElementById('stat-persen');
       const absenEl = document.getElementById('stat-absen');
-      if (hadirEl && persenEl && total > 0) {
-        const hadir = parseInt(hadirEl.innerText) || 0;
-        const persen = Math.round((hadir / total) * 100);
+      
+      const absenCount = Math.max(0, totalPegawai - hadir);
+      if (absenEl) absenEl.innerText = absenCount;
+      
+      if (persenEl && totalPegawai > 0) {
+        const persen = Math.round((hadir / totalPegawai) * 100);
         persenEl.innerText = persen + '%';
-        if (absenEl) absenEl.innerText = Math.max(0, total - hadir);
+      } else if (persenEl) {
+        persenEl.innerText = '0%';
       }
-    } catch(e) {}
+      
+      // 5. Update Donut Chart
+      updateStatusChart(Math.max(0, hadir - telatCount), telatCount, izinCount, absenCount);
+
+      if (window.lucide) window.lucide.createIcons();
+    } catch(e) {
+      console.error("Dashboard Data Sync Error:", e);
+    }
   }
 
   // ═══ Charts ═══
@@ -510,7 +532,7 @@ window.pages.initDashboard = function() {
       const res = await window.api.prosesIzin({ rowIndex, status, adminEmail });
       window.ui.hideLoading();
       window.ui.showToast(status === 'Disetujui' ? '✅' : '❌', res.message, status === 'Disetujui');
-      loadIzinPending();
+      refreshDashboardData();
     } catch(e) {
       window.ui.hideLoading();
       window.ui.showToast('⚠️', 'Gagal memproses', false);
@@ -540,9 +562,7 @@ window.pages.initDashboard = function() {
   };
 
   // ═══ Initialize ═══
-  loadTableLog();
-  loadIzinPending();
-  loadStats();
+  refreshDashboardData();
   initWeeklyChart();
   
   // Auto-refresh
@@ -551,8 +571,7 @@ window.pages.initDashboard = function() {
       clearInterval(refreshInterval);
       return;
     }
-    loadTableLog();
-    loadIzinPending();
+    refreshDashboardData();
   }, 30000);
   
   if (window.lucide) window.lucide.createIcons();
