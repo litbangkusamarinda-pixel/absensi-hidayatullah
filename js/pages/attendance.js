@@ -100,7 +100,7 @@ window.pages.renderAttendance = function() {
           </button>
         </div>
 
-        <button onclick="window.ui.openModal('modal-izin')" class="w-full py-4 mt-4 rounded-2xl bg-white/5 border border-white/10 text-white/80 font-bold hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
+        <button id="att-btn-izin" onclick="window.ui.openModal('modal-izin')" class="w-full py-4 mt-4 rounded-2xl bg-white/5 border border-white/10 text-white/80 font-bold hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
           <i data-lucide="clipboard-edit" class="w-5 h-5"></i>
           Ajukan Izin / Sakit
         </button>
@@ -186,6 +186,7 @@ window.pages.initAttendance = function() {
     const dotEl = document.getElementById('att-loc-dot');
     const msgEl = document.getElementById('att-status-message');
     const buttonsEl = document.getElementById('att-action-buttons');
+    const btnIzin = document.getElementById('att-btn-izin');
     
     if(textEl) textEl.textContent = 'Hari Libur';
     if(dotEl) {
@@ -193,9 +194,10 @@ window.pages.initAttendance = function() {
         dotEl.classList.add('bg-red-400');
     }
     if(buttonsEl) buttonsEl.classList.add('hidden');
+    if(btnIzin) btnIzin.classList.add('hidden');
     if(msgEl) {
         msgEl.classList.remove('hidden');
-        msgEl.innerHTML = '<i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-3 text-red-400/80"></i><div class="font-bold text-red-400">Hari Libur</div><div class="text-xs text-white/60 mt-1">Jadwal unit Anda hari ini adalah libur.</div>';
+        msgEl.innerHTML = '<i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-3 text-red-400/80"></i><div class="font-bold text-red-400">Hari Libur</div><div class="text-xs text-white/60 mt-1">Selamat menikmati Quality Time bersama keluarga tercinta. Semoga Allah melimpahkan keberkahan, kesehatan, dan kebahagiaan untuk Anda sekeluarga. 🤲</div>';
         if(window.lucide) window.lucide.createIcons();
     }
   };

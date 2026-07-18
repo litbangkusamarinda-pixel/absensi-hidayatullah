@@ -286,9 +286,15 @@
           </select>
         </div>
         
-        <div>
-          <label class="block text-[10px] font-black tracking-[0.2em] text-white/30 uppercase mb-2">Pilih Tanggal</label>
-          <input type="date" id="bypass-tanggal" class="hrms-input rounded-2xl" />
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-black tracking-[0.2em] text-white/30 uppercase mb-2">Mulai</label>
+            <input type="date" id="bypass-tanggal-mulai" class="hrms-input rounded-2xl" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black tracking-[0.2em] text-white/30 uppercase mb-2">Selesai</label>
+            <input type="date" id="bypass-tanggal-selesai" class="hrms-input rounded-2xl" />
+          </div>
         </div>
         
         <div class="grid grid-cols-2 gap-3">
@@ -391,18 +397,21 @@
 
     async function submitBypassAbsen() {
       const emailGuru = document.getElementById('bypass-guru').value;
-      const tanggal = document.getElementById('bypass-tanggal').value;
+      const tanggalMulai = document.getElementById('bypass-tanggal-mulai').value;
+      const tanggalSelesai = document.getElementById('bypass-tanggal-selesai').value;
       const ket = document.getElementById('bypass-keterangan').value.trim();
 
       if (!emailGuru) return window.ui.showToast('⚠️', 'Pilih guru terlebih dahulu!', false);
-      if (!tanggal) return window.ui.showToast('⚠️', 'Pilih tanggal terlebih dahulu!', false);
+      if (!tanggalMulai || !tanggalSelesai) return window.ui.showToast('⚠️', 'Pilih rentang tanggal terlebih dahulu!', false);
+      if (new Date(tanggalSelesai) < new Date(tanggalMulai)) return window.ui.showToast('⚠️', 'Tanggal selesai tidak boleh kurang dari tanggal mulai!', false);
 
       window.ui.showLoading("Menyimpan...");
       try {
         const res = await window.api.adminBypassAttendance({
           adminEmail: window.auth.currentUser.email,
           emailGuru: emailGuru,
-          tanggal: tanggal,
+          tanggalMulai: tanggalMulai,
+          tanggalSelesai: tanggalSelesai,
           jenisBypass: window.selectedBypassType,
           keterangan: ket
         });
