@@ -94,10 +94,10 @@ window.pages.renderUnits = function() {
             <div class="overflow-x-auto" style="max-height:300px;">
               <table class="hrms-table" id="tabelUnit">
                 <thead>
-                  <tr><th>Unit</th><th>Masuk</th><th>Pulang</th><th>Koordinat</th><th>Radius</th><th>WA Kepala</th></tr>
+                  <tr><th>Unit</th><th>Masuk</th><th>Pulang</th><th>Koordinat</th><th>Radius</th><th>WA Kepala</th><th>Aksi</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td colspan="6" class="text-center py-8 text-white/30 text-xs">Memuat...</td></tr>
+                  <tr><td colspan="7" class="text-center py-8 text-white/30 text-xs">Memuat...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -193,7 +193,7 @@ window.pages.initUnits = function() {
       if (countEl) countEl.textContent = d.length + ' unit terdaftar';
       
       if (!d.length) {
-        tb.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-white/30 text-xs">Belum ada unit</td></tr>';
+        tb.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-white/30 text-xs">Belum ada unit</td></tr>';
         return;
       }
       tb.innerHTML = d.map(r => `
@@ -204,6 +204,11 @@ window.pages.initUnits = function() {
           <td class="text-[10px] text-white/30">${r.lat}, ${r.lon}</td>
           <td><span class="badge badge-primary">${r.radius}M</span></td>
           <td class="text-xs text-white/40">${r.waKepala || '-'}</td>
+          <td>
+             <button onclick="window.pages.editUnit('${r.unit}', '${r.masuk}', '${r.pulang}', '${r.radius}', '${r.waKepala || ''}', '${r.lat}', '${r.lon}')" class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
+               Edit
+             </button>
+          </td>
         </tr>
       `).join('');
     } catch(e) {}
@@ -239,6 +244,55 @@ window.pages.initUnits = function() {
     } catch(e) {}
   }
 
+  // ═══ Edit Unit (UI) ═══
+  window.pages.editUnit = function(unit, masuk, pulang, radius, waKepala, lat, lon) {
+    document.getElementById('unit').value = unit;
+    document.getElementById('masuk').value = masuk;
+    document.getElementById('pulang').value = pulang;
+    document.getElementById('radius').value = radius;
+    document.getElementById('waKepala').value = waKepala;
+    document.getElementById('lat').value = lat;
+    document.getElementById('lon').value = lon;
+    
+    window._editModeOriginalUnit = unit;
+    
+    const btn = document.getElementById('btnSimpan');
+    btn.innerHTML = '<i data-lucide="edit-3" class="w-4 h-4"></i> Update Unit Sekolah';
+    btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+    
+    let btnBatal = document.getElementById('btnBatal');
+    if (!btnBatal) {
+      btnBatal = document.createElement('button');
+      btnBatal.id = 'btnBatal';
+      btnBatal.className = 'w-full py-3 text-sm rounded-xl mt-2 bg-white/10 hover:bg-white/20 text-white font-bold transition-all flex items-center justify-center gap-2';
+      btnBatal.innerHTML = '<i data-lucide="x" class="w-4 h-4"></i> Batal Edit';
+      btnBatal.onclick = window.pages.batalEdit;
+      btn.parentNode.insertBefore(btnBatal, btn.nextSibling);
+    }
+    btnBatal.style.display = 'flex';
+    
+    if (window._unitMap && window._unitMarker) {
+      window._unitMarker.setLatLng([lat, lon]);
+      window._unitMap.setView([lat, lon], 16);
+    }
+    if (window.lucide) window.lucide.createIcons();
+  };
+
+  window.pages.batalEdit = function() {
+    document.getElementById('unit').value = '';
+    document.getElementById('waKepala').value = '';
+    window._editModeOriginalUnit = null;
+    
+    const btn = document.getElementById('btnSimpan');
+    btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Simpan Unit Sekolah';
+    btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+    
+    const btnBatal = document.getElementById('btnBatal');
+    if (btnBatal) btnBatal.style.display = 'none';
+    
+    if (window.lucide) window.lucide.createIcons();
+  };
+
   // ═══ Save Unit ═══
   window.pages.simpanUnit = async function() {
     const d = {
@@ -255,16 +309,30 @@ window.pages.initUnits = function() {
       return;
     }
     const btn = document.getElementById('btnSimpan');
+    const isEdit = !!window._editModeOriginalUnit;
     btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...';
     try {
-      const res = await window.api.saveUnitAdmin({ adminEmail, unitData: d });
+      let res;
+      if (isEdit) {
+        res = await window.api.editUnitAdmin({ adminEmail, originalName: window._editModeOriginalUnit, unitData: d });
+      } else {
+        res = await window.api.saveUnitAdmin({ adminEmail, unitData: d });
+      }
       window.ui.showToast('✅', res.message, true);
       loadTableUnit();
-      document.getElementById('unit').value = '';
+      if (isEdit) {
+        window.pages.batalEdit();
+      } else {
+        document.getElementById('unit').value = '';
+      }
     } catch(e) {
       window.ui.showToast('⚠️', 'Gagal menyimpan unit', false);
     } finally {
-      btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Simpan Unit Sekolah';
+      if (!window._editModeOriginalUnit) {
+        btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Simpan Unit Sekolah';
+      } else {
+        btn.innerHTML = '<i data-lucide="edit-3" class="w-4 h-4"></i> Update Unit Sekolah';
+      }
       if (window.lucide) window.lucide.createIcons();
     }
   };
