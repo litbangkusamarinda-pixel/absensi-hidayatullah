@@ -60,10 +60,14 @@ window.pages.renderUnits = function() {
               <input type="number" id="radius" value="100" class="hrms-input text-sm">
             </div>
             <div>
+              <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1">WA Kepala Unit</label>
+              <input type="text" id="waKepala" placeholder="08123456789" class="hrms-input text-sm">
+            </div>
+            <div>
               <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1">Latitude</label>
               <input type="text" id="lat" readonly class="hrms-input text-sm bg-white/[0.02] cursor-not-allowed">
             </div>
-            <div class="col-span-2">
+            <div>
               <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1">Longitude</label>
               <input type="text" id="lon" readonly class="hrms-input text-sm bg-white/[0.02] cursor-not-allowed">
             </div>
@@ -90,10 +94,10 @@ window.pages.renderUnits = function() {
             <div class="overflow-x-auto" style="max-height:300px;">
               <table class="hrms-table" id="tabelUnit">
                 <thead>
-                  <tr><th>Unit</th><th>Masuk</th><th>Pulang</th><th>Koordinat</th><th>Radius</th></tr>
+                  <tr><th>Unit</th><th>Masuk</th><th>Pulang</th><th>Koordinat</th><th>Radius</th><th>WA Kepala</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td colspan="5" class="text-center py-8 text-white/30 text-xs">Memuat...</td></tr>
+                  <tr><td colspan="6" class="text-center py-8 text-white/30 text-xs">Memuat...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -189,7 +193,7 @@ window.pages.initUnits = function() {
       if (countEl) countEl.textContent = d.length + ' unit terdaftar';
       
       if (!d.length) {
-        tb.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-white/30 text-xs">Belum ada unit</td></tr>';
+        tb.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-white/30 text-xs">Belum ada unit</td></tr>';
         return;
       }
       tb.innerHTML = d.map(r => `
@@ -199,6 +203,7 @@ window.pages.initUnits = function() {
           <td class="text-xs">${r.pulang}</td>
           <td class="text-[10px] text-white/30">${r.lat}, ${r.lon}</td>
           <td><span class="badge badge-primary">${r.radius}M</span></td>
+          <td class="text-xs text-white/40">${r.waKepala || '-'}</td>
         </tr>
       `).join('');
     } catch(e) {}
@@ -241,6 +246,7 @@ window.pages.initUnits = function() {
       masuk: document.getElementById('masuk').value,
       pulang: document.getElementById('pulang').value,
       radius: document.getElementById('radius').value,
+      waKepala: document.getElementById('waKepala').value,
       lat: document.getElementById('lat').value,
       lon: document.getElementById('lon').value
     };
