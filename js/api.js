@@ -5,9 +5,22 @@ window.apiCall = async function(action, payload = {}) {
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
+      redirect: 'follow',
       body: JSON.stringify(payload)
     });
-    return await response.json();
+    const json = await response.json();
+
+    // Unwrap doPost() wrapper: {success: true, data: result} → result
+    if (json && json.success === true && json.data !== undefined) {
+      return json.data;
+    }
+    // Jika error dari doPost()
+    if (json && json.success === false) {
+      // Kembalikan object error agar consumer bisa cek .success / .message
+      return json;
+    }
+    // Fallback: kembalikan json apa adanya
+    return json;
   } catch (err) {
     console.error("API Error:", err);
     throw new Error("Gagal terhubung ke server.");
@@ -26,6 +39,7 @@ window.api = {
   getIzinAllAdmin: (adminEmail) => apiCall('getIzinAllAdmin', { adminEmail }),
   getUnitListAdmin: (adminEmail) => apiCall('getUnitListAdmin', { adminEmail }),
   getPegawaiListAdmin: (adminEmail) => apiCall('getPegawaiListAdmin', { adminEmail }),
+  getFilterDataAdmin: () => apiCall('getFilterDataAdmin'),
   getLaporanLengkapAdmin: () => apiCall('getLaporanLengkapAdmin'),
   prosesIzin: (data) => apiCall('prosesIzin', data),
   getAllLogAdmin: (adminEmail) => apiCall('getAllLogAdmin', { adminEmail }),
