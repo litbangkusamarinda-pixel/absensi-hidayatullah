@@ -34,7 +34,7 @@ window.pages.renderReportWeekly = function() {
 
       <!-- Filters -->
       <div class="glass-card p-5 no-print">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           <div>
             <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Mulai (Senin)</label>
             <input type="date" id="rpt-weekly-start" class="hrms-input text-sm" value="${toLocalISO(monday)}">
@@ -52,6 +52,14 @@ window.pages.renderReportWeekly = function() {
               <option>MTS-MA Putri</option>
               <option>TK Islam Qurrata Ayun & TPA</option>
               <option>STIT HISAM</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tipe</label>
+            <select id="rpt-weekly-type" class="hrms-input hrms-select text-sm">
+              <option value="all">Semua</option>
+              <option>Guru</option>
+              <option>Karyawan</option>
             </select>
           </div>
           <div class="flex items-end">
@@ -139,10 +147,11 @@ window.pages.initReportWeekly = function() {
       const startVal = document.getElementById('rpt-weekly-start').value;
       const endVal = document.getElementById('rpt-weekly-end').value;
       const filterUnit = document.getElementById('rpt-weekly-unit').value;
+      const filterTipe = document.getElementById('rpt-weekly-type').value;
 
       const [employees, rawLaporan] = await Promise.all([
         window.api.getPegawaiListAdmin(adminEmail),
-        window.api.getLaporanLengkapAdmin()
+        window.api.getLaporanRentangAdmin(startVal, endVal)
       ]);
 
       const checkUnitMatch = (dataUnit, filter) => {
@@ -152,7 +161,15 @@ window.pages.initReportWeekly = function() {
         return dataUnit === filter;
       };
 
-      const filteredEmployees = employees.filter(e => checkUnitMatch(e.unit, filterUnit));
+      const checkTipeMatch = (jabatan, filter) => {
+        if (filter === 'all') return true;
+        const isGuru = (jabatan || '').toLowerCase().includes('guru');
+        if (filter === 'Guru') return isGuru;
+        if (filter === 'Karyawan') return !isGuru;
+        return true;
+      };
+
+      const filteredEmployees = employees.filter(e => checkUnitMatch(e.unit, filterUnit) && checkTipeMatch(e.jabatan, filterTipe));
 
       // Get all dates between start and end
       const start = new Date(startVal);
@@ -165,11 +182,12 @@ window.pages.initReportWeekly = function() {
       }
       window.pages._weeklyDates = dates;
 
-      // Filter logs
+      // Filter logs (date already filtered by backend, but we filter by unit and tipe)
       const weekLogs = rawLaporan.filter(r => {
         if (!r.waktu) return false;
-        const datePart = String(r.waktu).split(' ')[0];
-        return datePart >= startVal && datePart <= endVal && checkUnitMatch(r.unit, filterUnit);
+        const emp = employees.find(e => e.nama === r.nama);
+        const jabatan = emp ? emp.jabatan : '';
+        return checkUnitMatch(r.unit, filterUnit) && checkTipeMatch(jabatan, filterTipe);
       });
 
       // Build per-person per-date
@@ -182,8 +200,17 @@ window.pages.initReportWeekly = function() {
       weekLogs.forEach(r => {
         const datePart = String(r.waktu).split(' ')[0];
         if (!personDays[r.nama]) personDays[r.nama] = { unit: r.unit, days: {} };
+        
+        const currentStatus = personDays[r.nama].days[datePart];
         if (r.jenis === 'Masuk') {
-          personDays[r.nama].days[datePart] = r.status === 'Terlambat' ? 'T' : 'H';
+          // Jangan timpa status jika sudah 'PC' (jika berbalik urutannya)
+          if (currentStatus !== 'PC' && currentStatus !== 'I' && currentStatus !== 'S') {
+            personDays[r.nama].days[datePart] = r.status === 'Terlambat' ? 'T' : 'H';
+          }
+        } else if (r.jenis === 'Pulang') {
+          if ((r.status || '').toLowerCase() === 'pulang cepat') {
+            personDays[r.nama].days[datePart] = 'PC';
+          }
         } else if (r.jenis === 'Izin') {
           personDays[r.nama].days[datePart] = 'I';
         } else if (r.jenis === 'Sakit') {
@@ -200,10 +227,17 @@ window.pages.initReportWeekly = function() {
         dates.forEach(d => {
           const st = p.days[d.date] || 'A';
           dailyCounts[d.date].total++;
-          if (st === 'H') { totalH++; dailyCounts[d.date].hadir++; }
-          else if (st === 'T') { totalT++; dailyCounts[d.date].hadir++; }
-          else if (st === 'I' || st === 'S') totalIS++;
-          else totalA++;
+          if (st === 'H') { 
+            totalH++; 
+            dailyCounts[d.date].hadir++; 
+          } else if (st === 'T' || st === 'PC') { 
+            totalT++; 
+            dailyCounts[d.date].hadir++; 
+          } else if (st === 'I' || st === 'S') {
+            totalIS++;
+          } else {
+            totalA++;
+          }
         });
       });
 
@@ -287,7 +321,7 @@ window.pages.initReportWeekly = function() {
 
     const statusCell = (s) => {
       if (s === 'H') return '<span class="badge badge-success text-[9px]">H</span>';
-      if (s === 'T') return '<span class="badge badge-warning text-[9px]">T</span>';
+      if (s === 'T' || s === 'PC') return `<span class="badge badge-warning text-[9px]">${s}</span>`;
       if (s === 'I') return '<span class="badge text-[9px]" style="background:rgba(59,130,246,0.15);color:#60A5FA;">I</span>';
       if (s === 'S') return '<span class="badge text-[9px]" style="background:rgba(6,182,212,0.15);color:#22D3EE;">S</span>';
       return '<span class="badge badge-danger text-[9px]">A</span>';
@@ -297,7 +331,7 @@ window.pages.initReportWeekly = function() {
       ? `<tr><td colspan="${3 + dates.length + 1}" class="text-center py-10 text-white/30 text-xs">Tidak ada data</td></tr>`
       : data.map(e => {
           let hadir = 0;
-          dates.forEach(d => { const s = e.days[d.date]; if (s === 'H' || s === 'T') hadir++; });
+          dates.forEach(d => { const s = e.days[d.date]; if (s === 'H' || s === 'T' || s === 'PC') hadir++; });
           const pct = dates.length > 0 ? Math.round((hadir / dates.length) * 100) : 0;
           return `<tr>
             <td class="text-xs text-white/30">${e.idx}</td>

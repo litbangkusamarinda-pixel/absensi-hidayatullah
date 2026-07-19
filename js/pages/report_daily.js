@@ -162,9 +162,10 @@ window.pages.initReportDaily = function() {
       const dateVal = document.getElementById('rpt-daily-date').value;
       const filterUnit = document.getElementById('rpt-daily-unit').value;
 
+      const filterTipe = document.getElementById('rpt-daily-type').value;
       const [employees, rawLaporan] = await Promise.all([
         window.api.getPegawaiListAdmin(adminEmail),
-        window.api.getLaporanLengkapAdmin()
+        window.api.getLaporanHarianAdmin(dateVal)
       ]);
 
       const checkUnitMatch = (dataUnit, filter) => {
@@ -174,13 +175,22 @@ window.pages.initReportDaily = function() {
         return dataUnit === filter;
       };
 
-      const filteredEmployees = employees.filter(e => checkUnitMatch(e.unit, filterUnit));
+      const checkTipeMatch = (jabatan, filter) => {
+        if (filter === 'all') return true;
+        const isGuru = (jabatan || '').toLowerCase().includes('guru');
+        if (filter === 'Guru') return isGuru;
+        if (filter === 'Karyawan') return !isGuru;
+        return true;
+      };
 
-      // Filter logs for the selected date
+      const filteredEmployees = employees.filter(e => checkUnitMatch(e.unit, filterUnit) && checkTipeMatch(e.jabatan, filterTipe));
+
+      // Filter logs (date is already filtered by backend, but we filter by Unit and Tipe here)
       const dayLogs = rawLaporan.filter(r => {
         if (!r.waktu) return false;
-        const datePart = String(r.waktu).split(' ')[0];
-        return datePart === dateVal && checkUnitMatch(r.unit, filterUnit);
+        const emp = employees.find(e => e.nama === r.nama);
+        const jabatan = emp ? emp.jabatan : '';
+        return checkUnitMatch(r.unit, filterUnit) && checkTipeMatch(jabatan, filterTipe);
       });
 
       // Build per-person stats
@@ -192,10 +202,16 @@ window.pages.initReportDaily = function() {
 
         if (r.jenis === 'Masuk') {
           personStats[r.nama].masuk = jam;
-          personStats[r.nama].status = r.status || 'Hadir';
+          // Jangan timpa status jika sudah 'Pulang Cepat' atau izin (berjaga-jaga jika terbalik urutannya)
+          if (personStats[r.nama].status === '-' || personStats[r.nama].status === 'Tidak Hadir') {
+            personStats[r.nama].status = r.status || 'Hadir';
+          }
           personStats[r.nama].unit = r.unit;
         } else if (r.jenis === 'Pulang') {
           personStats[r.nama].pulang = jam;
+          if ((r.status || '').toLowerCase() === 'pulang cepat') {
+            personStats[r.nama].status = 'Pulang Cepat';
+          }
         } else if (r.jenis === 'Izin') {
           personStats[r.nama].status = 'Izin';
           personStats[r.nama].keterangan = r.keterangan || 'Izin';
@@ -218,11 +234,18 @@ window.pages.initReportDaily = function() {
 
       Object.values(personStats).forEach(p => {
         const s = p.status.toLowerCase();
-        if (s === 'tepat waktu' || s === 'hadir') totalHadir++;
-        else if (s === 'terlambat' || s === 'pulang cepat') { totalHadir++; totalTerlambat++; }
-        else if (s === 'izin') totalIzin++;
-        else if (s === 'sakit') totalSakit++;
-        else totalAbsen++;
+        if (s === 'tepat waktu' || s === 'hadir') {
+          totalHadir++;
+        } else if (s === 'terlambat' || s === 'pulang cepat') { 
+          totalHadir++; 
+          totalTerlambat++; 
+        } else if (s === 'izin') {
+          totalIzin++;
+        } else if (s === 'sakit') {
+          totalSakit++;
+        } else {
+          totalAbsen++;
+        }
 
         if (p.masuk) {
           const hour = p.masuk.split(':')[0];
@@ -333,7 +356,7 @@ window.pages.initReportDaily = function() {
     const statusBadge = (s) => {
       const sl = s.toLowerCase();
       if (sl === 'tepat waktu' || sl === 'hadir') return `<span class="badge badge-success">${s}</span>`;
-      if (sl === 'terlambat') return `<span class="badge badge-warning">${s}</span>`;
+      if (sl === 'terlambat' || sl === 'pulang cepat') return `<span class="badge badge-warning">${s}</span>`;
       if (sl === 'izin') return `<span class="badge" style="background:rgba(59,130,246,0.15);color:#60A5FA;">${s}</span>`;
       if (sl === 'sakit') return `<span class="badge" style="background:rgba(6,182,212,0.15);color:#22D3EE;">${s}</span>`;
       if (sl === 'tidak hadir') return `<span class="badge badge-danger">${s}</span>`;

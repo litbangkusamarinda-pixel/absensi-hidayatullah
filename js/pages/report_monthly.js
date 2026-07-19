@@ -204,31 +204,7 @@ window.pages.renderReportMonthly = function() {
                 </tr>
               </thead>
               <tbody id="rpt-daily-table">
-                ${Array.from({length:22}, (_, i) => {
-                  const hadir = 30 + Math.floor(Math.random()*8);
-                  const telat = Math.floor(Math.random()*5);
-                  const izin = Math.floor(Math.random()*3);
-                  const sakit = Math.floor(Math.random()*2);
-                  const total = 40;
-                  const absen = total - hadir - izin - sakit;
-                  const pct = Math.round((hadir/total)*100);
-                  return `<tr>
-                    <td class="text-xs font-semibold">${i+1} ${['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][new Date().getMonth()]}</td>
-                    <td><span class="badge badge-success">${hadir}</span></td>
-                    <td><span class="badge badge-warning">${telat}</span></td>
-                    <td>${izin}</td>
-                    <td>${sakit}</td>
-                    <td><span class="${absen > 0 ? 'badge badge-danger' : ''}">${Math.max(0,absen)}</span></td>
-                    <td>
-                      <div class="flex items-center gap-2">
-                        <div class="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                          <div class="h-full rounded-full ${pct >= 90 ? 'bg-[#22C55E]' : pct >= 75 ? 'bg-[#F59E0B]' : 'bg-[#EF4444]'}" style="width:${pct}%"></div>
-                        </div>
-                        <span class="text-xs font-bold ${pct >= 90 ? 'text-[#4ADE80]' : pct >= 75 ? 'text-[#FBBF24]' : 'text-[#F87171]'}">${pct}%</span>
-                      </div>
-                    </td>
-                  </tr>`;
-                }).join('')}
+                <tr><td colspan="7" class="text-center py-10 text-white/30 text-xs">Klik "Generate Laporan" untuk memuat data</td></tr>
               </tbody>
             </table>
           </div>
@@ -292,28 +268,7 @@ window.pages.renderReportMonthly = function() {
               <tr><th>Unit</th><th>% Kehadiran</th><th>Terlambat</th><th>Absen</th><th>Skor</th></tr>
             </thead>
             <tbody id="rpt-unit-comparison">
-              ${[
-                { unit:'SD Integral Hidayatullah', pct:96, late:12, absent:4, score:'A' },
-                { unit:'MTS-MA Putra', pct:93, late:18, absent:7, score:'A-' },
-                { unit:'MTS-MA Putri', pct:95, late:10, absent:5, score:'A' },
-                { unit:'TK & TPA', pct:91, late:15, absent:9, score:'B+' },
-                { unit:'STIT HISAM', pct:94, late:8, absent:6, score:'A-' },
-              ].map(u => `
-                <tr>
-                  <td class="font-semibold text-white">${u.unit}</td>
-                  <td>
-                    <div class="flex items-center gap-2">
-                      <div class="flex-1 h-2 bg-white/[0.06] rounded-full overflow-hidden max-w-[100px]">
-                        <div class="h-full rounded-full bg-[#14B88A]" style="width:${u.pct}%"></div>
-                      </div>
-                      <span class="text-xs font-bold text-[#14B88A]">${u.pct}%</span>
-                    </div>
-                  </td>
-                  <td><span class="badge badge-warning">${u.late}</span></td>
-                  <td><span class="badge badge-danger">${u.absent}</span></td>
-                  <td><span class="text-sm font-black ${u.score.startsWith('A') ? 'text-[#22C55E]' : 'text-[#F59E0B]'}">${u.score}</span></td>
-                </tr>
-              `).join('')}
+              <tr><td colspan="5" class="text-center py-10 text-white/30 text-xs">Klik "Generate Laporan" untuk memuat data</td></tr>
             </tbody>
           </table>
         </div>
@@ -426,7 +381,7 @@ window.pages.initReportMonthly = function() {
         labels: Array.from({length:22}, (_, i) => i+1),
         datasets: [{
           label: 'Hadir',
-          data: Array.from({length:22}, () => 30 + Math.floor(Math.random()*8)),
+          data: Array.from({length:22}, () => 0),
           borderColor: '#14B88A',
           backgroundColor: 'rgba(20,184,138,0.08)',
           fill: true,
@@ -455,7 +410,7 @@ window.pages.initReportMonthly = function() {
         labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
         datasets: [{
           label: 'Terlambat',
-          data: [8, 12, 6, 10],
+          data: [0, 0, 0, 0],
           backgroundColor: ['rgba(245,158,11,0.3)', 'rgba(239,68,68,0.3)', 'rgba(59,130,246,0.3)', 'rgba(245,158,11,0.3)'],
           borderColor: ['#F59E0B', '#EF4444', '#3B82F6', '#F59E0B'],
           borderWidth: 1.5,
@@ -482,11 +437,21 @@ window.pages.initReportMonthly = function() {
       const startDateVal = document.getElementById('rpt-start-date').value;
       const endDateVal = document.getElementById('rpt-end-date').value;
       const filterUnit = document.getElementById('rpt-unit').value;
+      const filterTipe = document.getElementById('rpt-type').value;
       
       const startDate = new Date(startDateVal);
       startDate.setHours(0,0,0,0);
       const endDate = new Date(endDateVal);
       endDate.setHours(23,59,59,999);
+
+      // Hitung start date dikurangi durasi bulan tersebut untuk mengambil data "vs Periode Lalu"
+      const durationMs = endDate.getTime() - startDate.getTime();
+      const prevEndDate = new Date(startDate.getTime() - 1);
+      const prevStartDate = new Date(prevEndDate.getTime() - durationMs);
+      
+      const toLocalISO = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+      const fetchStart = toLocalISO(prevStartDate);
+      const fetchEnd = toLocalISO(endDate);
       
       const checkUnitMatch = (dataUnit, filter) => {
         if (filter === 'all') return true;
@@ -526,13 +491,21 @@ window.pages.initReportMonthly = function() {
 
       const [employees, rawLaporan] = await Promise.all([
         window.api.getPegawaiListAdmin(adminEmail),
-        window.api.getLaporanLengkapAdmin()
+        window.api.getLaporanRentangAdmin(fetchStart, fetchEnd)
       ]);
       
       const tbody = document.getElementById('rpt-detail-body');
       if (!tbody) { window.ui.hideLoading(); return; }
 
-      const filteredEmployees = employees.filter(e => checkUnitMatch(e.unit, filterUnit));
+      const checkTipeMatch = (jabatan, filter) => {
+        if (filter === 'all') return true;
+        const isGuru = (jabatan || '').toLowerCase().includes('guru');
+        if (filter === 'Guru') return isGuru;
+        if (filter === 'Karyawan') return !isGuru;
+        return true;
+      };
+
+      const filteredEmployees = employees.filter(e => checkUnitMatch(e.unit, filterUnit) && checkTipeMatch(e.jabatan, filterTipe));
 
       if (!filteredEmployees.length) {
         tbody.innerHTML = '<tr><td colspan="12" class="text-center py-10 text-white/30 text-xs">Tidak ada data pegawai</td></tr>';
@@ -562,7 +535,11 @@ window.pages.initReportMonthly = function() {
         
         const isTimeMatch = logDate >= startDate && logDate <= endDate;
         const isUnitMatch = checkUnitMatch(r.unit, filterUnit);
-        return isTimeMatch && isUnitMatch;
+        const emp = employees.find(e => e.nama === r.nama);
+        const jabatan = emp ? emp.jabatan : '';
+        const isTipeMatch = checkTipeMatch(jabatan, filterTipe);
+        
+        return isTimeMatch && isUnitMatch && isTipeMatch;
       });
       
       // Calculate stats for Executive Summary, Top Discipline and Unit Stats
@@ -580,42 +557,55 @@ window.pages.initReportMonthly = function() {
         const datePart = String(r.waktu).split(' ')[0];
         if (datePart) uniqueDates.add(datePart);
         
+        // Helper untuk menghitung rata-rata waktu (konversi waktu ke menit)
+        const timeToMinutes = (waktuStr) => {
+           const timePart = String(waktuStr).split(' ')[1];
+           if (!timePart) return null;
+           const t = timePart.split(':');
+           if (t.length >= 2) return parseInt(t[0], 10) * 60 + parseInt(t[1], 10);
+           return null;
+        };
+        const mnt = timeToMinutes(r.waktu);
+
         if(!unitStats[r.unit]) unitStats[r.unit] = { hadir: 0, lambat: 0, absen: 0, izin: 0, sakit: 0, total: 0, pegawai: new Set() };
+        if(!guruStats[r.nama]) guruStats[r.nama] = { unit: r.unit, tepat: 0, lambat: 0, hadir: 0, izin: 0, sakit: 0, mntMasuk: 0, mntPulang: 0, countMasuk: 0, countPulang: 0 };
 
         if (r.jenis === "Masuk") {
           totalHadir++;
           unitStats[r.unit].hadir++;
           unitStats[r.unit].pegawai.add(r.nama);
-          if (r.status === "Terlambat" || r.status === "Pulang Cepat") {
+          if (r.status === "Terlambat") {
             unitStats[r.unit].lambat++;
           }
-        } else if (r.jenis === "Pulang") {
-          totalPulang++;
-        } else if (r.jenis === "Izin" || r.status === "Izin") {
-          totalIzin++;
-          unitStats[r.unit].izin++;
-        } else if (r.jenis === "Sakit" || r.status === "Sakit") {
-          totalSakit++;
-          unitStats[r.unit].sakit++;
-        }
-        
-        if(!guruStats[r.nama]) guruStats[r.nama] = { unit: r.unit, tepat: 0, lambat: 0, hadir: 0, izin: 0, sakit: 0 };
-        
-        if (r.jenis === "Masuk") {
           guruStats[r.nama].hadir++;
           if (r.status === "Tepat Waktu") guruStats[r.nama].tepat++;
-          if (r.status === "Terlambat" || r.status === "Pulang Cepat") {
+          if (r.status === "Terlambat") {
             guruStats[r.nama].lambat++;
             totalTerlambat++;
           }
-        } else if (r.jenis === "Izin" || r.jenis === "Sakit") {
-          // Jenis dari Log_Izin
-          if (r.jenis === "Izin") guruStats[r.nama].izin++;
-          if (r.jenis === "Sakit") guruStats[r.nama].sakit++;
-        } else {
-          // Fallback untuk Log_Absen yang memiliki status Izin/Sakit (jika ada)
-          if (r.status === "Izin") guruStats[r.nama].izin++;
-          if (r.status === "Sakit") guruStats[r.nama].sakit++;
+          if (mnt !== null) {
+            guruStats[r.nama].mntMasuk += mnt;
+            guruStats[r.nama].countMasuk++;
+          }
+        } else if (r.jenis === "Pulang") {
+          totalPulang++;
+          if ((r.status || "").toLowerCase() === "pulang cepat") {
+            unitStats[r.unit].lambat++;
+            guruStats[r.nama].lambat++;
+            totalTerlambat++;
+          }
+          if (mnt !== null) {
+            guruStats[r.nama].mntPulang += mnt;
+            guruStats[r.nama].countPulang++;
+          }
+        } else if (r.jenis === "Izin" || r.status === "Izin") {
+          totalIzin++;
+          unitStats[r.unit].izin++;
+          guruStats[r.nama].izin++;
+        } else if (r.jenis === "Sakit" || r.status === "Sakit") {
+          totalSakit++;
+          unitStats[r.unit].sakit++;
+          guruStats[r.nama].sakit++;
         }
       });
       
@@ -643,7 +633,10 @@ window.pages.initReportMonthly = function() {
           
           const isTimeMatch = logDate >= prevStartDate && logDate <= prevEndDate;
           const isUnitMatch = checkUnitMatch(r.unit, filterUnit);
-          return isTimeMatch && isUnitMatch;
+          const emp = employees.find(e => e.nama === r.nama);
+          const jabatan = emp ? emp.jabatan : '';
+          const isTipeMatch = checkTipeMatch(jabatan, filterTipe);
+          return isTimeMatch && isUnitMatch && isTipeMatch;
         });
         
         let prevHadir = 0;
@@ -833,6 +826,14 @@ window.pages.initReportMonthly = function() {
         }
       }
 
+      const formatTime = (totalMinutes, count) => {
+        if (count === 0) return '-';
+        const avg = Math.round(totalMinutes / count);
+        const h = Math.floor(avg / 60);
+        const m = avg % 60;
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      };
+
       const actualHariKerja = uniqueDates.size > 0 ? uniqueDates.size : 22;
       window._reportData = filteredEmployees.map((e, i) => {
         const stats = guruStats[e.nama] || {};
@@ -841,8 +842,10 @@ window.pages.initReportMonthly = function() {
         const izin = stats.izin || 0;
         const sakit = stats.sakit || 0;
         const absen = actualHariKerja - hadir - izin - sakit;
-        const pct = Math.round((hadir / actualHariKerja) * 100) || 0;
-        return { ...e, hadir, telat, izin, sakit, absen: Math.max(0,absen), pct, idx: i+1 };
+        const pct = actualHariKerja > 0 ? Math.round((hadir / actualHariKerja) * 100) : 0;
+        const avgMasuk = stats.countMasuk ? formatTime(stats.mntMasuk, stats.countMasuk) : '-';
+        const avgPulang = stats.countPulang ? formatTime(stats.mntPulang, stats.countPulang) : '-';
+        return { ...e, hadir, telat, izin, sakit, absen: Math.max(0,absen), pct, idx: i+1, avgMasuk, avgPulang };
       });
 
       // === GENERATE REKAP HARIAN (DAILY SUMMARY) ===
@@ -1068,14 +1071,14 @@ window.pages.initReportMonthly = function() {
           </div>
         </td>
         <td class="text-xs text-white/50">${e.unit}</td>
-        <td class="text-xs text-white/40">Guru</td>
+        <td class="text-xs text-white/40">${e.jabatan || 'Karyawan'}</td>
         <td><span class="badge badge-success">${e.hadir}</span></td>
         <td><span class="badge badge-warning">${e.telat}</span></td>
         <td class="text-xs">${e.izin}</td>
         <td class="text-xs">${e.sakit}</td>
         <td><span class="${e.absen > 0 ? 'badge badge-danger' : 'text-xs text-white/30'}">${e.absen}</span></td>
-        <td class="text-xs text-white/40">07:${(5 + Math.floor(Math.random()*15)).toString().padStart(2,'0')}</td>
-        <td class="text-xs text-white/40">15:${Math.floor(Math.random()*30).toString().padStart(2,'0')}</td>
+        <td class="text-xs text-white/40 font-mono">${e.avgMasuk}</td>
+        <td class="text-xs text-white/40 font-mono">${e.avgPulang}</td>
         <td>
           <div class="flex items-center gap-2">
             <div class="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden max-w-[60px]">

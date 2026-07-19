@@ -17,8 +17,22 @@ const _personnelHelpers = {
     if (filter === 'TK Islam Qurrata Ayun & TPA') return dataUnit === "TK Islam Qurrata 'Ayun" || dataUnit === "TPA YAA BUNAYYA -PAGI" || dataUnit === "TPA YAA BUNAYYA - SIANG";
     return dataUnit === filter;
   },
+  checkTipeMatch(jabatan, filter) {
+    if (filter === 'all') return true;
+    const isGuru = (jabatan || '').toLowerCase().includes('guru');
+    if (filter === 'Guru') return isGuru;
+    if (filter === 'Karyawan') return !isGuru;
+    return true;
+  },
+  dateDefaults() {
+    const now = new Date();
+    const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+    const first = today.substring(0, 8) + '01';
+    return { today, first };
+  },
   backButton: '<button onclick="window.router.navigateTo(\'reports\')" class="flex items-center gap-1 text-xs text-white/30 hover:text-white/60 transition-colors mb-4 group no-print"><i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i> Kembali ke Pusat Laporan</button>',
   unitFilter: `<select id="rpt-pers-unit" class="hrms-input hrms-select text-sm"><option value="all">Semua Unit</option><option>SD Integral Hidayatullah</option><option>MTS-MA Putra</option><option>MTS-MA Putri</option><option>TK Islam Qurrata Ayun & TPA</option><option>STIT HISAM</option></select>`,
+  tipeFilter: `<select id="rpt-pers-type" class="hrms-input hrms-select text-sm"><option value="all">Semua Tipe</option><option value="Guru">Guru</option><option value="Karyawan">Karyawan</option></select>`,
   statusBadge(s) {
     const sl = (s || '').toLowerCase();
     if (sl === 'tepat waktu' || sl === 'hadir') return `<span class="badge badge-success">${s}</span>`;
@@ -46,7 +60,15 @@ window.pages.renderReportEmpHistory = function() {
       </div>
 
       <div class="glass-card p-5 no-print">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+          <div>
+            <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Dari</label>
+            <input type="date" id="pers-emp-start" class="hrms-input text-sm" value="${_personnelHelpers.dateDefaults().first}">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Sampai</label>
+            <input type="date" id="pers-emp-end" class="hrms-input text-sm" value="${_personnelHelpers.dateDefaults().today}">
+          </div>
           <div>
             <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Pilih Karyawan</label>
             <select id="pers-emp-select" class="hrms-input hrms-select text-sm"><option value="">-- Pilih --</option></select>
@@ -113,11 +135,14 @@ window.pages.initReportEmpHistory = function() {
 
   window.pages.generateEmpHistory = async function() {
     const nama = document.getElementById('pers-emp-select')?.value;
+    const startVal = document.getElementById('pers-emp-start')?.value;
+    const endVal = document.getElementById('pers-emp-end')?.value;
+
     if (!nama) { window.ui.showToast('⚠️', 'Pilih karyawan terlebih dahulu', false); return; }
 
     window.ui.showLoading('Memuat riwayat...');
     try {
-      const rawLaporan = await window.api.getLaporanLengkapAdmin();
+      const rawLaporan = await window.api.getLaporanRentangAdmin(startVal, endVal);
       const logs = rawLaporan.filter(r => r.nama === nama).sort((a, b) => {
         return String(b.waktu || '').localeCompare(String(a.waktu || ''));
       });
@@ -126,6 +151,7 @@ window.pages.initReportEmpHistory = function() {
       let hadir = 0, terlambat = 0, izin = 0, sakit = 0;
       logs.forEach(r => {
         if (r.jenis === 'Masuk') { hadir++; if (r.status === 'Terlambat') terlambat++; }
+        else if (r.jenis === 'Pulang' && (r.status || '').toLowerCase() === 'pulang cepat') terlambat++;
         else if (r.jenis === 'Izin') izin++;
         else if (r.jenis === 'Sakit') sakit++;
       });
@@ -191,7 +217,15 @@ window.pages.renderReportTeacherHistory = function() {
       </div>
 
       <div class="glass-card p-5 no-print">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+          <div>
+            <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Dari</label>
+            <input type="date" id="pers-guru-start" class="hrms-input text-sm" value="${_personnelHelpers.dateDefaults().first}">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Sampai</label>
+            <input type="date" id="pers-guru-end" class="hrms-input text-sm" value="${_personnelHelpers.dateDefaults().today}">
+          </div>
           <div>
             <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Pilih Guru</label>
             <select id="pers-guru-select" class="hrms-input hrms-select text-sm"><option value="">-- Pilih --</option></select>
@@ -255,16 +289,20 @@ window.pages.initReportTeacherHistory = function() {
 
   window.pages.generateGuruHistory = async function() {
     const nama = document.getElementById('pers-guru-select')?.value;
+    const startVal = document.getElementById('pers-guru-start')?.value;
+    const endVal = document.getElementById('pers-guru-end')?.value;
+
     if (!nama) { window.ui.showToast('⚠️', 'Pilih guru terlebih dahulu', false); return; }
 
     window.ui.showLoading('Memuat riwayat...');
     try {
-      const rawLaporan = await window.api.getLaporanLengkapAdmin();
+      const rawLaporan = await window.api.getLaporanRentangAdmin(startVal, endVal);
       const logs = rawLaporan.filter(r => r.nama === nama).sort((a, b) => String(b.waktu || '').localeCompare(String(a.waktu || '')));
 
       let hadir = 0, terlambat = 0, izin = 0, sakit = 0;
       logs.forEach(r => {
         if (r.jenis === 'Masuk') { hadir++; if (r.status === 'Terlambat') terlambat++; }
+        else if (r.jenis === 'Pulang' && (r.status || '').toLowerCase() === 'pulang cepat') terlambat++;
         else if (r.jenis === 'Izin') izin++;
         else if (r.jenis === 'Sakit') sakit++;
       });
@@ -334,11 +372,14 @@ window.pages.renderReportTopDiscipline = function() {
       </div>
 
       <div class="glass-card p-5 no-print">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Dari</label><input type="date" id="rpt-disc-start" class="hrms-input text-sm" value="${firstDay}"></div>
           <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Sampai</label><input type="date" id="rpt-disc-end" class="hrms-input text-sm" value="${todayStr}"></div>
           <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Unit</label>
-            <select id="rpt-disc-unit" class="hrms-input hrms-select text-sm"><option value="all">Semua Unit</option><option>SD Integral Hidayatullah</option><option>MTS-MA Putra</option><option>MTS-MA Putri</option><option>TK Islam Qurrata Ayun & TPA</option><option>STIT HISAM</option></select>
+            ${_personnelHelpers.unitFilter.replace('id="rpt-pers-unit"', 'id="rpt-disc-unit"')}
+          </div>
+          <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tipe Pegawai</label>
+            ${_personnelHelpers.tipeFilter.replace('id="rpt-pers-type"', 'id="rpt-disc-type"')}
           </div>
           <div class="flex items-end"><button onclick="window.pages.generateTopDiscipline()" class="btn-primary text-xs w-full"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Generate</button></div>
         </div>
@@ -376,25 +417,32 @@ window.pages.initReportTopDiscipline = function() {
       const startVal = document.getElementById('rpt-disc-start').value;
       const endVal = document.getElementById('rpt-disc-end').value;
       const filterUnit = document.getElementById('rpt-disc-unit').value;
+      const filterTipe = document.getElementById('rpt-disc-type').value;
 
       const [employees, rawLaporan] = await Promise.all([
         window.api.getPegawaiListAdmin(adminEmail),
-        window.api.getLaporanLengkapAdmin()
+        window.api.getLaporanRentangAdmin(startVal, endVal)
       ]);
 
       const logs = rawLaporan.filter(r => {
         if (!r.waktu) return false;
-        const datePart = String(r.waktu).split(' ')[0];
-        return datePart >= startVal && datePart <= endVal && _personnelHelpers.checkUnitMatch(r.unit, filterUnit);
+        if (!_personnelHelpers.checkUnitMatch(r.unit, filterUnit)) return false;
+        const emp = employees.find(e => e.nama === r.nama);
+        const jabatan = emp ? emp.jabatan : '';
+        if (!_personnelHelpers.checkTipeMatch(jabatan, filterTipe)) return false;
+        return true;
       });
 
       const stats = {};
       logs.forEach(r => {
-        if (r.jenis !== 'Masuk') return;
         if (!stats[r.nama]) stats[r.nama] = { unit: r.unit, hadir: 0, tepat: 0, lambat: 0 };
-        stats[r.nama].hadir++;
-        if (r.status === 'Tepat Waktu') stats[r.nama].tepat++;
-        if (r.status === 'Terlambat' || r.status === 'Pulang Cepat') stats[r.nama].lambat++;
+        if (r.jenis === 'Masuk') {
+          stats[r.nama].hadir++;
+          if (r.status === 'Tepat Waktu') stats[r.nama].tepat++;
+          if (r.status === 'Terlambat') stats[r.nama].lambat++;
+        } else if (r.jenis === 'Pulang') {
+          if ((r.status || '').toLowerCase() === 'pulang cepat') stats[r.nama].lambat++;
+        }
       });
 
       const ranking = Object.keys(stats).map(nama => {
@@ -471,11 +519,14 @@ window.pages.renderReportAttention = function() {
       </div>
 
       <div class="glass-card p-5 no-print">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Dari</label><input type="date" id="rpt-attn-start" class="hrms-input text-sm" value="${firstDay}"></div>
           <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Sampai</label><input type="date" id="rpt-attn-end" class="hrms-input text-sm" value="${todayStr}"></div>
           <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Unit</label>
-            <select id="rpt-attn-unit" class="hrms-input hrms-select text-sm"><option value="all">Semua Unit</option><option>SD Integral Hidayatullah</option><option>MTS-MA Putra</option><option>MTS-MA Putri</option><option>TK Islam Qurrata Ayun & TPA</option><option>STIT HISAM</option></select>
+            ${_personnelHelpers.unitFilter.replace('id="rpt-pers-unit"', 'id="rpt-attn-unit"')}
+          </div>
+          <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tipe Pegawai</label>
+            ${_personnelHelpers.tipeFilter.replace('id="rpt-pers-type"', 'id="rpt-attn-type"')}
           </div>
           <div class="flex items-end"><button onclick="window.pages.generateAttention()" class="btn-primary text-xs w-full"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Generate</button></div>
         </div>
@@ -513,16 +564,20 @@ window.pages.initReportAttention = function() {
       const startVal = document.getElementById('rpt-attn-start').value;
       const endVal = document.getElementById('rpt-attn-end').value;
       const filterUnit = document.getElementById('rpt-attn-unit').value;
+      const filterTipe = document.getElementById('rpt-attn-type').value;
 
       const [employees, rawLaporan] = await Promise.all([
         window.api.getPegawaiListAdmin(adminEmail),
-        window.api.getLaporanLengkapAdmin()
+        window.api.getLaporanRentangAdmin(startVal, endVal)
       ]);
 
       const logs = rawLaporan.filter(r => {
         if (!r.waktu) return false;
-        const datePart = String(r.waktu).split(' ')[0];
-        return datePart >= startVal && datePart <= endVal && _personnelHelpers.checkUnitMatch(r.unit, filterUnit);
+        if (!_personnelHelpers.checkUnitMatch(r.unit, filterUnit)) return false;
+        const emp = employees.find(e => e.nama === r.nama);
+        const jabatan = emp ? emp.jabatan : '';
+        if (!_personnelHelpers.checkTipeMatch(jabatan, filterTipe)) return false;
+        return true;
       });
 
       const uniqueDates = new Set();
@@ -533,15 +588,20 @@ window.pages.initReportAttention = function() {
         if (!stats[r.nama]) stats[r.nama] = { unit: r.unit, hadir: 0, lambat: 0, izin: 0, sakit: 0 };
         if (r.jenis === 'Masuk') {
           stats[r.nama].hadir++;
-          if (r.status === 'Terlambat' || r.status === 'Pulang Cepat') stats[r.nama].lambat++;
-        } else if (r.jenis === 'Izin') stats[r.nama].izin++;
-        else if (r.jenis === 'Sakit') stats[r.nama].sakit++;
+          if (r.status === 'Terlambat') stats[r.nama].lambat++;
+        } else if (r.jenis === 'Pulang') {
+          if ((r.status || '').toLowerCase() === 'pulang cepat') stats[r.nama].lambat++;
+        } else if (r.jenis === 'Izin') {
+          stats[r.nama].izin++;
+        } else if (r.jenis === 'Sakit') {
+          stats[r.nama].sakit++;
+        }
       });
 
       const hariKerja = uniqueDates.size || 22;
 
       // Filter: employees with high tardiness or absences
-      const filteredEmps = employees.filter(e => _personnelHelpers.checkUnitMatch(e.unit, filterUnit));
+      const filteredEmps = employees.filter(e => _personnelHelpers.checkUnitMatch(e.unit, filterUnit) && _personnelHelpers.checkTipeMatch(e.jabatan, filterTipe));
       const attentionList = filteredEmps.map(e => {
         const s = stats[e.nama] || { hadir: 0, lambat: 0, izin: 0, sakit: 0 };
         const absen = Math.max(0, hariKerja - s.hadir - s.izin - s.sakit);

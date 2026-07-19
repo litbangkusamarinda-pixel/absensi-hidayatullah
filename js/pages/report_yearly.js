@@ -26,7 +26,7 @@ window.pages.renderReportYearly = function() {
 
       <!-- Filters -->
       <div class="glass-card p-5 no-print">
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           <div>
             <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tahun</label>
             <select id="rpt-yearly-year" class="hrms-input hrms-select text-sm">
@@ -42,6 +42,14 @@ window.pages.renderReportYearly = function() {
               <option>MTS-MA Putri</option>
               <option>TK Islam Qurrata Ayun & TPA</option>
               <option>STIT HISAM</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tipe Pegawai</label>
+            <select id="rpt-yearly-type" class="hrms-input hrms-select text-sm">
+              <option value="all">Semua</option>
+              <option>Guru</option>
+              <option>Karyawan</option>
             </select>
           </div>
           <div class="flex items-end">
@@ -129,10 +137,14 @@ window.pages.initReportYearly = function() {
       const adminEmail = window.auth.currentUser.email;
       const year = parseInt(document.getElementById('rpt-yearly-year').value);
       const filterUnit = document.getElementById('rpt-yearly-unit').value;
+      const filterTipe = document.getElementById('rpt-yearly-type').value;
+
+      const fetchStart = `${year}-01-01`;
+      const fetchEnd = `${year}-12-31`;
 
       const [employees, rawLaporan] = await Promise.all([
         window.api.getPegawaiListAdmin(adminEmail),
-        window.api.getLaporanLengkapAdmin()
+        window.api.getLaporanRentangAdmin(fetchStart, fetchEnd)
       ]);
 
       const checkUnitMatch = (dataUnit, filter) => {
@@ -142,15 +154,31 @@ window.pages.initReportYearly = function() {
         return dataUnit === filter;
       };
 
-      const filteredEmployees = employees.filter(e => checkUnitMatch(e.unit, filterUnit));
+      const checkTipeMatch = (jabatan, filter) => {
+        if (filter === 'all') return true;
+        const isGuru = (jabatan || '').toLowerCase().includes('guru');
+        if (filter === 'Guru') return isGuru;
+        if (filter === 'Karyawan') return !isGuru;
+        return true;
+      };
 
-      // Filter logs for selected year
+      const filteredEmployees = employees.filter(e => checkUnitMatch(e.unit, filterUnit) && checkTipeMatch(e.jabatan, filterTipe));
+
+      // Filter logs for selected year and filters
       const yearLogs = rawLaporan.filter(r => {
         if (!r.waktu) return false;
         const datePart = String(r.waktu).split(' ')[0];
         const parts = datePart.split('-');
         const logYear = parts[0] && parts[0].length === 4 ? parseInt(parts[0]) : parseInt(parts[2]);
-        return logYear === year && checkUnitMatch(r.unit, filterUnit);
+        if (logYear !== year) return false;
+        
+        if (!checkUnitMatch(r.unit, filterUnit)) return false;
+
+        const emp = employees.find(e => e.nama === r.nama);
+        const jabatan = emp ? emp.jabatan : '';
+        if (!checkTipeMatch(jabatan, filterTipe)) return false;
+
+        return true;
       });
 
       // Build monthly stats
@@ -166,7 +194,11 @@ window.pages.initReportYearly = function() {
 
         if (r.jenis === 'Masuk') {
           monthly[monthIdx].hadir++;
-          if (r.status === 'Terlambat' || r.status === 'Pulang Cepat') monthly[monthIdx].terlambat++;
+          if (r.status === 'Terlambat') monthly[monthIdx].terlambat++;
+        } else if (r.jenis === 'Pulang') {
+          if ((r.status || '').toLowerCase() === 'pulang cepat') {
+            monthly[monthIdx].terlambat++;
+          }
         } else if (r.jenis === 'Izin' || r.status === 'Izin') {
           monthly[monthIdx].izin++;
         } else if (r.jenis === 'Sakit' || r.status === 'Sakit') {

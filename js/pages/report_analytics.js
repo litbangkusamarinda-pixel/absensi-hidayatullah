@@ -18,6 +18,14 @@ const _anlHelpers = {
   },
   back: '<button onclick="window.router.navigateTo(\'reports\')" class="flex items-center gap-1 text-xs text-white/30 hover:text-white/60 transition-colors mb-4 group no-print"><i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i> Kembali ke Pusat Laporan</button>',
   unitOpts: '<option value="all">Semua Unit</option><option>SD Integral Hidayatullah</option><option>MTS-MA Putra</option><option>MTS-MA Putri</option><option>TK Islam Qurrata Ayun & TPA</option><option>STIT HISAM</option>',
+  tipeOpts: '<option value="all">Semua Tipe</option><option value="Guru">Guru</option><option value="Karyawan">Karyawan</option>',
+  checkTipeMatch(jabatan, filter) {
+    if (filter === 'all') return true;
+    const isGuru = (jabatan || '').toLowerCase().includes('guru');
+    if (filter === 'Guru') return isGuru;
+    if (filter === 'Karyawan') return !isGuru;
+    return true;
+  },
   dateDefaults() {
     const now = new Date();
     const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
@@ -26,10 +34,11 @@ const _anlHelpers = {
   },
   filterBar(prefix) {
     const d = this.dateDefaults();
-    return `<div class="glass-card p-5 no-print"><div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    return `<div class="glass-card p-5 no-print"><div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
       <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Dari</label><input type="date" id="${prefix}-start" class="hrms-input text-sm" value="${d.first}"></div>
       <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Sampai</label><input type="date" id="${prefix}-end" class="hrms-input text-sm" value="${d.today}"></div>
       <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Unit</label><select id="${prefix}-unit" class="hrms-input hrms-select text-sm">${this.unitOpts}</select></div>
+      <div><label class="block text-[10px] font-bold tracking-widest text-white/30 uppercase mb-1.5">Tipe Pegawai</label><select id="${prefix}-type" class="hrms-input hrms-select text-sm">${this.tipeOpts}</select></div>
       <div class="flex items-end"><button onclick="window.pages.generate_${prefix}()" class="btn-primary text-xs w-full"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Generate</button></div>
     </div><button onclick="window.print()" class="btn-secondary text-xs"><i data-lucide="printer" class="w-3.5 h-3.5"></i> Print</button></div>`;
   },
@@ -38,17 +47,21 @@ const _anlHelpers = {
     const startVal = document.getElementById(`${prefix}-start`).value;
     const endVal = document.getElementById(`${prefix}-end`).value;
     const filterUnit = document.getElementById(`${prefix}-unit`).value;
+    const filterTipe = document.getElementById(`${prefix}-type`) ? document.getElementById(`${prefix}-type`).value : 'all';
     const [employees, rawLaporan] = await Promise.all([
       window.api.getPegawaiListAdmin(adminEmail),
-      window.api.getLaporanLengkapAdmin()
+      window.api.getLaporanRentangAdmin(startVal, endVal)
     ]);
-    const filteredEmps = employees.filter(e => this.checkUnitMatch(e.unit, filterUnit));
+    const filteredEmps = employees.filter(e => this.checkUnitMatch(e.unit, filterUnit) && this.checkTipeMatch(e.jabatan, filterTipe));
     const logs = rawLaporan.filter(r => {
       if (!r.waktu) return false;
-      const dp = String(r.waktu).split(' ')[0];
-      return dp >= startVal && dp <= endVal && this.checkUnitMatch(r.unit, filterUnit);
+      if (!this.checkUnitMatch(r.unit, filterUnit)) return false;
+      const emp = employees.find(e => e.nama === r.nama);
+      const jabatan = emp ? emp.jabatan : '';
+      if (!this.checkTipeMatch(jabatan, filterTipe)) return false;
+      return true;
     });
-    return { employees: filteredEmps, logs, startVal, endVal, filterUnit, allLaporan: rawLaporan, allEmployees: employees };
+    return { employees: filteredEmps, logs, startVal, endVal, filterUnit, filterTipe, allLaporan: rawLaporan, allEmployees: employees };
   }
 };
 
@@ -87,7 +100,7 @@ window.pages.initReportLate = function() {
       const lateByHour = {};
       const personLate = {};
 
-      logs.filter(r => r.jenis === 'Masuk' && (r.status === 'Terlambat' || r.status === 'Pulang Cepat')).forEach(r => {
+      logs.filter(r => (r.jenis === 'Masuk' && r.status === 'Terlambat') || (r.jenis === 'Pulang' && (r.status || '').toLowerCase() === 'pulang cepat')).forEach(r => {
         const parts = String(r.waktu).split(/[- T:]/);
         if (parts.length >= 3) {
           const d = parts[0].length === 4 ? new Date(parts[0], parts[1]-1, parts[2]) : new Date(parts[2], parts[1]-1, parts[0]);
@@ -404,7 +417,8 @@ window.pages.initReportCompareMonth = function() {
     window.ui.showLoading('Membandingkan bulan...');
     try {
       const adminEmail = window.auth.currentUser.email; const year = parseInt(document.getElementById('cmonth-year').value); const filterUnit = document.getElementById('cmonth-unit').value;
-      const [employees, rawLaporan] = await Promise.all([window.api.getPegawaiListAdmin(adminEmail), window.api.getLaporanLengkapAdmin()]);
+      const fetchStart = `${year}-01-01`; const fetchEnd = `${year}-12-31`;
+      const [employees, rawLaporan] = await Promise.all([window.api.getPegawaiListAdmin(adminEmail), window.api.getLaporanRentangAdmin(fetchStart, fetchEnd)]);
       const filteredEmps = employees.filter(e => _anlHelpers.checkUnitMatch(e.unit, filterUnit));
       const yearLogs = rawLaporan.filter(r => { if (!r.waktu) return false; const dp = String(r.waktu).split(' ')[0]; const p = dp.split('-'); return (p[0].length === 4 ? parseInt(p[0]) : parseInt(p[2])) === year && _anlHelpers.checkUnitMatch(r.unit, filterUnit); });
       const monthly = Array.from({ length: 12 }, () => ({ hadir: 0, lambat: 0, dates: new Set() }));
@@ -455,7 +469,8 @@ window.pages.initReportCompareYear = function() {
     window.ui.showLoading('Membandingkan tahun...');
     try {
       const adminEmail = window.auth.currentUser.email; const filterUnit = document.getElementById('cyear-unit').value;
-      const [employees, rawLaporan] = await Promise.all([window.api.getPegawaiListAdmin(adminEmail), window.api.getLaporanLengkapAdmin()]);
+      const now = new Date(); const fetchStart = `${now.getFullYear()-4}-01-01`; const fetchEnd = `${now.getFullYear()}-12-31`;
+      const [employees, rawLaporan] = await Promise.all([window.api.getPegawaiListAdmin(adminEmail), window.api.getLaporanRentangAdmin(fetchStart, fetchEnd)]);
       const filteredLogs = rawLaporan.filter(r => r.waktu && _anlHelpers.checkUnitMatch(r.unit, filterUnit));
       const yearStats = {};
       filteredLogs.forEach(r => { const dp = String(r.waktu).split(' ')[0]; const p = dp.split('-'); const yr = p[0].length === 4 ? p[0] : p[2]; if (!yearStats[yr]) yearStats[yr] = { hadir: 0, lambat: 0, dates: new Set() }; yearStats[yr].dates.add(dp); if (r.jenis === 'Masuk') { yearStats[yr].hadir++; if (r.status === 'Terlambat') yearStats[yr].lambat++; } });
