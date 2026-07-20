@@ -221,11 +221,16 @@ window.pages.initDashboard = function() {
   async function refreshDashboardData() {
     try {
       // Fetch in parallel
+      const now = new Date();
+      const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
       const [dLog, dPegawai, dIzin] = await Promise.all([
-        window.api.getTodayLogAdmin(adminEmail).catch(() => []),
+        window.api.getLaporanHarianAdmin(todayStr).catch(() => []),
         window.api.getPegawaiListAdmin(adminEmail).catch(() => []),
         window.api.getIzinPendingAdmin(adminEmail).catch(() => [])
       ]);
+      
+      // Reverse for newest on top in Live Log
+      if (Array.isArray(dLog)) dLog.reverse();
       
       // --- 1. Process Pegawai Stats ---
       const totalPegawai = dPegawai.length || 0;
@@ -258,7 +263,7 @@ window.pages.initDashboard = function() {
 
       // --- 2. Process Live Log ---
       const tb = document.getElementById('tabelLog');
-      let hadirCount = 0, telatCount = 0, masukSet = new Set(), pulangSet = new Set();
+      let hadirCount = 0, telatCount = 0, masukSet = new Set(), pulangSet = new Set(), izinSakitSet = new Set(), telatSet = new Set();
       
       if (tb) {
         if (dLog.success === false) { 
@@ -269,21 +274,24 @@ window.pages.initDashboard = function() {
           tb.innerHTML = dLog.map(r => {
             if (r.jenis === 'Masuk') { masukSet.add(r.nama); hadirCount++; }
             if (r.jenis === 'Pulang') pulangSet.add(r.nama);
-            if (r.status === 'Terlambat') telatCount++;
+            if (r.jenis === 'Izin' || r.jenis === 'Sakit') izinSakitSet.add(r.nama);
+            if (r.status === 'Terlambat' || r.status === 'Pulang Cepat') { telatSet.add(r.nama); telatCount++; }
             
+            const isIzinSakit = (r.jenis === 'Izin' || r.jenis === 'Sakit');
             const bc = (r.status === 'Terlambat' || r.status === 'Pulang Cepat') 
-              ? 'badge badge-danger' : 'badge badge-success';
-            const jc = r.jenis === 'Masuk' ? 'badge badge-neutral' : 'badge badge-info';
+              ? 'badge badge-danger' : (isIzinSakit ? 'badge' : 'badge badge-success');
+            const bgCustom = isIzinSakit ? 'style="background:rgba(59,130,246,0.15);color:#60A5FA;"' : '';
+            const jc = r.jenis === 'Masuk' ? 'badge badge-neutral' : (r.jenis === 'Pulang' ? 'badge badge-info' : 'badge badge-warning');
                 
             return `
               <tr class="hover:bg-white/[0.02] transition-colors">
-                <td class="whitespace-nowrap text-xs text-white/50">${r.waktu}</td>
+                <td class="whitespace-nowrap text-xs text-white/50">${r.waktu.split(' ')[1] || r.waktu}</td>
                 <td>
                   <div class="font-semibold text-white text-sm">${r.nama}</div>
                   <div class="text-[10px] text-white/30 truncate max-w-[140px]">${r.unit}</div>
                 </td>
                 <td><span class="${jc}">${r.jenis}</span></td>
-                <td><span class="${bc}">${r.status}</span></td>
+                <td><span class="${bc}" ${bgCustom}>${r.status}</span></td>
               </tr>
             `;
           }).join('');
@@ -293,13 +301,15 @@ window.pages.initDashboard = function() {
       // Calculate attendance metrics based on unique check-ins (masukSet)
       const hadir = masukSet.size;
       const belumPulang = Math.max(0, hadir - pulangSet.size);
+      const izinSakitApproved = izinSakitSet.size;
+      const uniqueTelat = telatSet.size;
       
       const hadirEl = document.getElementById('stat-hadir');
       const telatEl = document.getElementById('stat-telat');
       const belumPulangEl = document.getElementById('stat-belum-pulang');
       
       if (hadirEl) hadirEl.innerText = hadir;
-      if (telatEl) telatEl.innerText = telatCount;
+      if (telatEl) telatEl.innerText = uniqueTelat;
       if (belumPulangEl) belumPulangEl.innerText = belumPulang;
       
       // Update sidebar if exists
@@ -351,7 +361,7 @@ window.pages.initDashboard = function() {
       const persenEl = document.getElementById('stat-persen');
       const absenEl = document.getElementById('stat-absen');
       
-      const absenCount = Math.max(0, totalPegawai - hadir);
+      const absenCount = Math.max(0, totalPegawai - hadir - izinSakitApproved);
       if (absenEl) absenEl.innerText = absenCount;
       
       if (persenEl && totalPegawai > 0) {
@@ -362,7 +372,7 @@ window.pages.initDashboard = function() {
       }
       
       // 5. Update Donut Chart
-      updateStatusChart(Math.max(0, hadir - telatCount), telatCount, izinCount, absenCount);
+      updateStatusChart(Math.max(0, hadir - uniqueTelat), uniqueTelat, izinSakitApproved, absenCount);
 
       if (window.lucide) window.lucide.createIcons();
     } catch(e) {
@@ -480,17 +490,12 @@ window.pages.initDashboard = function() {
     });
   }
 
-  function updateStatusChart(hadir, telat) {
+  function updateStatusChart(hadir, telat, izin = 0, absen = 0) {
     const ctx = document.getElementById('chart-status');
     if (!ctx) return;
     
-    const izinEl = document.getElementById('stat-izin');
-    const izin = parseInt(izinEl?.innerText) || 0;
-    const absenEl = document.getElementById('stat-absen');
-    const absen = parseInt(absenEl?.innerText) || 0;
-
     if (chartStatus) {
-      chartStatus.data.datasets[0].data = [hadir - telat, telat, izin, absen];
+      chartStatus.data.datasets[0].data = [hadir, telat, izin, absen];
       chartStatus.update();
       return;
     }
@@ -500,7 +505,7 @@ window.pages.initDashboard = function() {
       data: {
         labels: ['Tepat Waktu', 'Terlambat', 'Izin/Sakit', 'Tidak Hadir'],
         datasets: [{
-          data: [hadir - telat, telat, izin, absen],
+          data: [hadir, telat, izin, absen],
           backgroundColor: ['#14B88A', '#F59E0B', '#3B82F6', '#EF4444'],
           borderColor: '#102B22',
           borderWidth: 3,
