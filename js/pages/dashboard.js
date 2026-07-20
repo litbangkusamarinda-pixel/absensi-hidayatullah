@@ -232,14 +232,16 @@ window.pages.initDashboard = function() {
       // Reverse for newest on top in Live Log
       if (Array.isArray(dLog)) dLog.reverse();
       
-      // --- 1. Process Pegawai Stats ---
-      const totalPegawai = dPegawai.length || 0;
+      // --- 1 & 2. Process Stats & Live Log using Unified Logic ---
+      const tb = document.getElementById('tabelLog');
+      const personStats = {};
       let totalGuru = 0;
       let totalKaryawan = 0;
-      
-      // Try to differentiate by role/jabatan if the API provides it
+
+      // Init from Pegawai Database
       if (dPegawai && dPegawai.length) {
         dPegawai.forEach(p => {
+          personStats[p.nama] = { status: 'Tidak Hadir', masuk: false, pulang: false };
           const role = (p.jabatan || p.unit || p.role || p.posisi || '').toLowerCase();
           if (role.includes('guru') || role.includes('pengajar') || role.includes('ustadz')) {
             totalGuru++;
@@ -248,7 +250,81 @@ window.pages.initDashboard = function() {
           }
         });
       }
+
+      // Process Logs
+      let liveLogHTML = '';
+      if (dLog.success === false) { 
+        liveLogHTML = '<tr><td colspan="4" class="text-center py-8 text-red-400 text-xs">Gagal memuat log</td></tr>';
+      } else if (!dLog.length) { 
+        liveLogHTML = '<tr><td colspan="4" class="text-center py-8 text-white/30 text-xs">Belum ada data hari ini</td></tr>'; 
+      } else {
+        liveLogHTML = dLog.map(r => {
+          // If a log exists for a deleted/unknown employee, track them too!
+          if (!personStats[r.nama]) {
+            personStats[r.nama] = { status: 'Tidak Hadir', masuk: false, pulang: false };
+          }
+          
+          if (r.jenis === 'Masuk') {
+            if (personStats[r.nama].status === 'Tidak Hadir') {
+              personStats[r.nama].status = r.status || 'Hadir'; // 'Tepat Waktu' or 'Terlambat'
+            }
+            personStats[r.nama].masuk = true;
+          } else if (r.jenis === 'Pulang') {
+            personStats[r.nama].pulang = true;
+            if ((r.status || '').toLowerCase() === 'pulang cepat') {
+              personStats[r.nama].status = 'Pulang Cepat';
+            }
+          } else if (r.jenis === 'Izin') {
+            personStats[r.nama].status = 'Izin';
+          } else if (r.jenis === 'Sakit') {
+            personStats[r.nama].status = 'Sakit';
+          }
+
+          const isIzinSakit = (r.jenis === 'Izin' || r.jenis === 'Sakit');
+          const bc = (r.status === 'Terlambat' || r.status === 'Pulang Cepat') 
+            ? 'badge badge-danger' : (isIzinSakit ? 'badge' : 'badge badge-success');
+          const bgCustom = isIzinSakit ? 'style="background:rgba(59,130,246,0.15);color:#60A5FA;"' : '';
+          const jc = r.jenis === 'Masuk' ? 'badge badge-neutral' : (r.jenis === 'Pulang' ? 'badge badge-info' : 'badge badge-warning');
+              
+          return `
+            <tr class="hover:bg-white/[0.02] transition-colors">
+              <td class="whitespace-nowrap text-xs text-white/50">${r.waktu.split(' ')[1] || r.waktu}</td>
+              <td>
+                <div class="font-semibold text-white text-sm">${r.nama}</div>
+                <div class="text-[10px] text-white/30 truncate max-w-[140px]">${r.unit}</div>
+              </td>
+              <td><span class="${jc}">${r.jenis}</span></td>
+              <td><span class="${bc}" ${bgCustom}>${r.status}</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (tb) tb.innerHTML = liveLogHTML;
+
+      // Calculate final metrics from personStats
+      let hadir = 0, uniqueTelat = 0, izinSakitApproved = 0, absenCount = 0, belumPulang = 0;
       
+      Object.values(personStats).forEach(p => {
+        const s = p.status.toLowerCase();
+        if (s === 'tepat waktu' || s === 'hadir') {
+          hadir++;
+        } else if (s === 'terlambat' || s === 'pulang cepat') { 
+          hadir++; 
+          uniqueTelat++; 
+        } else if (s === 'izin' || s === 'sakit') {
+          izinSakitApproved++;
+        } else {
+          absenCount++;
+        }
+        
+        if (p.masuk && !p.pulang) {
+          belumPulang++;
+        }
+      });
+
+      const totalPegawai = Object.keys(personStats).length;
+
       // Fallback: If we couldn't differentiate at all, display total for both
       if (totalGuru === 0 && totalKaryawan > 0) {
         totalGuru = totalPegawai;
@@ -257,52 +333,8 @@ window.pages.initDashboard = function() {
       
       const totalEl = document.getElementById('stat-total');
       const guruEl = document.getElementById('stat-guru');
-      // If we managed to split them, display the split. Otherwise, show totals.
       if (totalEl) totalEl.innerText = (totalKaryawan > 0 && totalGuru !== totalKaryawan) ? totalKaryawan : totalPegawai;
       if (guruEl) guruEl.innerText = (totalGuru > 0 && totalGuru !== totalKaryawan) ? totalGuru : totalPegawai;
-
-      // --- 2. Process Live Log ---
-      const tb = document.getElementById('tabelLog');
-      let hadirCount = 0, telatCount = 0, masukSet = new Set(), pulangSet = new Set(), izinSakitSet = new Set(), telatSet = new Set();
-      
-      if (tb) {
-        if (dLog.success === false) { 
-          tb.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-400 text-xs">Gagal memuat log</td></tr>';
-        } else if (!dLog.length) { 
-          tb.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-white/30 text-xs">Belum ada data hari ini</td></tr>'; 
-        } else {
-          tb.innerHTML = dLog.map(r => {
-            if (r.jenis === 'Masuk') { masukSet.add(r.nama); hadirCount++; }
-            if (r.jenis === 'Pulang') pulangSet.add(r.nama);
-            if (r.jenis === 'Izin' || r.jenis === 'Sakit') izinSakitSet.add(r.nama);
-            if (r.status === 'Terlambat' || r.status === 'Pulang Cepat') { telatSet.add(r.nama); telatCount++; }
-            
-            const isIzinSakit = (r.jenis === 'Izin' || r.jenis === 'Sakit');
-            const bc = (r.status === 'Terlambat' || r.status === 'Pulang Cepat') 
-              ? 'badge badge-danger' : (isIzinSakit ? 'badge' : 'badge badge-success');
-            const bgCustom = isIzinSakit ? 'style="background:rgba(59,130,246,0.15);color:#60A5FA;"' : '';
-            const jc = r.jenis === 'Masuk' ? 'badge badge-neutral' : (r.jenis === 'Pulang' ? 'badge badge-info' : 'badge badge-warning');
-                
-            return `
-              <tr class="hover:bg-white/[0.02] transition-colors">
-                <td class="whitespace-nowrap text-xs text-white/50">${r.waktu.split(' ')[1] || r.waktu}</td>
-                <td>
-                  <div class="font-semibold text-white text-sm">${r.nama}</div>
-                  <div class="text-[10px] text-white/30 truncate max-w-[140px]">${r.unit}</div>
-                </td>
-                <td><span class="${jc}">${r.jenis}</span></td>
-                <td><span class="${bc}" ${bgCustom}>${r.status}</span></td>
-              </tr>
-            `;
-          }).join('');
-        }
-      }
-      
-      // Calculate attendance metrics based on unique check-ins (masukSet)
-      const hadir = masukSet.size;
-      const belumPulang = Math.max(0, hadir - pulangSet.size);
-      const izinSakitApproved = izinSakitSet.size;
-      const uniqueTelat = telatSet.size;
       
       const hadirEl = document.getElementById('stat-hadir');
       const telatEl = document.getElementById('stat-telat');
@@ -316,7 +348,7 @@ window.pages.initDashboard = function() {
       const rsHadir = document.getElementById('rs-hadir');
       const rsTelat = document.getElementById('rs-telat');
       if (rsHadir) rsHadir.textContent = hadir;
-      if (rsTelat) rsTelat.textContent = telatCount;
+      if (rsTelat) rsTelat.textContent = uniqueTelat;
 
       // --- 3. Process Izin Pending ---
       const tbIzin = document.getElementById('tabelPending');
@@ -361,7 +393,6 @@ window.pages.initDashboard = function() {
       const persenEl = document.getElementById('stat-persen');
       const absenEl = document.getElementById('stat-absen');
       
-      const absenCount = Math.max(0, totalPegawai - hadir - izinSakitApproved);
       if (absenEl) absenEl.innerText = absenCount;
       
       if (persenEl && totalPegawai > 0) {
