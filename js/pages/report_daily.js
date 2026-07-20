@@ -204,13 +204,18 @@ window.pages.initReportDaily = function() {
           personStats[r.nama].masuk = jam;
           // Jangan timpa status jika sudah 'Pulang Cepat' atau izin (berjaga-jaga jika terbalik urutannya)
           if (personStats[r.nama].status === '-' || personStats[r.nama].status === 'Tidak Hadir') {
-            personStats[r.nama].status = r.status || 'Hadir';
+            personStats[r.nama].status = (r.status || 'Hadir').trim();
           }
           personStats[r.nama].unit = r.unit;
         } else if (r.jenis === 'Pulang') {
           personStats[r.nama].pulang = jam;
-          if ((r.status || '').toLowerCase() === 'pulang cepat') {
+          const statusPulang = (r.status || '').toLowerCase().trim();
+          
+          if (statusPulang === 'pulang cepat') {
             personStats[r.nama].status = 'Pulang Cepat';
+          } else if (personStats[r.nama].status === '-' || personStats[r.nama].status === 'Tidak Hadir') {
+            // Jika mereka lupa absen masuk tapi absen pulang, anggap hadir
+            personStats[r.nama].status = (r.status || 'Hadir').trim();
           }
         } else if (r.jenis === 'Izin') {
           personStats[r.nama].status = 'Izin';
@@ -233,7 +238,7 @@ window.pages.initReportDaily = function() {
       const checkinHours = {};
 
       Object.values(personStats).forEach(p => {
-        const s = p.status.toLowerCase();
+        const s = (p.status || '').toLowerCase().trim();
         if (s === 'tepat waktu' || s === 'hadir') {
           totalHadir++;
         } else if (s === 'terlambat' || s === 'pulang cepat') { 
