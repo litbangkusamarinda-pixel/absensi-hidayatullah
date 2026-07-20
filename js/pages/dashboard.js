@@ -312,8 +312,9 @@ window.pages.initDashboard = function() {
         } else if (s === 'terlambat' || s === 'pulang cepat') { 
           hadir++; 
           uniqueTelat++; 
-        } else if (s === 'izin' || s === 'sakit') {
+        } else if (s === 'izin' || s === 'sakit' || s === 'tugas keluar' || s === 'cuti') {
           izinSakitApproved++;
+          absenCount++; // Masukkan ke dalam total Ketidakhadiran agar sinkron dengan Laporan
         } else {
           absenCount++;
         }
@@ -403,7 +404,8 @@ window.pages.initDashboard = function() {
       }
       
       // 5. Update Donut Chart
-      updateStatusChart(Math.max(0, hadir - uniqueTelat), uniqueTelat, izinSakitApproved, absenCount);
+      // Kurangi absenCount dengan izinSakitApproved untuk chart agar tidak terhitung ganda (karena sudah dijumlahkan di absenCount sebelumnya)
+      updateStatusChart(Math.max(0, hadir - uniqueTelat), uniqueTelat, izinSakitApproved, Math.max(0, absenCount - izinSakitApproved));
 
       if (window.lucide) window.lucide.createIcons();
     } catch(e) {
