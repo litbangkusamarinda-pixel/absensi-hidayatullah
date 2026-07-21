@@ -127,7 +127,7 @@ window.pages.initPiketSchedule = function() {
       if(pUnit) {
           pUnit.innerHTML = '<option value="">Pilih Unit...</option>';
           units.forEach(u => {
-            pUnit.innerHTML += \`<option value="\${u}">\${u}</option>\`;
+            pUnit.innerHTML += `<option value="${u}">${u}</option>`;
           });
       }
     } catch(e) {
@@ -148,7 +148,7 @@ window.pages.initPiketSchedule = function() {
       : window.pages.piketPegawaiList;
       
     filtered.forEach(g => {
-      selectGuru.innerHTML += \`<option value="\${g.nama}">\${g.nama}</option>\`;
+      selectGuru.innerHTML += `<option value="${g.nama}">${g.nama}</option>`;
     });
   };
 
@@ -168,20 +168,20 @@ window.pages.initPiketSchedule = function() {
       }
 
       tb.innerHTML = d.map(r => {
-        return \`
+        return `
           <tr>
-            <td class="font-semibold text-white text-[11px]">\${r.unit}</td>
-            <td class="font-bold text-white text-xs">\${r.hari}</td>
-            <td class="text-xs">\${r.nama}</td>
-            <td class="text-xs">\${r.masuk}</td>
-            <td class="text-xs">\${r.pulang}</td>
+            <td class="font-semibold text-white text-[11px]">${r.unit}</td>
+            <td class="font-bold text-white text-xs">${r.hari}</td>
+            <td class="text-xs">${r.nama}</td>
+            <td class="text-xs">${r.masuk}</td>
+            <td class="text-xs">${r.pulang}</td>
             <td>
-              <button onclick="window.pages.hapusPiket(\${r.rowIndex})" class="bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg p-1.5 transition-colors">
+              <button onclick="window.pages.hapusPiket(${r.rowIndex})" class="bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg p-1.5 transition-colors">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </td>
           </tr>
-        \`;
+        `;
       }).join('');
       
       if (window.lucide) window.lucide.createIcons();
