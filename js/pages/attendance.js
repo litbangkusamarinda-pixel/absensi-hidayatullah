@@ -392,8 +392,11 @@ window.pages.initAttendance = function() {
       try {
         const specialHours = await window.api.getJadwalHari();
         const todaySpecial = specialHours.find(h => h.unit === currentUserUnit && h.hari === currentDay);
-        if (todaySpecial && todaySpecial.libur === 'Ya') {
-            window.isHoliday = true;
+        if (todaySpecial) {
+            var liburVal = todaySpecial.libur;
+            if (liburVal === true || String(liburVal).toUpperCase() === 'TRUE' || String(liburVal).toUpperCase() === 'YA') {
+                window.isHoliday = true;
+            }
         }
       } catch (err) {
         console.error("Gagal load jadwal khusus", err);

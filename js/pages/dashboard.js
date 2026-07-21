@@ -586,7 +586,7 @@ window.pages.initDashboard = function() {
     btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Menyiapkan...';
     try {
       const data = await window.api.getAllLogAdmin(adminEmail);
-      let csv = 'data:text/csv;charset=utf-8,' + data.map(r => r.map(c => '"'+c+'"').join(',')).join('\\r\\n');
+      let csv = 'data:text/csv;charset=utf-8,' + data.map(r => r.map(c => '"'+c+'"').join(',')).join('\r\n');
       let a = document.createElement('a');
       a.setAttribute('href', encodeURI(csv));
       a.setAttribute('download', 'Laporan_Absensi_Hidayatullah.csv');

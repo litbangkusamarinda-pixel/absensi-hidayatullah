@@ -368,6 +368,13 @@
       selected.querySelector('span:last-child').classList.add('text-white');
     }
     async function submitIzinForm() {
+      // ── Validasi Frontend: Cegah submit jika user sedang Cuti/Tugas Luar ──
+      if (window.isBypassed) {
+        window.ui.showToast('❌', 'Tidak dapat mengajukan izin karena Anda sedang ' + (window.bypassType || 'Cuti') + ' hari ini.', false);
+        window.ui.closeModal('modal-izin');
+        return;
+      }
+
       const ket = document.getElementById('izin-keterangan').value.trim();
       window.ui.showLoading("Mengirim...");
       try {

@@ -4,8 +4,8 @@
   <base target="_top">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">document.getElementById('adminEmailDisplay').innerText = adminEmail;
-  </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', function(){ if(typeof adminEmail !== 'undefined') document.getElementById('adminEmailDisplay').innerText = adminEmail; });</script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{--g9:#064e3b;--g8:#065f46;--g7:#047857;--g6:#059669;--g5:#10b981;--g4:#34d399;--g1:#d1fae5;--l4:#a3e635;--l3:#bef264;--l2:#d9f99d;--l1:#ecfccb;--surface:#f0fdf4;--glass:rgba(255,255,255,0.72);--gb:rgba(16,185,129,0.18);--r:16px;}
