@@ -51,5 +51,9 @@ window.api = {
   getJadwalHari: () => apiCall('getJadwalHari'),
   saveJadwalHari: (data) => apiCall('saveJadwalHari', data),
   deleteJadwalHari: (data) => apiCall('deleteJadwalHari', data),
-  checkTodayBypass: (email) => apiCall('checkTodayBypass', { email })
+  checkTodayBypass: (email) => apiCall('checkTodayBypass', { email }),
+  
+  getPiketListAdmin: () => apiCall('getPiketListAdmin'),
+  savePiketAdmin: (data) => apiCall('savePiketAdmin', data),
+  deletePiketAdmin: (data) => apiCall('deletePiketAdmin', data)
 };

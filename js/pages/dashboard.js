@@ -437,7 +437,9 @@ window.pages.initDashboard = function() {
     
     // Try to fetch real data
     try {
-      const rawLaporan = await window.api.getLaporanLengkapAdmin();
+      const startDate = last7[0].key;
+      const endDate = last7[last7.length - 1].key;
+      const rawLaporan = await window.api.getLaporanRentangAdmin(startDate, endDate);
       const dateMap = {};
       last7.forEach((d, i) => { dateMap[d.key] = i; });
       

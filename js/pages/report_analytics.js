@@ -366,7 +366,7 @@ window.pages.initReportCompareUnit = function() {
       const adminEmail = window.auth.currentUser.email;
       const startVal = document.getElementById('cunit-start').value;
       const endVal = document.getElementById('cunit-end').value;
-      const [employees, rawLaporan] = await Promise.all([window.api.getPegawaiListAdmin(adminEmail), window.api.getLaporanLengkapAdmin()]);
+      const [employees, rawLaporan] = await Promise.all([window.api.getPegawaiListAdmin(adminEmail), window.api.getLaporanRentangAdmin(startVal, endVal)]);
       const logs = rawLaporan.filter(r => { if (!r.waktu) return false; const dp = String(r.waktu).split(' ')[0]; return dp >= startVal && dp <= endVal; });
       const uniqueDates = new Set(); logs.forEach(r => { const dp = String(r.waktu).split(' ')[0]; uniqueDates.add(dp); });
       const hariKerja = uniqueDates.size || 22;
@@ -564,7 +564,7 @@ window.pages.initReportFoundation = function() {
     try {
       const adminEmail = window.auth.currentUser.email;
       const startVal = document.getElementById('found-start').value; const endVal = document.getElementById('found-end').value;
-      const [employees, rawLaporan] = await Promise.all([window.api.getPegawaiListAdmin(adminEmail), window.api.getLaporanLengkapAdmin()]);
+      const [employees, rawLaporan] = await Promise.all([window.api.getPegawaiListAdmin(adminEmail), window.api.getLaporanRentangAdmin(startVal, endVal)]);
       const logs = rawLaporan.filter(r => { if (!r.waktu) return false; const dp = String(r.waktu).split(' ')[0]; return dp >= startVal && dp <= endVal; });
       const uniqueDates = new Set(); let totalH = 0, totalL = 0, totalI = 0, totalS = 0;
       const unitMap = {};
