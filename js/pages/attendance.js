@@ -167,6 +167,9 @@ window.pages.initAttendance = function() {
   window.targetLon = null;
   window.maxRadius = 35; // Fallback
   
+  window.jamMasukStr = null; // Jam masuk unit (format HH:mm)
+  window.jamPulangStr = null; // Jam pulang unit (format HH:mm)
+  
   window.gpsSamples = [];
   window.ignoredFirstGps = false;
   window.isHoliday = false;
@@ -425,6 +428,22 @@ window.pages.initAttendance = function() {
         window.targetLat = parseFloat(myUnit.lat);
         window.targetLon = parseFloat(myUnit.lon);
         window.maxRadius = parseFloat(myUnit.radius) || 35;
+        
+        // Simpan jam masuk/pulang default dari unit
+        window.jamMasukStr = myUnit.masuk ? myUnit.masuk.toString() : null;
+        window.jamPulangStr = myUnit.pulang ? myUnit.pulang.toString() : null;
+      }
+      
+      // Override jam masuk/pulang jika ada jadwal khusus hari ini
+      try {
+        const specialHoursForTime = await window.api.getJadwalHari();
+        const todaySchedule = specialHoursForTime.find(h => h.unit === currentUserUnit && h.hari === currentDay);
+        if (todaySchedule) {
+          if (todaySchedule.masuk) window.jamMasukStr = todaySchedule.masuk.toString();
+          if (todaySchedule.pulang) window.jamPulangStr = todaySchedule.pulang.toString();
+        }
+      } catch (err) {
+        console.error("Gagal load jadwal khusus untuk konfirmasi waktu", err);
       }
       getLocation();
     } catch(e) {
@@ -434,7 +453,101 @@ window.pages.initAttendance = function() {
   }
   initLocationTracker();
 
-  // Absen Logic
+  // ═══ Helper: Parse jam string ke menit ═══
+  function parseJamToMinutes(jamStr) {
+    if (!jamStr) return null;
+    const s = jamStr.toString().trim();
+    // Format HH:mm atau H:mm
+    const parts = s.split(':');
+    if (parts.length >= 2) {
+      return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+    // Format desimal dari Spreadsheet (contoh 0.333... = 08:00)
+    const num = parseFloat(s);
+    if (!isNaN(num) && num >= 0 && num <= 1) {
+      return Math.round(num * 24 * 60);
+    }
+    return null;
+  }
+
+  function formatMenitKeJam(totalMenit) {
+    const jam = Math.floor(totalMenit / 60);
+    const menit = totalMenit % 60;
+    return String(jam).padStart(2, '0') + ':' + String(menit).padStart(2, '0');
+  }
+
+  // ═══ Konfirmasi Waktu (Double Confirmation Modal) ═══
+  function showAbsenConfirmation(jenis, pesan, onConfirm) {
+    // Hapus modal lama jika ada
+    const old = document.getElementById('modal-konfirmasi-absen');
+    if (old) old.remove();
+
+    const iconMasuk = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`;
+    const iconPulang = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`;
+
+    const isMasuk = jenis === 'Masuk';
+    const gradientFrom = isMasuk ? 'from-amber-500' : 'from-red-500';
+    const gradientTo = isMasuk ? 'to-orange-600' : 'to-rose-600';
+    const iconColor = isMasuk ? 'text-amber-400' : 'text-red-400';
+    const iconBg = isMasuk ? 'bg-amber-400/10 border-amber-400/20' : 'bg-red-400/10 border-red-400/20';
+    const icon = isMasuk ? iconMasuk : iconPulang;
+
+    const modalHTML = `
+      <div id="modal-konfirmasi-absen" class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" style="animation: fadeIn 0.2s ease-out">
+        <div class="bg-[#0F2A1F] rounded-3xl border border-white/10 shadow-2xl max-w-sm w-full overflow-hidden" style="animation: slideUp 0.3s ease-out">
+          
+          <!-- Header with gradient -->
+          <div class="bg-gradient-to-r ${gradientFrom} ${gradientTo} p-5 text-center">
+            <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+              <div class="text-white">${icon}</div>
+            </div>
+            <h3 class="text-lg font-bold text-white">⚠️ Konfirmasi Absen ${jenis}</h3>
+          </div>
+          
+          <!-- Body -->
+          <div class="p-5 space-y-4">
+            <div class="${iconBg} border rounded-2xl p-4 text-center">
+              <p class="text-sm ${iconColor} font-medium leading-relaxed">${pesan}</p>
+            </div>
+            
+            <p class="text-xs text-white/50 text-center">Apakah Anda yakin ingin melanjutkan?</p>
+            
+            <!-- Buttons -->
+            <div class="flex gap-3">
+              <button id="btn-konfirmasi-batal" class="flex-1 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 font-bold text-sm transition-all active:scale-95">
+                Batalkan
+              </button>
+              <button id="btn-konfirmasi-lanjut" class="flex-1 py-3 rounded-2xl bg-gradient-to-r ${gradientFrom} ${gradientTo} text-white font-bold text-sm shadow-lg hover:opacity-90 transition-all active:scale-95">
+                Ya, Lanjutkan
+              </button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Event listeners
+    document.getElementById('btn-konfirmasi-batal').addEventListener('click', function() {
+      const modal = document.getElementById('modal-konfirmasi-absen');
+      if (modal) modal.remove();
+    });
+
+    document.getElementById('btn-konfirmasi-lanjut').addEventListener('click', function() {
+      const modal = document.getElementById('modal-konfirmasi-absen');
+      if (modal) modal.remove();
+      onConfirm();
+    });
+
+    // Klik di luar modal untuk menutup
+    document.getElementById('modal-konfirmasi-absen').addEventListener('click', function(e) {
+      if (e.target === this) this.remove();
+    });
+  }
+
+  // ═══ Absen Logic dengan Double Confirmation ═══
   window.isSubmittingAbsen = false;
   window.handleAbsen = async function(jenis) {
     if (window.isSubmittingAbsen) return;
@@ -449,7 +562,42 @@ window.pages.initAttendance = function() {
       getLocation(); 
       return; 
     }
-    
+
+    // ═══ Double Confirmation: Cek waktu sebelum proses ═══
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    const jamMasukMins = parseJamToMinutes(window.jamMasukStr);
+    const jamPulangMins = parseJamToMinutes(window.jamPulangStr);
+
+    if (jenis === 'Pulang' && jamPulangMins !== null && currentMins < jamPulangMins) {
+      // Guru menekan Absen Pulang SEBELUM waktu pulang resmi
+      const selisih = jamPulangMins - currentMins;
+      const jamSekarang = formatMenitKeJam(currentMins);
+      const jamPulangFormatted = formatMenitKeJam(jamPulangMins);
+      const pesan = `Perhatian: Waktu pulang resmi adalah jam <strong>${jamPulangFormatted}</strong>. Saat ini masih jam <strong>${jamSekarang}</strong> (${selisih} menit lebih awal).<br><br>Absen ini akan tercatat sebagai <strong>Pulang Cepat</strong>.`;
+      showAbsenConfirmation('Pulang', pesan, function() {
+        prosesAbsenFinal(jenis);
+      });
+      return;
+    }
+
+    if (jenis === 'Masuk' && jamPulangMins !== null && currentMins >= jamPulangMins) {
+      // Guru menekan Absen Masuk SETELAH waktu pulang (kemungkinan salah pencet)
+      const jamSekarang = formatMenitKeJam(currentMins);
+      const jamPulangFormatted = formatMenitKeJam(jamPulangMins);
+      const pesan = `Perhatian: Saat ini sudah jam <strong>${jamSekarang}</strong>, sedangkan waktu pulang resmi adalah jam <strong>${jamPulangFormatted}</strong>.<br><br>Anda yakin ingin melakukan <strong>Absen Masuk</strong> di jam ini?`;
+      showAbsenConfirmation('Masuk', pesan, function() {
+        prosesAbsenFinal(jenis);
+      });
+      return;
+    }
+
+    // Langsung proses jika tidak ada anomali waktu
+    prosesAbsenFinal(jenis);
+  };
+
+  // ═══ Fungsi Proses Absen Setelah Konfirmasi ═══
+  async function prosesAbsenFinal(jenis) {
     window.isSubmittingAbsen = true;
     window.ui.showLoading("Memproses absensi...");
     try {
@@ -467,15 +615,19 @@ window.pages.initAttendance = function() {
       if(res.success) {
         simpanRiwayatLokal(`Absen ${jenis}`, res.message.includes('Terlambat') || res.message.includes('Cepat') ? 'Terlambat' : 'Tepat Waktu', false);
         renderRiwayatLokal();
+        // Refresh dari server setelah delay singkat (beri waktu backend menulis)
+        setTimeout(() => { if(window.loadRiwayatServer) window.loadRiwayatServer(); }, 2000);
       }
     } catch(e) {
       window.ui.hideLoading();
       window.isSubmittingAbsen = false;
       window.ui.showToast('⚠️','Kesalahan koneksi.',false);
     }
-  };
+  }
 
-  // Local History Management
+  // ═══ History Management (Server + Local Cache) ═══
+  
+  // Cache lokal untuk tampilan instan setelah absen (optimistic UI)
   function simpanRiwayatLokal(jenis, status, isIzin) {
     const email = window.auth.currentUser.email;
     let r = JSON.parse(localStorage.getItem('rv_'+email) || '[]');
@@ -484,11 +636,13 @@ window.pages.initAttendance = function() {
       jenis, 
       status, 
       waktu: now.toLocaleDateString('id-ID')+' '+now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}), 
-      isIzin
+      isIzin,
+      source: 'local'
     });
-    localStorage.setItem('rv_'+email, JSON.stringify(r.slice(0, 5))); // Keep last 5
+    localStorage.setItem('rv_'+email, JSON.stringify(r.slice(0, 10)));
   }
 
+  // Tampilkan data dari localStorage (instant, sebagai fallback/cache)
   function renderRiwayatLokal() {
     const email = window.auth.currentUser.email;
     const r = JSON.parse(localStorage.getItem('rv_'+email) || '[]');
@@ -496,13 +650,94 @@ window.pages.initAttendance = function() {
     if(!el) return;
     
     if(!r.length) {
-      el.innerHTML = '<div class="text-center text-sm text-white/50 py-4">Belum ada riwayat hari ini</div>';
+      el.innerHTML = '<div class="text-center text-sm text-white/50 py-4">Memuat riwayat dari server...</div>';
       return;
     }
     
-    el.innerHTML = r.map(x => {
+    renderRiwayatItems(el, r);
+  }
+
+  // Fetch riwayat dari server (data akurat dari Google Sheets)
+  window.loadRiwayatServer = async function() {
+    const el = document.getElementById('att-riwayat-list');
+    if(!el) return;
+    
+    const email = window.auth.currentUser.email;
+    
+    try {
+      // Fetch absen log dan izin log secara paralel
+      const [absenLogs, izinLogs] = await Promise.all([
+        window.api.getMyRecentLog(email),
+        window.api.getMyRecentIzin(email)
+      ]);
+      
+      // Gabungkan dan format data
+      const combined = [];
+      
+      // Format absen logs
+      if (Array.isArray(absenLogs)) {
+        absenLogs.forEach(log => {
+          combined.push({
+            jenis: 'Absen ' + log.jenis,
+            status: log.status || '-',
+            waktu: log.waktu,
+            isIzin: false,
+            source: 'server'
+          });
+        });
+      }
+      
+      // Format izin logs
+      if (Array.isArray(izinLogs)) {
+        izinLogs.forEach(log => {
+          const statusLabel = log.statusAdmin === 'Disetujui' ? '✓ Disetujui' 
+                            : log.statusAdmin === 'Ditolak' ? '✗ Ditolak'
+                            : '⏳ Menunggu';
+          combined.push({
+            jenis: log.jenis,
+            status: statusLabel,
+            waktu: log.waktu,
+            isIzin: true,
+            source: 'server'
+          });
+        });
+      }
+      
+      // Simpan ke localStorage sebagai cache
+      localStorage.setItem('rv_'+email, JSON.stringify(combined.slice(0, 10)));
+      
+      if(!combined.length) {
+        el.innerHTML = '<div class="text-center text-sm text-white/50 py-4">Belum ada riwayat absensi</div>';
+        return;
+      }
+      
+      renderRiwayatItems(el, combined);
+      
+    } catch(e) {
+      console.error('Gagal memuat riwayat dari server:', e);
+      // Fallback: tetap tampilkan data lokal yang sudah ada
+      const r = JSON.parse(localStorage.getItem('rv_'+email) || '[]');
+      if (r.length) {
+        renderRiwayatItems(el, r);
+      } else {
+        el.innerHTML = '<div class="text-center text-sm text-white/50 py-4">Gagal memuat riwayat</div>';
+      }
+    }
+  };
+
+  // Render item riwayat ke DOM
+  function renderRiwayatItems(el, items) {
+    el.innerHTML = items.map(x => {
       const dotColor = x.isIzin ? 'bg-amber-400' : (x.jenis.includes('Masuk') ? 'bg-emerald-400' : 'bg-blue-400');
-      const statusColor = x.isIzin ? 'text-amber-400' : (x.status === 'Tepat Waktu' ? 'text-emerald-400' : 'text-red-400');
+      
+      let statusColor;
+      if (x.isIzin) {
+        statusColor = x.status.includes('Disetujui') ? 'text-emerald-400' 
+                    : x.status.includes('Ditolak') ? 'text-red-400' 
+                    : 'text-amber-400';
+      } else {
+        statusColor = (x.status === 'Tepat Waktu' || x.status === '—') ? 'text-emerald-400' : 'text-red-400';
+      }
       
       return `
         <div class="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/10">
@@ -519,7 +754,9 @@ window.pages.initAttendance = function() {
     }).join('');
   }
   
+  // Init: tampilkan cache lokal dulu, lalu fetch dari server
   renderRiwayatLokal();
+  window.loadRiwayatServer();
   
   // ═══ Logic Persetujuan Kepala Sekolah ═══
   window.pages.loadIzinPendingKepsek = async function() {

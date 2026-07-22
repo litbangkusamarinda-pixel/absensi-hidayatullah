@@ -53,6 +53,10 @@ window.api = {
   deleteJadwalHari: (data) => apiCall('deleteJadwalHari', data),
   checkTodayBypass: (email) => apiCall('checkTodayBypass', { email }),
   
+  // Riwayat User (Mobile)
+  getMyRecentLog: (email) => apiCall('getMyRecentLog', { email }),
+  getMyRecentIzin: (email) => apiCall('getMyRecentIzin', { email }),
+  
   getPiketListAdmin: () => apiCall('getPiketListAdmin'),
   savePiketAdmin: (data) => apiCall('savePiketAdmin', data),
   deletePiketAdmin: (data) => apiCall('deletePiketAdmin', data)

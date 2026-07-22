@@ -387,6 +387,10 @@
         window.ui.closeModal('modal-izin');
         window.ui.showToast(res.success ? '✅' : '⚠️', res.message, res.success);
         document.getElementById('izin-keterangan').value = '';
+        // Refresh riwayat dari server agar izin/sakit tampil di widget riwayat
+        if (res.success) {
+          setTimeout(() => { if(window.loadRiwayatServer) window.loadRiwayatServer(); }, 2000);
+        }
       } catch(e) {
         window.ui.hideLoading();
         window.ui.showToast('❌', e.message, false);
