@@ -457,15 +457,24 @@ window.pages.initAttendance = function() {
   function parseJamToMinutes(jamStr) {
     if (!jamStr) return null;
     const s = jamStr.toString().trim();
-    // Format HH:mm atau H:mm
-    const parts = s.split(':');
-    if (parts.length >= 2) {
-      return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    // Format HH:mm atau H:mm — gunakan regex agar aman dari string Date "1899-..."
+    const match = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (match) {
+      const h = parseInt(match[1]);
+      const m = parseInt(match[2]);
+      if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+        return h * 60 + m;
+      }
     }
-    // Format desimal dari Spreadsheet (contoh 0.333... = 08:00)
+    // Format desimal dari Spreadsheet (contoh 0.625 = 15:00)
     const num = parseFloat(s);
     if (!isNaN(num) && num >= 0 && num <= 1) {
       return Math.round(num * 24 * 60);
+    }
+    // Fallback: coba parse sebagai Date object (handle string ISO "1899-12-30T07:00:00.000Z")
+    const dateObj = new Date(s);
+    if (!isNaN(dateObj.getTime())) {
+      return dateObj.getHours() * 60 + dateObj.getMinutes();
     }
     return null;
   }
