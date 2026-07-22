@@ -221,7 +221,10 @@ window.pages.initAttendance = function() {
     if(btnIzin) btnIzin.classList.add('hidden');
     if(msgEl) {
         msgEl.classList.remove('hidden');
-        msgEl.innerHTML = `<i data-lucide="info" class="w-8 h-8 mx-auto mb-3 text-amber-400/80"></i><div class="font-bold text-amber-400">Status: ${type}</div><div class="text-xs text-white/60 mt-1">Anda saat ini tercatat sedang ${type}. Absensi lokasi dinonaktifkan hari ini.</div>`;
+        msgEl.innerHTML = `<i data-lucide="info" class="w-8 h-8 mx-auto mb-3 text-amber-400/80"></i><div class="font-bold text-amber-400">Status: ${type}</div><div class="text-xs text-white/60 mt-1">Anda saat ini tercatat sedang ${type}. Absensi lokasi dinonaktifkan hari ini.</div>
+        <button onclick="window.kembaliBertugas()" class="mt-4 w-full py-3 rounded-2xl bg-gradient-to-r from-[#14B88A] to-[#22c55e] text-white font-bold text-sm shadow-lg shadow-[#14B88A]/20 hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2">
+          <i data-lucide="undo-2" class="w-4 h-4"></i> Kembali Bertugas (Absen Masuk)
+        </button>`;
         if(window.lucide) window.lucide.createIcons();
     }
   };
@@ -257,6 +260,45 @@ window.pages.initAttendance = function() {
     const buttonsEl = document.getElementById('att-action-buttons');
     if(buttonsEl) buttonsEl.classList.add('hidden');
 
+    getLocation();
+  };
+
+  // ═══ Kembali Bertugas (memutus rantai bypass) ═══
+  window.kembaliBertugas = function() {
+    // Hapus status bypass di frontend
+    window.isBypassed = false;
+    window.bypassType = null;
+    
+    window.ui.showToast('🔄', 'Mempersiapkan absensi kembali...', true);
+    
+    // Reset GPS samples
+    window.gpsSamples = [];
+    window.ignoredFirstGps = false;
+    
+    // Tampilkan pesan loading GPS
+    const textEl = document.getElementById('att-loc-text');
+    if(textEl) textEl.textContent = 'Mendapatkan lokasi GPS...';
+    
+    const dotEl = document.getElementById('att-loc-dot');
+    if(dotEl) {
+      dotEl.classList.remove('bg-amber-400', 'bg-emerald-400', 'bg-blue-400');
+      dotEl.classList.add('bg-red-400');
+    }
+    
+    const msgEl = document.getElementById('att-status-message');
+    if(msgEl) {
+        msgEl.classList.remove('hidden');
+        msgEl.innerHTML = '<i data-lucide="satellite" class="w-8 h-8 mx-auto mb-3 text-blue-300 opacity-80 animate-pulse"></i><div class="font-bold text-blue-300">Mengaktifkan GPS...</div><div class="text-xs text-white/50 mt-1">Silakan tunggu, GPS sedang dikalibrasi untuk absen kembali</div>';
+        if(window.lucide) window.lucide.createIcons();
+    }
+    
+    const buttonsEl = document.getElementById('att-action-buttons');
+    if(buttonsEl) buttonsEl.classList.add('hidden');
+    
+    const btnIzin = document.getElementById('att-btn-izin');
+    if(btnIzin) btnIzin.classList.remove('hidden');
+    
+    // Mulai tracking GPS — setelah GPS siap, tombol absen akan muncul secara otomatis
     getLocation();
   };
 
@@ -409,33 +451,23 @@ window.pages.initAttendance = function() {
         window.showHolidayMessage();
         return;
       }
-      
-      try {
-        const bypassCheck = await window.api.checkTodayBypass(window.auth.currentUser.email);
-        if (bypassCheck && bypassCheck.isBypassed) {
-            window.isBypassed = true;
-            window.bypassType = bypassCheck.type;
-            window.showBypassMessage(window.bypassType);
-            return;
-        }
-      } catch (err) {
-        console.error("Gagal load status bypass", err);
-      }
 
-      const units = await window.api.getUnitListAdmin(''); // Fetch unit data
-      const myUnit = units.find(u => u.unit === currentUserUnit);
-      if (myUnit) {
-        window.targetLat = parseFloat(myUnit.lat);
-        window.targetLon = parseFloat(myUnit.lon);
-        window.maxRadius = parseFloat(myUnit.radius) || 35;
-        
-        // Simpan jam masuk/pulang default dari unit
-        window.jamMasukStr = myUnit.masuk ? myUnit.masuk.toString() : null;
-        window.jamPulangStr = myUnit.pulang ? myUnit.pulang.toString() : null;
-      }
-      
-      // Override jam masuk/pulang jika ada jadwal khusus hari ini
+      // ── Ambil data unit (lat/lon/radius/jam) SEBELUM cek bypass ──
+      // Ini penting agar tombol "Kembali Bertugas" punya koordinat target GPS
       try {
+        const units = await window.api.getUnitListAdmin('');
+        const myUnit = units.find(u => u.unit === currentUserUnit);
+        if (myUnit) {
+          window.targetLat = parseFloat(myUnit.lat);
+          window.targetLon = parseFloat(myUnit.lon);
+          window.maxRadius = parseFloat(myUnit.radius) || 35;
+          
+          // Simpan jam masuk/pulang default dari unit
+          window.jamMasukStr = myUnit.masuk ? myUnit.masuk.toString() : null;
+          window.jamPulangStr = myUnit.pulang ? myUnit.pulang.toString() : null;
+        }
+        
+        // Override jam masuk/pulang jika ada jadwal khusus hari ini
         const specialHoursForTime = await window.api.getJadwalHari();
         const todaySchedule = specialHoursForTime.find(h => h.unit === currentUserUnit && h.hari === currentDay);
         if (todaySchedule) {
@@ -443,11 +475,25 @@ window.pages.initAttendance = function() {
           if (todaySchedule.pulang) window.jamPulangStr = todaySchedule.pulang.toString();
         }
       } catch (err) {
-        console.error("Gagal load jadwal khusus untuk konfirmasi waktu", err);
+        console.error("Gagal load data unit/jadwal", err);
       }
+      
+      // ── Cek status bypass ──
+      try {
+        const bypassCheck = await window.api.checkTodayBypass(window.auth.currentUser.email);
+        if (bypassCheck && bypassCheck.isBypassed) {
+            window.isBypassed = true;
+            window.bypassType = bypassCheck.type;
+            window.showBypassMessage(window.bypassType);
+            return; // Jangan mulai GPS tracking, tapi data unit sudah tersimpan
+        }
+      } catch (err) {
+        console.error("Gagal load status bypass", err);
+      }
+
       getLocation();
     } catch(e) {
-      console.error("Gagal load data unit", e);
+      console.error("Gagal inisialisasi location tracker", e);
       getLocation(); // Tetap panggil walau gagal, nanti jaraknya error (NaN) tapi gps jalan
     }
   }
