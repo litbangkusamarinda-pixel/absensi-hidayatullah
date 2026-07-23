@@ -81,7 +81,17 @@ window.pages.renderAttendanceLog = function() {
 
       <!-- Filters Section -->
       <div class="bg-white/5 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-white/60 mb-2">Dari Tanggal</label>
+            <input type="date" id="filter-log-date-start" onchange="window.pages.filterAttendanceLog()" class="w-full bg-[#102B22] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#14B88A]">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-white/60 mb-2">Sampai Tanggal</label>
+            <input type="date" id="filter-log-date-end" onchange="window.pages.filterAttendanceLog()" class="w-full bg-[#102B22] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#14B88A]">
+          </div>
+
           <div>
             <label class="block text-xs font-semibold text-white/60 mb-2">Cari Nama / Email</label>
             <div class="relative">
@@ -285,6 +295,19 @@ window.pages.initAttendanceLog = async function() {
 
     window.pages._attendanceLogRawData = formatted;
     window.pages.populateLogUnitFilter(formatted);
+
+    // Set default filter tanggal ke hari ini (realtime) jika belum terisi
+    const dateStartEl = document.getElementById('filter-log-date-start');
+    const dateEndEl = document.getElementById('filter-log-date-end');
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    if (dateStartEl && !dateStartEl.value) {
+      dateStartEl.value = todayStr;
+    }
+    if (dateEndEl && !dateEndEl.value) {
+      dateEndEl.value = todayStr;
+    }
+
     window.pages.filterAttendanceLog();
 
   } catch (err) {
@@ -316,12 +339,27 @@ window.pages.populateLogUnitFilter = function(data) {
 };
 
 window.pages.filterAttendanceLog = function() {
+  const dateStartVal = document.getElementById('filter-log-date-start')?.value || '';
+  const dateEndVal = document.getElementById('filter-log-date-end')?.value || '';
   const searchVal = (document.getElementById('filter-log-search')?.value || '').toLowerCase().trim();
   const unitVal = (document.getElementById('filter-log-unit')?.value || '').trim();
   const jenisVal = (document.getElementById('filter-log-jenis')?.value || '').trim();
   const statusVal = (document.getElementById('filter-log-status')?.value || '').trim();
 
   let filtered = window.pages._attendanceLogRawData.filter(item => {
+    // Parser tanggal item (waktu format: "dd/MM/yyyy HH:mm:ss" atau "dd/MM/yyyy" atau timestamp String)
+    let itemDateStr = '';
+    if (item.waktu && typeof item.waktu === 'string') {
+      const parts = item.waktu.split(' ')[0].split('/');
+      if (parts.length === 3) {
+        // dd/MM/yyyy -> yyyy-MM-dd
+        itemDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      }
+    }
+
+    const matchDateStart = !dateStartVal || (itemDateStr && itemDateStr >= dateStartVal);
+    const matchDateEnd = !dateEndVal || (itemDateStr && itemDateStr <= dateEndVal);
+
     const matchSearch = !searchVal || 
       (item.nama && item.nama.toLowerCase().includes(searchVal)) || 
       (item.email && item.email.toLowerCase().includes(searchVal));
@@ -330,7 +368,7 @@ window.pages.filterAttendanceLog = function() {
     const matchJenis = !jenisVal || item.jenis === jenisVal;
     const matchStatus = !statusVal || item.status === statusVal;
 
-    return matchSearch && matchUnit && matchJenis && matchStatus;
+    return matchDateStart && matchDateEnd && matchSearch && matchUnit && matchJenis && matchStatus;
   });
 
   document.getElementById('log-stat-total').textContent = filtered.length;

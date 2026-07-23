@@ -366,6 +366,12 @@ function renderSettingsPage() {
             <div class="flex items-center justify-between text-white/40">
               <span>Pengembang</span><span class="font-bold text-white/60">NSFZA — Smart Solutions</span>
             </div>
+            <div class="flex items-center justify-between text-white/40">
+              <span>No. HP / WhatsApp</span><span class="font-bold text-white/60">085250414056</span>
+            </div>
+            <div class="flex items-center justify-between text-white/40">
+              <span>Email</span><span class="font-bold text-white/60">syukur.lpihs@gmail.com</span>
+            </div>
           </div>
         </div>
 

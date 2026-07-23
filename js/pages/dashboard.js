@@ -20,21 +20,24 @@ window.pages.renderDashboard = function() {
   return `
     <div class="space-y-6 pb-10">
       
-      <!-- Greeting -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-fade-in-up">
+      <!-- Greeting Banner dengan Gradien Emerald + Royal Indigo -->
+      <div class="dashboard-welcome-banner p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-in-up">
         <div>
-          <p class="text-xs font-bold tracking-widest text-[#14B88A] uppercase mb-1">${greeting}</p>
-          <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-1">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.08] border border-white/[0.1] backdrop-filter backdrop-blur-md mb-2">
+            <span class="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
+            <p class="text-xs font-bold tracking-wider text-[#6366F1] uppercase">${greeting}</p>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight mb-1">
             ${user.name.split(' ')[0]}! 👋
           </h1>
-          <p class="text-sm text-white/40 font-medium">
+          <p class="text-sm text-white/70 font-medium">
             Ringkasan aktivitas HRMS Hidayatullah hari ini
           </p>
         </div>
         <div class="flex items-center gap-2 no-print">
-          <div class="flex items-center gap-2 text-xs bg-white/[0.04] px-4 py-2 rounded-xl border border-white/[0.06]">
-            <span class="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></span>
-            <span class="text-white/60 font-semibold">Online</span>
+          <div class="flex items-center gap-2 text-xs bg-black/20 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/10 shadow-lg">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+            <span class="text-white/90 font-semibold tracking-wide">System Online</span>
           </div>
         </div>
       </div>
@@ -42,74 +45,74 @@ window.pages.renderDashboard = function() {
       <!-- ═══ STAT CARDS ═══ -->
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 stagger-children">
         
-        <div class="stat-card accent-info">
+        <div class="stat-card accent-indigo">
           <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-[#3B82F6]/15 flex items-center justify-center">
-              <i data-lucide="graduation-cap" class="w-5 h-5 text-[#60A5FA]"></i>
+            <div class="w-10 h-10 rounded-xl bg-[#6366F1]/15 border border-[#6366F1]/30 flex items-center justify-center shadow-inner">
+              <i data-lucide="graduation-cap" class="w-5 h-5 text-[#818CF8]"></i>
             </div>
           </div>
           <div class="stat-label">Total Guru</div>
-          <div class="stat-value text-2xl" id="stat-guru">-</div>
+          <div class="stat-value text-2xl text-white" id="stat-guru">-</div>
         </div>
 
-        <div class="stat-card accent-info">
+        <div class="stat-card accent-violet">
           <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-[#8B5CF6]/15 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 flex items-center justify-center shadow-inner">
               <i data-lucide="users" class="w-5 h-5 text-[#A78BFA]"></i>
             </div>
           </div>
           <div class="stat-label">Karyawan</div>
-          <div class="stat-value text-2xl" id="stat-total">-</div>
+          <div class="stat-value text-2xl text-white" id="stat-total">-</div>
         </div>
 
         <div class="stat-card accent-success">
           <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-[#22C55E]/15 flex items-center justify-center">
-              <i data-lucide="user-check" class="w-5 h-5 text-[#4ADE80]"></i>
+            <div class="w-10 h-10 rounded-xl bg-[#10B981]/15 border border-[#10B981]/30 flex items-center justify-center shadow-inner">
+              <i data-lucide="user-check" class="w-5 h-5 text-[#34D399]"></i>
             </div>
           </div>
           <div class="stat-label">Hadir</div>
-          <div class="stat-value text-2xl" id="stat-hadir">-</div>
+          <div class="stat-value text-2xl text-white" id="stat-hadir">-</div>
         </div>
 
         <div class="stat-card accent-warning">
           <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-[#F59E0B]/15 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-[#F59E0B]/15 border border-[#F59E0B]/30 flex items-center justify-center shadow-inner">
               <i data-lucide="clock" class="w-5 h-5 text-[#FBBF24]"></i>
             </div>
           </div>
           <div class="stat-label">Terlambat</div>
-          <div class="stat-value text-2xl" id="stat-telat">-</div>
+          <div class="stat-value text-2xl text-white" id="stat-telat">-</div>
         </div>
 
         <div class="stat-card accent-danger">
           <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-[#EF4444]/15 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-[#EF4444]/15 border border-[#EF4444]/30 flex items-center justify-center shadow-inner">
               <i data-lucide="user-x" class="w-5 h-5 text-[#F87171]"></i>
             </div>
           </div>
           <div class="stat-label">Tidak Hadir</div>
-          <div class="stat-value text-2xl" id="stat-absen">0</div>
+          <div class="stat-value text-2xl text-white" id="stat-absen">0</div>
         </div>
 
-        <div class="stat-card accent-warning">
+        <div class="stat-card accent-cyan">
           <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-[#F97316]/15 flex items-center justify-center">
-              <i data-lucide="log-out" class="w-5 h-5 text-[#FB923C]"></i>
+            <div class="w-10 h-10 rounded-xl bg-[#06B6D4]/15 border border-[#06B6D4]/30 flex items-center justify-center shadow-inner">
+              <i data-lucide="log-out" class="w-5 h-5 text-[#38BDF8]"></i>
             </div>
           </div>
           <div class="stat-label">Belum Pulang</div>
-          <div class="stat-value text-2xl" id="stat-belum-pulang">-</div>
+          <div class="stat-value text-2xl text-white" id="stat-belum-pulang">-</div>
         </div>
 
         <div class="stat-card accent-primary">
           <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-[#14B88A]/15 flex items-center justify-center">
-              <i data-lucide="percent" class="w-5 h-5 text-[#14B88A]"></i>
+            <div class="w-10 h-10 rounded-xl bg-[#14B88A]/15 border border-[#14B88A]/30 flex items-center justify-center shadow-inner">
+              <i data-lucide="percent" class="w-5 h-5 text-[#2DD4BF]"></i>
             </div>
           </div>
           <div class="stat-label">Kehadiran</div>
-          <div class="stat-value text-2xl" id="stat-persen">-%</div>
+          <div class="stat-value text-2xl text-white" id="stat-persen">-%</div>
         </div>
 
       </div>
@@ -541,10 +544,10 @@ window.pages.initDashboard = function() {
         labels: ['Tepat Waktu', 'Terlambat', 'Izin/Sakit', 'Tidak Hadir'],
         datasets: [{
           data: [hadir, telat, izin, absen],
-          backgroundColor: ['#14B88A', '#F59E0B', '#3B82F6', '#EF4444'],
-          borderColor: '#102B22',
+          backgroundColor: ['#10B981', '#F59E0B', '#6366F1', '#EF4444'],
+          borderColor: '#0F172A',
           borderWidth: 3,
-          hoverOffset: 6
+          hoverOffset: 8
         }]
       },
       options: {
