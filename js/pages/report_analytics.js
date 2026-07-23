@@ -11,10 +11,16 @@ window.pages = window.pages || {};
 // ═══ SHARED ═══
 const _anlHelpers = {
   checkUnitMatch(dataUnit, filter) {
-    if (filter === 'all') return true;
-    if (filter === 'SD Integral Hidayatullah') return dataUnit === 'SD Integral Hidayatullah' || dataUnit === 'SD Integral Hidayatullah 2';
-    if (filter === 'TK Islam Qurrata Ayun & TPA') return dataUnit === "TK Islam Qurrata 'Ayun" || dataUnit === "TPA YAA BUNAYYA -PAGI" || dataUnit === "TPA YAA BUNAYYA - SIANG";
-    return dataUnit === filter;
+    if (!filter || filter === 'all') return true;
+    const dUnit = (dataUnit || '').toLowerCase().trim();
+    const fUnit = filter.toLowerCase().trim();
+    if (fUnit === 'sd integral hidayatullah') {
+      return dUnit === 'sd integral hidayatullah' || dUnit === 'sd integral hidayatullah 2';
+    }
+    if (fUnit === 'tk islam qurrata ayun & tpa') {
+      return dUnit.includes('qurrata') || dUnit.includes('yaa bunayya');
+    }
+    return dUnit === fUnit;
   },
   back: '<button onclick="window.router.navigateTo(\'reports\')" class="flex items-center gap-1 text-xs text-white/30 hover:text-white/60 transition-colors mb-4 group no-print"><i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i> Kembali ke Pusat Laporan</button>',
   unitOpts: '<option value="all">Semua Unit</option><option>SD Integral Hidayatullah</option><option>MTS-MA Putra</option><option>MTS-MA Putri</option><option>TK Islam Qurrata Ayun & TPA</option><option>STIT HISAM</option>',
