@@ -668,10 +668,13 @@ window.pages.initAttendance = function() {
       // Update global toast styling if possible, or just use the default
       window.ui.showToast(res.success ? '✅' : '🚫', res.message, res.success);
       if(res.success) {
-        simpanRiwayatLokal(`Absen ${jenis}`, res.message.includes('Terlambat') || res.message.includes('Cepat') ? 'Terlambat' : 'Tepat Waktu', false);
+        const statusLabel = res.message.includes('Terlambat') ? 'Terlambat' 
+                          : res.message.includes('Cepat') ? 'Pulang Cepat' 
+                          : 'Tepat Waktu';
+        simpanRiwayatLokal(`Absen ${jenis}`, statusLabel, false);
         renderRiwayatLokal();
         // Refresh dari server setelah delay singkat (beri waktu backend menulis)
-        setTimeout(() => { if(window.loadRiwayatServer) window.loadRiwayatServer(); }, 2000);
+        setTimeout(() => { if(window.loadRiwayatServer) window.loadRiwayatServer(); }, 2500);
       }
     } catch(e) {
       window.ui.hideLoading();
@@ -687,11 +690,14 @@ window.pages.initAttendance = function() {
     const email = window.auth.currentUser.email;
     let r = JSON.parse(localStorage.getItem('rv_'+email) || '[]');
     const now = new Date();
+    const formattedTime = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+    
     r.unshift({
       jenis, 
       status, 
-      waktu: now.toLocaleDateString('id-ID')+' '+now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}), 
+      waktu: formattedTime, 
       isIzin,
+      timestamp: now.getTime(),
       source: 'local'
     });
     localStorage.setItem('rv_'+email, JSON.stringify(r.slice(0, 10)));
@@ -726,47 +732,66 @@ window.pages.initAttendance = function() {
         window.api.getMyRecentIzin(email)
       ]);
       
+      // Ambil cache lokal saat ini untuk dipadukan (mencegah hilangnya data lokal yang sangat baru)
+      const localCache = JSON.parse(localStorage.getItem('rv_'+email) || '[]');
+      const nowTs = new Date().getTime();
+      const recentLocalItems = localCache.filter(item => item.source === 'local' && (nowTs - (item.timestamp || 0) < 60000));
+      
       // Gabungkan dan format data
       const combined = [];
       
-      // Format absen logs
+      // Masukkan item lokal yang sangat baru terlebih dahulu jika belum ada di log server
+      recentLocalItems.forEach(loc => {
+        combined.push(loc);
+      });
+      
+      // Format absen logs dari server
       if (Array.isArray(absenLogs)) {
         absenLogs.forEach(log => {
-          combined.push({
-            jenis: 'Absen ' + log.jenis,
-            status: log.status || '-',
-            waktu: log.waktu,
-            isIzin: false,
-            source: 'server'
-          });
+          const jenisText = log.jenis ? (log.jenis.startsWith('Absen') ? log.jenis : 'Absen ' + log.jenis) : 'Absen';
+          // Cek jika item ini sudah ada dari local cache
+          const existsInLocal = combined.some(c => c.jenis === jenisText && c.waktu === log.waktu);
+          if (!existsInLocal) {
+            combined.push({
+              jenis: jenisText,
+              status: log.status || '-',
+              waktu: log.waktu,
+              isIzin: false,
+              source: 'server'
+            });
+          }
         });
       }
       
-      // Format izin logs
+      // Format izin logs dari server
       if (Array.isArray(izinLogs)) {
         izinLogs.forEach(log => {
           const statusLabel = log.statusAdmin === 'Disetujui' ? '✓ Disetujui' 
                             : log.statusAdmin === 'Ditolak' ? '✗ Ditolak'
                             : '⏳ Menunggu';
-          combined.push({
-            jenis: log.jenis,
-            status: statusLabel,
-            waktu: log.waktu,
-            isIzin: true,
-            source: 'server'
-          });
+          const existsInLocal = combined.some(c => c.jenis === log.jenis && c.waktu === log.waktu);
+          if (!existsInLocal) {
+            combined.push({
+              jenis: log.jenis,
+              status: statusLabel,
+              waktu: log.waktu,
+              isIzin: true,
+              source: 'server'
+            });
+          }
         });
       }
       
-      // Simpan ke localStorage sebagai cache
-      localStorage.setItem('rv_'+email, JSON.stringify(combined.slice(0, 10)));
+      // Simpan ke localStorage sebagai cache (maks 10)
+      const finalItems = combined.slice(0, 10);
+      localStorage.setItem('rv_'+email, JSON.stringify(finalItems));
       
-      if(!combined.length) {
+      if(!finalItems.length) {
         el.innerHTML = '<div class="text-center text-sm text-white/50 py-4">Belum ada riwayat absensi</div>';
         return;
       }
       
-      renderRiwayatItems(el, combined);
+      renderRiwayatItems(el, finalItems);
       
     } catch(e) {
       console.error('Gagal memuat riwayat dari server:', e);

@@ -37,6 +37,7 @@ window.router = {
     'report-attention':   { render: () => window.pages.renderReportAttention(),   layout: 'admin', title: 'Perlu Perhatian' },
     'report-executive':   { render: () => window.pages.renderReportExecutive(),   layout: 'admin', title: 'Laporan Eksekutif' },
     'report-foundation':  { render: () => window.pages.renderReportFoundation(),  layout: 'admin', title: 'Dashboard Yayasan' },
+    'attendance-log': { render: () => window.pages.renderAttendanceLog(), layout: 'admin', title: 'Log Absensi Guru' },
     'announcements': { render: () => window.pages.renderSettings('announcements'), layout: 'admin', title: 'Pengumuman' },
     'calendar':   { render: () => window.pages.renderSettings('calendar'),   layout: 'admin', title: 'Kalender' },
     'profile':    { render: () => window.pages.renderSettings('profile'),    layout: 'admin', title: 'Profil Saya' },
@@ -120,6 +121,7 @@ window.router = {
           items: [
             { id: 'dashboard',  icon: 'layout-dashboard', label: 'Dashboard' },
             { id: 'attendance', icon: 'scan-line',         label: 'Absensi' },
+            { id: 'attendance-log', icon: 'file-text',     label: 'Log Absen' },
           ]
         },
         {
