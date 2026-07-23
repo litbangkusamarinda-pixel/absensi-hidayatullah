@@ -296,10 +296,15 @@ window.pages.initAttendanceLog = async function() {
     window.pages._attendanceLogRawData = formatted;
     window.pages.populateLogUnitFilter(formatted);
 
-    // Set default filter tanggal ke hari ini (realtime) jika belum terisi
+    // Set default filter tanggal ke hari ini (realtime lokal) jika belum terisi
     const dateStartEl = document.getElementById('filter-log-date-start');
     const dateEndEl = document.getElementById('filter-log-date-end');
-    const todayStr = new Date().toISOString().split('T')[0];
+    
+    const now = new Date();
+    const localYear = now.getFullYear();
+    const localMonth = String(now.getMonth() + 1).padStart(2, '0');
+    const localDay = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${localYear}-${localMonth}-${localDay}`;
 
     if (dateStartEl && !dateStartEl.value) {
       dateStartEl.value = todayStr;
@@ -347,13 +352,34 @@ window.pages.filterAttendanceLog = function() {
   const statusVal = (document.getElementById('filter-log-status')?.value || '').trim();
 
   let filtered = window.pages._attendanceLogRawData.filter(item => {
-    // Parser tanggal item (waktu format: "dd/MM/yyyy HH:mm:ss" atau "dd/MM/yyyy" atau timestamp String)
+    // Parser tanggal item (mendukung "dd/MM/yyyy HH:mm:ss", "yyyy-MM-dd", atau instance Date)
     let itemDateStr = '';
-    if (item.waktu && typeof item.waktu === 'string') {
-      const parts = item.waktu.split(' ')[0].split('/');
-      if (parts.length === 3) {
-        // dd/MM/yyyy -> yyyy-MM-dd
-        itemDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    if (item.waktu) {
+      if (item.waktu instanceof Date) {
+        const y = item.waktu.getFullYear();
+        const m = String(item.waktu.getMonth() + 1).padStart(2, '0');
+        const d = String(item.waktu.getDate()).padStart(2, '0');
+        itemDateStr = `${y}-${m}-${d}`;
+      } else if (typeof item.waktu === 'string') {
+        const datePart = item.waktu.split(' ')[0].trim();
+        if (datePart.includes('/')) {
+          const parts = datePart.split('/');
+          if (parts.length === 3) {
+            // dd/MM/yyyy -> yyyy-MM-dd
+            itemDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          }
+        } else if (datePart.includes('-')) {
+          const parts = datePart.split('-');
+          if (parts.length === 3) {
+            if (parts[0].length === 4) {
+              // yyyy-MM-dd
+              itemDateStr = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+            } else if (parts[2].length === 4) {
+              // dd-MM-yyyy -> yyyy-MM-dd
+              itemDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            }
+          }
+        }
       }
     }
 
