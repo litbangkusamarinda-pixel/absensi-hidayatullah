@@ -356,20 +356,36 @@ window.pages.filterAttendanceLog = function() {
         if (datePart.includes('/')) {
           const parts = datePart.split('/');
           if (parts.length === 3) {
-            // dd/MM/yyyy -> yyyy-MM-dd
-            itemDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            let p0 = parts[0].padStart(2, '0');
+            let p1 = parts[1].padStart(2, '0');
+            let p2 = parts[2];
+            if (p2.length === 4) {
+              // Jika p0 <= 12 dan p1 > 12, maka asumsi MM/DD/YYYY, sebaliknya DD/MM/YYYY
+              if (parseInt(p0) <= 12 && parseInt(p1) > 12) {
+                itemDateStr = `${p2}-${p0}-${p1}`;
+              } else {
+                itemDateStr = `${p2}-${p1}-${p0}`;
+              }
+            }
           }
         } else if (datePart.includes('-')) {
           const parts = datePart.split('-');
           if (parts.length === 3) {
             if (parts[0].length === 4) {
-              // yyyy-MM-dd
               itemDateStr = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
             } else if (parts[2].length === 4) {
-              // dd-MM-yyyy -> yyyy-MM-dd
               itemDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
             }
           }
+        }
+        
+        // Fallback jika itemDateStr masih kosong dan ada Date yang valid
+        if (!itemDateStr && !isNaN(new Date(datePart).getTime())) {
+          const parsed = new Date(datePart);
+          const y = parsed.getFullYear();
+          const m = String(parsed.getMonth() + 1).padStart(2, '0');
+          const d = String(parsed.getDate()).padStart(2, '0');
+          itemDateStr = `${y}-${m}-${d}`;
         }
       }
     }
