@@ -296,22 +296,13 @@ window.pages.initAttendanceLog = async function() {
     window.pages._attendanceLogRawData = formatted;
     window.pages.populateLogUnitFilter(formatted);
 
-    // Set default filter tanggal ke hari ini (realtime lokal) jika belum terisi
+    // Default filter tanggal dibiarkan kosong agar secara default menampilkan semua data (atau data terbaru)
+    // Pengguna dapat memilih tanggal jika ingin memfilter rentang waktu tertentu.
     const dateStartEl = document.getElementById('filter-log-date-start');
     const dateEndEl = document.getElementById('filter-log-date-end');
-    
-    const now = new Date();
-    const localYear = now.getFullYear();
-    const localMonth = String(now.getMonth() + 1).padStart(2, '0');
-    const localDay = String(now.getDate()).padStart(2, '0');
-    const todayStr = `${localYear}-${localMonth}-${localDay}`;
 
-    if (dateStartEl && !dateStartEl.value) {
-      dateStartEl.value = todayStr;
-    }
-    if (dateEndEl && !dateEndEl.value) {
-      dateEndEl.value = todayStr;
-    }
+    if (dateStartEl) dateStartEl.value = '';
+    if (dateEndEl) dateEndEl.value = '';
 
     window.pages.filterAttendanceLog();
 
