@@ -148,10 +148,16 @@ window.pages.initReportYearly = function() {
       ]);
 
       const checkUnitMatch = (dataUnit, filter) => {
-        if (filter === 'all') return true;
-        if (filter === 'SD Integral Hidayatullah') return dataUnit === 'SD Integral Hidayatullah' || dataUnit === 'SD Integral Hidayatullah 2';
-        if (filter === 'TK Islam Qurrata Ayun & TPA') return dataUnit === "TK Islam Qurrata 'Ayun" || dataUnit === "TPA YAA BUNAYYA -PAGI" || dataUnit === "TPA YAA BUNAYYA - SIANG";
-        return dataUnit === filter;
+        if (!filter || filter === 'all') return true;
+        const dUnit = (dataUnit || '').toLowerCase().trim();
+        const fUnit = filter.toLowerCase().trim();
+        if (fUnit === 'sd integral hidayatullah') {
+          return dUnit === 'sd integral hidayatullah' || dUnit === 'sd integral hidayatullah 2';
+        }
+        if (fUnit === 'tk islam qurrata ayun & tpa') {
+          return dUnit.includes('qurrata') || dUnit.includes('yaa bunayya');
+        }
+        return dUnit === fUnit;
       };
 
       const checkTipeMatch = (jabatan, filter) => {
