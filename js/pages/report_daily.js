@@ -194,7 +194,7 @@ window.pages.initReportDaily = function() {
       // Filter logs (date is already filtered by backend, but we filter by Unit and Tipe here)
       const dayLogs = rawLaporan.filter(r => {
         if (!r.waktu) return false;
-        const emp = employees.find(e => e.nama === r.nama);
+        const emp = employees.find(e => (e.email || e.nama) === (r.email || r.nama));
         const jabatan = emp ? emp.jabatan : '';
         return checkUnitMatch(r.unit, filterUnit) && checkTipeMatch(jabatan, filterTipe);
       });
@@ -202,40 +202,42 @@ window.pages.initReportDaily = function() {
       // Build per-person stats
       const personStats = {};
       dayLogs.forEach(r => {
-        if (!personStats[r.nama]) personStats[r.nama] = { unit: r.unit, masuk: null, pulang: null, status: '-', keterangan: '-' };
+        const key = r.email || r.nama;
+        if (!personStats[key]) personStats[key] = { nama: r.nama, unit: r.unit, masuk: null, pulang: null, status: '-', keterangan: '-' };
         const waktuParts = String(r.waktu).split(' ');
         const jam = waktuParts[1] || '';
 
         if (r.jenis === 'Masuk') {
-          personStats[r.nama].masuk = jam;
+          personStats[key].masuk = jam;
           // Jangan timpa status jika sudah 'Pulang Cepat' atau izin (berjaga-jaga jika terbalik urutannya)
-          if (personStats[r.nama].status === '-' || personStats[r.nama].status === 'Tidak Hadir') {
-            personStats[r.nama].status = (r.status || 'Hadir').trim();
+          if (personStats[key].status === '-' || personStats[key].status === 'Tidak Hadir') {
+            personStats[key].status = (r.status || 'Hadir').trim();
           }
-          personStats[r.nama].unit = r.unit;
+          personStats[key].unit = r.unit;
         } else if (r.jenis === 'Pulang') {
-          personStats[r.nama].pulang = jam;
+          personStats[key].pulang = jam;
           const statusPulang = (r.status || '').toLowerCase().trim();
           
           if (statusPulang === 'pulang cepat') {
-            personStats[r.nama].status = 'Pulang Cepat';
-          } else if (personStats[r.nama].status === '-' || personStats[r.nama].status === 'Tidak Hadir') {
+            personStats[key].status = 'Pulang Cepat';
+          } else if (personStats[key].status === '-' || personStats[key].status === 'Tidak Hadir') {
             // Jika mereka lupa absen masuk tapi absen pulang, anggap hadir
-            personStats[r.nama].status = (r.status || 'Hadir').trim();
+            personStats[key].status = (r.status || 'Hadir').trim();
           }
         } else if (r.jenis === 'Izin') {
-          personStats[r.nama].status = 'Izin';
-          personStats[r.nama].keterangan = r.keterangan || 'Izin';
+          personStats[key].status = 'Izin';
+          personStats[key].keterangan = r.keterangan || 'Izin';
         } else if (r.jenis === 'Sakit') {
-          personStats[r.nama].status = 'Sakit';
-          personStats[r.nama].keterangan = r.keterangan || 'Sakit';
+          personStats[key].status = 'Sakit';
+          personStats[key].keterangan = r.keterangan || 'Sakit';
         }
       });
 
       // Add employees who have no logs (absent)
       filteredEmployees.forEach(e => {
-        if (!personStats[e.nama]) {
-          personStats[e.nama] = { unit: e.unit, masuk: null, pulang: null, status: 'Tidak Hadir', keterangan: '-' };
+        const key = e.email || e.nama;
+        if (!personStats[key]) {
+          personStats[key] = { nama: e.nama, unit: e.unit, masuk: null, pulang: null, status: 'Tidak Hadir', keterangan: '-' };
         }
       });
 
@@ -341,10 +343,9 @@ window.pages.initReportDaily = function() {
       }
 
       // Detail Table
-      const tableData = Object.keys(personStats).map((nama, i) => ({
+      const tableData = Object.values(personStats).map((person, i) => ({
         idx: i + 1,
-        nama,
-        ...personStats[nama]
+        ...person
       }));
 
       window.pages._dailyData = tableData;
