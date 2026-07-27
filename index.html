@@ -253,6 +253,11 @@
         </button>
       </div>
       
+      <div class="mb-4">
+        <label class="block text-[10px] font-black tracking-[0.2em] text-white/30 uppercase mb-2">Tanggal Izin</label>
+        <input type="date" id="izin-tanggal" class="hrms-input rounded-2xl" />
+      </div>
+      
       <div class="mb-6">
         <label class="block text-[10px] font-black tracking-[0.2em] text-white/30 uppercase mb-2">Keterangan</label>
         <textarea id="izin-keterangan" rows="3" class="hrms-input resize-none rounded-2xl" placeholder="Tuliskan keterangan detail di sini..."></textarea>
@@ -380,17 +385,26 @@
       }
 
       const ket = document.getElementById('izin-keterangan').value.trim();
+      let tgl = document.getElementById('izin-tanggal').value;
+      
+      if (!tgl) {
+        const now = new Date();
+        tgl = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+      }
+
       window.ui.showLoading("Mengirim...");
       try {
         const res = await window.api.submitIzin({
           email: window.auth.currentUser.email,
           jenisIzin: window.selectedIzinType,
-          keterangan: ket || '-'
+          keterangan: ket || '-',
+          tanggalIzin: tgl
         });
         window.ui.hideLoading();
         window.ui.closeModal('modal-izin');
         window.ui.showToast(res.success ? '✅' : '⚠️', res.message, res.success);
         document.getElementById('izin-keterangan').value = '';
+        document.getElementById('izin-tanggal').value = '';
         // Refresh riwayat dari server agar izin/sakit tampil di widget riwayat
         if (res.success) {
           setTimeout(() => { if(window.loadRiwayatServer) window.loadRiwayatServer(); }, 2000);

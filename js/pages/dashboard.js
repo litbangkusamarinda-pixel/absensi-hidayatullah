@@ -379,7 +379,7 @@ window.pages.initDashboard = function() {
               <div class="flex justify-between items-start mb-2">
                 <div>
                   <div class="font-bold text-white text-[13px] group-hover:text-[#FBBF24] transition-colors">${r.nama}</div>
-                  <div class="text-[10px] text-white/30">${r.waktu} • ${r.unit}</div>
+                  <div class="text-[10px] text-white/30">${(r.tanggalIzin && !r.waktu.startsWith(r.tanggalIzin)) ? '<span class="text-[#0EA5E9] font-bold">Untuk: ' + r.tanggalIzin + '</span> (' + r.waktu + ')' : r.waktu} • ${r.unit}</div>
                 </div>
                 <span class="badge badge-warning text-[8px]">${r.jenis}</span>
               </div>
