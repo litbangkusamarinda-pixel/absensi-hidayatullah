@@ -277,13 +277,18 @@ window.pages.initDashboard = function() {
             if ((r.status || '').toLowerCase() === 'pulang cepat') {
               personStats[r.nama].status = 'Pulang Cepat';
             }
-          } else if (r.jenis === 'Izin') {
-            personStats[r.nama].status = 'Izin';
-          } else if (r.jenis === 'Sakit') {
-            personStats[r.nama].status = 'Sakit';
+          } else {
+            // FIXED: Deteksi SEMUA jenis izin (Sakit, Izin, Cuti, Pulang Awal, Izin Urusan Keluarga, Tugas Luar)
+            const jenisLower = (r.jenis || '').toLowerCase();
+            const izinTypes = ['izin', 'sakit', 'cuti', 'pulang awal', 'izin urusan keluarga', 'tugas luar'];
+            const isIzinType = izinTypes.some(t => jenisLower.includes(t));
+            const isStatusDisetujui = (r.status || '').toLowerCase() === 'disetujui';
+            if (isIzinType || isStatusDisetujui) {
+              personStats[r.nama].status = r.jenis; // "Sakit", "Izin", "Cuti", dll
+            }
           }
 
-          const isIzinSakit = (r.jenis === 'Izin' || r.jenis === 'Sakit');
+          const isIzinSakit = !['Masuk', 'Pulang'].includes(r.jenis);
           const bc = (r.status === 'Terlambat' || r.status === 'Pulang Cepat') 
             ? 'badge badge-danger' : (isIzinSakit ? 'badge' : 'badge badge-success');
           const bgCustom = isIzinSakit ? 'style="background:rgba(59,130,246,0.15);color:#60A5FA;"' : '';
@@ -305,6 +310,30 @@ window.pages.initDashboard = function() {
 
       if (tb) tb.innerHTML = liveLogHTML;
 
+      // --- FIXED: Proses izin "Menunggu" ke personStats ---
+      // dIzin berisi izin pending (Menunggu), filter hanya yang tanggalIzin = hari ini
+      if (Array.isArray(dIzin) && dIzin.length > 0) {
+        const now = new Date();
+        const todayParts = [
+          String(now.getDate()).padStart(2, '0'),
+          String(now.getMonth() + 1).padStart(2, '0'),
+          String(now.getFullYear())
+        ].join('/');
+        
+        dIzin.forEach(izin => {
+          // Cek apakah tanggalIzin cocok dengan hari ini (format dd/MM/yyyy)
+          const tglIzin = (izin.tanggalIzin || '').trim();
+          const isToday = tglIzin === todayParts || !tglIzin; // Jika tanggal kosong, anggap hari ini
+          
+          if (isToday && izin.nama && personStats[izin.nama]) {
+            // Hanya override jika guru belum absen masuk hari ini
+            if (personStats[izin.nama].status === 'Tidak Hadir') {
+              personStats[izin.nama].status = (izin.jenis || 'Izin') + ' (Menunggu)';
+            }
+          }
+        });
+      }
+
       // Calculate final metrics from personStats
       let hadir = 0, uniqueTelat = 0, izinSakitApproved = 0, absenCount = 0, belumPulang = 0;
       
@@ -315,9 +344,11 @@ window.pages.initDashboard = function() {
         } else if (s === 'terlambat' || s === 'pulang cepat') { 
           hadir++; 
           uniqueTelat++; 
-        } else if (s === 'izin' || s === 'sakit' || s === 'tugas keluar' || s === 'cuti') {
+        } else if (s === 'izin' || s === 'sakit' || s === 'tugas luar' || s === 'cuti' || 
+                   s === 'pulang awal' || s === 'izin urusan keluarga' ||
+                   s.includes('menunggu')) {
           izinSakitApproved++;
-          absenCount++; // Masukkan ke dalam total Ketidakhadiran agar sinkron dengan Laporan
+          absenCount++;
         } else {
           absenCount++;
         }
