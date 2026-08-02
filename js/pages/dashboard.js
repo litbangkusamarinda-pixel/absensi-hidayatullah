@@ -227,7 +227,7 @@ window.pages.initDashboard = function() {
       const now = new Date();
       const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
       const [dLog, dPegawai, dIzin] = await Promise.all([
-        window.api.getLaporanHarianAdmin(todayStr).catch(() => []),
+        window.api.getLaporanHarianAdmin(todayStr, adminEmail).catch(() => []),
         window.api.getPegawaiListAdmin(adminEmail).catch(() => []),
         window.api.getIzinPendingAdmin(adminEmail).catch(() => [])
       ]);
