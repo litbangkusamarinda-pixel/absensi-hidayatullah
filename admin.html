@@ -275,7 +275,8 @@
 
     function loadTablePegawai(){
       apiCall('getPegawaiListAdmin', {adminEmail: adminEmail}).then(function(d){
-        var tb=document.querySelector('#tabelPegawai tbody'); tb.innerHTML='';
+        var tb=document.querySelector('#tabelPegawai tbody'); if(!tb) return;
+        tb.innerHTML='';
         if(!d.length){ tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:#94a3b8;">Belum ada guru</td></tr>'; return; }
         d.forEach(function(r){ tb.innerHTML+='<tr><td><strong>'+r.nama+'</strong></td><td style="font-size:13px;">'+r.email+'</td><td><span class="badge b-unit">'+r.unit+'</span></td><td style="font-size:13px;">'+r.tgl+'</td></tr>'; });
       });
@@ -299,7 +300,7 @@
       var d={unit:document.getElementById('unit').value,masuk:document.getElementById('masuk').value,pulang:document.getElementById('pulang').value,radius:document.getElementById('radius').value,lat:document.getElementById('lat').value,lon:document.getElementById('lon').value};
       if(!d.unit||!d.lat){alert('Nama Unit dan titik Peta wajib diisi!');return;}
       document.getElementById('btnSimpan').innerText='Menyimpan...';
-      apiCall('saveUnitAdmin', {adminEmail: adminEmail, unitData: d}).then(function(res){ alert(res.message); document.getElementById('btnSimpan').innerText='Simpan Unit Sekolah'; document.getElementById('modalUnit').style.display='none'; loadTableUnit(); });
+      apiCall('saveUnitAdmin', {adminEmail: adminEmail, unitData: d}).then(function(res){ alert(res.message); document.getElementById('btnSimpan').innerText='Simpan Unit Sekolah'; loadTableUnit(); });
     }
 
     function loadJadwalHari(){

@@ -39,10 +39,10 @@ window.api = {
   getIzinAllAdmin: (adminEmail) => apiCall('getIzinAllAdmin', { adminEmail }),
   getUnitListAdmin: (adminEmail) => apiCall('getUnitListAdmin', { adminEmail }),
   getPegawaiListAdmin: (adminEmail) => apiCall('getPegawaiListAdmin', { adminEmail }),
-  getFilterDataAdmin: () => apiCall('getFilterDataAdmin'),
+  getFilterDataAdmin: (adminEmail) => apiCall('getFilterDataAdmin', { adminEmail }),
   getLaporanLengkapAdmin: () => apiCall('getLaporanLengkapAdmin'),
   getLaporanHarianAdmin: (tanggal, adminEmail) => apiCall('getLaporanHarianAdmin', { tanggal, adminEmail }),
-  getLaporanRentangAdmin: (start, end) => apiCall('getLaporanRentangAdmin', { start, end }),
+  getLaporanRentangAdmin: (start, end, adminEmail) => apiCall('getLaporanRentangAdmin', { start, end, adminEmail }),
   prosesIzin: (data) => apiCall('prosesIzin', data),
   getAllLogAdmin: (adminEmail) => apiCall('getAllLogAdmin', { adminEmail }),
   saveUnitAdmin: (data) => apiCall('saveUnitAdmin', data),
@@ -52,6 +52,11 @@ window.api = {
   saveJadwalHari: (data) => apiCall('saveJadwalHari', data),
   deleteJadwalHari: (data) => apiCall('deleteJadwalHari', data),
   checkTodayBypass: (email) => apiCall('checkTodayBypass', { email }),
+  
+  // Hari Libur (Tanggal Merah)
+  getHariLibur: () => apiCall('getHariLibur'),
+  saveHariLibur: (data) => apiCall('saveHariLibur', data),
+  deleteHariLibur: (data) => apiCall('deleteHariLibur', data),
   
   // Riwayat User (Mobile)
   getMyRecentLog: (email) => apiCall('getMyRecentLog', { email }),

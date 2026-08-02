@@ -448,7 +448,7 @@ window.pages.initDashboard = function() {
   }
 
   // ═══ Charts ═══
-  async function initWeeklyChart() {
+  async function initWeeklyChart(adminEmail) {
     const ctx = document.getElementById('chart-weekly');
     if (!ctx) return;
     
@@ -473,7 +473,7 @@ window.pages.initDashboard = function() {
     try {
       const startDate = last7[0].key;
       const endDate = last7[last7.length - 1].key;
-      const rawLaporan = await window.api.getLaporanRentangAdmin(startDate, endDate);
+      const rawLaporan = await window.api.getLaporanRentangAdmin(startDate, endDate, adminEmail);
       const dateMap = {};
       last7.forEach((d, i) => { dateMap[d.key] = i; });
       
@@ -637,7 +637,7 @@ window.pages.initDashboard = function() {
 
   // ═══ Initialize ═══
   refreshDashboardData();
-  initWeeklyChart();
+  initWeeklyChart(adminEmail);
   
   // Auto-refresh
   let refreshInterval = setInterval(() => {

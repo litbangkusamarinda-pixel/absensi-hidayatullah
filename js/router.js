@@ -18,6 +18,7 @@ window.router = {
     'special-hours': { render: () => window.pages.renderSpecialHours(), layout: 'admin', title: 'Jam Kerja Khusus' },
     'units':      { render: () => window.pages.renderUnits(),       layout: 'admin',    title: 'Manajemen Unit' },
     'piket-schedule': { render: () => window.pages.renderPiketSchedule(), layout: 'admin', title: 'Jadwal Piket' },
+    'holidays':   { render: () => window.pages.renderHolidays(),  layout: 'admin',    title: 'Hari Libur' },
     'reports':    { render: () => window.pages.renderReportCenter(),layout: 'admin',    title: 'Pusat Laporan' },
     'report-monthly': { render: () => window.pages.renderReportMonthly(), layout: 'admin', title: 'Laporan Bulanan' },
     'report-daily':   { render: () => window.pages.renderReportDaily(),   layout: 'admin', title: 'Laporan Harian' },
@@ -131,6 +132,7 @@ window.router = {
             { id: 'special-hours', icon: 'clock',           label: 'Jam Kerja Khusus' },
             { id: 'piket-schedule', icon: 'clipboard-list', label: 'Jadwal Piket' },
             { id: 'units',     icon: 'building-2',      label: 'Unit Sekolah' },
+            { id: 'holidays',  icon: 'calendar-off',    label: 'Hari Libur' },
           ]
         },
         {
