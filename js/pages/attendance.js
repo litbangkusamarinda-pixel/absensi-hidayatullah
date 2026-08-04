@@ -320,15 +320,17 @@ window.pages.initAttendance = function() {
            const msgEl = document.getElementById('att-status-message');
            
            if(textEl) textEl.textContent = 'Menemukan sinyal awal...';
-           if(msgEl) {
+           if(msgEl && !window.isHoliday && !window.isBypassed) {
                msgEl.innerHTML = '<i data-lucide="satellite" class="w-8 h-8 mx-auto mb-3 text-blue-300 opacity-80 animate-pulse"></i><div class="font-bold text-blue-300">Sedang Mencari GPS...</div><div class="text-xs text-white/50 mt-1">Menghubungkan ke satelit terdekat...</div>';
                if(window.lucide) window.lucide.createIcons();
            }
            return;
         }
 
+        // Jangan update UI jika sedang libur atau bypass
+        if (window.isHoliday || window.isBypassed) return;
+
         const accuracy = Math.round(pos.coords.accuracy);
-        // Memberikan kelonggaran akurasi agar tidak terjebak loop (fallback logic pindah ke backend)
         const MIN_ACCURACY = 150;
 
         const textEl = document.getElementById('att-loc-text');
@@ -337,7 +339,10 @@ window.pages.initAttendance = function() {
         const msgEl = document.getElementById('att-status-message');
 
         // Jika koordinat target belum dapat, tunggu dulu
-        if (window.targetLat === null || window.targetLon === null) return;
+        if (window.targetLat === null || window.targetLon === null) {
+            if(textEl) textEl.textContent = `Akurasi ${accuracy}m · Menunggu data lokasi sekolah...`;
+            return;
+        }
 
         // Cek akurasi terlebih dahulu
         if (accuracy > MIN_ACCURACY) {
@@ -358,14 +363,18 @@ window.pages.initAttendance = function() {
             return;
         }
 
-        // Kumpulkan sampel (Rolling window of 5)
+        // Kumpulkan sampel (Rolling window)
         window.gpsSamples.push({lat: pos.coords.latitude, lon: pos.coords.longitude});
-        if (window.gpsSamples.length > 5) {
+        
+        // Tentukan jumlah sampel minimum berdasarkan akurasi
+        let requiredSamples = accuracy <= 40 ? 1 : (accuracy <= 80 ? 3 : 5);
+        
+        if (window.gpsSamples.length > requiredSamples) {
             window.gpsSamples.shift(); // Buang yang paling lama
         }
 
-        if (window.gpsSamples.length < 5) {
-            if(textEl) textEl.textContent = `Akurasi ${accuracy}m · Mengambil sampel (${window.gpsSamples.length}/5)`;
+        if (window.gpsSamples.length < requiredSamples) {
+            if(textEl) textEl.textContent = `Akurasi ${accuracy}m · Mengambil sampel (${window.gpsSamples.length}/${requiredSamples})`;
             if(dotEl) {
                 dotEl.classList.remove('bg-emerald-400', 'bg-amber-400', 'bg-red-400');
                 dotEl.classList.add('bg-blue-400');
@@ -377,12 +386,12 @@ window.pages.initAttendance = function() {
                 msgEl.innerHTML = `<i data-lucide="satellite" class="w-8 h-8 mx-auto mb-3 text-blue-400/80 animate-pulse"></i><div class="font-bold text-blue-400">Mengkalibrasi Lokasi...</div><div class="text-xs text-white/60 mt-1">Mengambil data titik koordinat ke-${window.gpsSamples.length}</div>`;
                 if(window.lucide) window.lucide.createIcons();
             }
-            return; // Tunggu sampai 5 sampel penuh
+            return; // Tunggu sampai sampel penuh
         }
 
-        // Kalau sudah mencapai 5 sampel, hitung rata-rata
-        let avgLat = window.gpsSamples.reduce((sum, val) => sum + val.lat, 0) / 5;
-        let avgLon = window.gpsSamples.reduce((sum, val) => sum + val.lon, 0) / 5;
+        // Hitung rata-rata
+        let avgLat = window.gpsSamples.reduce((sum, val) => sum + val.lat, 0) / window.gpsSamples.length;
+        let avgLon = window.gpsSamples.reduce((sum, val) => sum + val.lon, 0) / window.gpsSamples.length;
         
         window.userLat = avgLat; 
         window.userLon = avgLon;
@@ -410,6 +419,7 @@ window.pages.initAttendance = function() {
         }
       }, 
       err => {
+        if (window.isHoliday || window.isBypassed) return;
         const textEl = document.getElementById('att-loc-text');
         if(textEl) textEl.textContent = 'GPS error — aktifkan & izinkan lokasi!';
         const dotEl = document.getElementById('att-loc-dot');
@@ -430,71 +440,81 @@ window.pages.initAttendance = function() {
   
   async function initLocationTracker() {
     try {
+      const currentUserUnit = window.auth.currentUser.unit;
+      const email = window.auth.currentUser.email;
       const days = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
       const currentDay = days[new Date().getDay()];
-      const currentUserUnit = window.auth.currentUser.unit;
-      
-      try {
-        const specialHours = await window.api.getJadwalHari();
-        const todaySpecial = specialHours.find(h => h.unit === currentUserUnit && h.hari === currentDay);
-        if (todaySpecial) {
-            var liburVal = todaySpecial.libur;
-            if (liburVal === true || String(liburVal).toUpperCase() === 'TRUE' || String(liburVal).toUpperCase() === 'YA') {
-                window.isHoliday = true;
-            }
-        }
-      } catch (err) {
-        console.error("Gagal load jadwal khusus", err);
+
+      // 1. Cek Cache Koordinat di LocalStorage agar instan
+      const cachedUnit = localStorage.getItem('unit_loc_' + currentUserUnit);
+      if (cachedUnit) {
+        try {
+          const parsed = JSON.parse(cachedUnit);
+          window.targetLat = parseFloat(parsed.lat);
+          window.targetLon = parseFloat(parsed.lon);
+          window.maxRadius = parseFloat(parsed.radius) || 35;
+          window.jamMasukStr = parsed.masuk || null;
+          window.jamPulangStr = parsed.pulang || null;
+        } catch(e) {}
       }
 
-      if (window.isHoliday) {
-        window.showHolidayMessage();
-        return;
-      }
-
-      // ── Ambil data unit (lat/lon/radius/jam) SEBELUM cek bypass ──
-      // Ini penting agar tombol "Kembali Bertugas" punya koordinat target GPS
-      try {
-        const units = await window.api.getUnitListAdmin('');
-        const myUnit = units.find(u => u.unit === currentUserUnit);
-        if (myUnit) {
-          window.targetLat = parseFloat(myUnit.lat);
-          window.targetLon = parseFloat(myUnit.lon);
-          window.maxRadius = parseFloat(myUnit.radius) || 35;
-          
-          // Simpan jam masuk/pulang default dari unit
-          window.jamMasukStr = myUnit.masuk ? myUnit.masuk.toString() : null;
-          window.jamPulangStr = myUnit.pulang ? myUnit.pulang.toString() : null;
-        }
-        
-        // Override jam masuk/pulang jika ada jadwal khusus hari ini
-        const specialHoursForTime = await window.api.getJadwalHari();
-        const todaySchedule = specialHoursForTime.find(h => h.unit === currentUserUnit && h.hari === currentDay);
-        if (todaySchedule) {
-          if (todaySchedule.masuk) window.jamMasukStr = todaySchedule.masuk.toString();
-          if (todaySchedule.pulang) window.jamPulangStr = todaySchedule.pulang.toString();
-        }
-      } catch (err) {
-        console.error("Gagal load data unit/jadwal", err);
-      }
-      
-      // ── Cek status bypass ──
-      try {
-        const bypassCheck = await window.api.checkTodayBypass(window.auth.currentUser.email);
-        if (bypassCheck && bypassCheck.isBypassed) {
-            window.isBypassed = true;
-            window.bypassType = bypassCheck.type;
-            window.showBypassMessage(window.bypassType);
-            return; // Jangan mulai GPS tracking, tapi data unit sudah tersimpan
-        }
-      } catch (err) {
-        console.error("Gagal load status bypass", err);
-      }
-
+      // 2. Langsung nyalakan GPS di detik pertama (tidak menunggu API)
       getLocation();
+
+      // 3. Request API secara Paralel
+      const [specialHours, units, bypassCheck] = await Promise.all([
+        window.api.getJadwalHari().catch(() => []),
+        window.api.getUnitListAdmin('').catch(() => []),
+        window.api.checkTodayBypass(email).catch(() => null)
+      ]);
+
+      // 4. Proses Hasil API
+      
+      // A. Cek Libur
+      const todaySpecial = specialHours.find(h => h.unit === currentUserUnit && h.hari === currentDay);
+      if (todaySpecial) {
+          var liburVal = todaySpecial.libur;
+          if (liburVal === true || String(liburVal).toUpperCase() === 'TRUE' || String(liburVal).toUpperCase() === 'YA') {
+              window.isHoliday = true;
+              window.showHolidayMessage();
+              if (window.watchId) navigator.geolocation.clearWatch(window.watchId);
+              return;
+          }
+          if (todaySpecial.masuk) window.jamMasukStr = todaySpecial.masuk.toString();
+          if (todaySpecial.pulang) window.jamPulangStr = todaySpecial.pulang.toString();
+      }
+
+      // B. Cek Bypass
+      if (bypassCheck && bypassCheck.isBypassed) {
+          window.isBypassed = true;
+          window.bypassType = bypassCheck.type;
+          window.showBypassMessage(window.bypassType);
+          if (window.watchId) navigator.geolocation.clearWatch(window.watchId);
+          return;
+      }
+
+      // C. Update Target Koordinat jika ada update dari server
+      const myUnit = units.find(u => u.unit === currentUserUnit);
+      if (myUnit) {
+        window.targetLat = parseFloat(myUnit.lat);
+        window.targetLon = parseFloat(myUnit.lon);
+        window.maxRadius = parseFloat(myUnit.radius) || 35;
+        
+        if (!todaySpecial || !todaySpecial.masuk) window.jamMasukStr = myUnit.masuk ? myUnit.masuk.toString() : null;
+        if (!todaySpecial || !todaySpecial.pulang) window.jamPulangStr = myUnit.pulang ? myUnit.pulang.toString() : null;
+        
+        // Simpan ke Cache
+        localStorage.setItem('unit_loc_' + currentUserUnit, JSON.stringify({
+          lat: myUnit.lat,
+          lon: myUnit.lon,
+          radius: myUnit.radius,
+          masuk: window.jamMasukStr,
+          pulang: window.jamPulangStr
+        }));
+      }
+
     } catch(e) {
       console.error("Gagal inisialisasi location tracker", e);
-      getLocation(); // Tetap panggil walau gagal, nanti jaraknya error (NaN) tapi gps jalan
     }
   }
   initLocationTracker();
