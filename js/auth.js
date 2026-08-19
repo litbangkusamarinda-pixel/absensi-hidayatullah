@@ -22,8 +22,14 @@ window.auth = {
           }
         } catch (err) {
           ui.hideLoading();
-          ui.showToast('⚠️', 'Gagal memverifikasi sesi', false);
-          this.logout();
+          // Fallback offline: cegah auto-logout jika koneksi timeout
+          const localName = localStorage.getItem('hrms_emp_name') || 'Pegawai';
+          const localUnit = localStorage.getItem('hrms_emp_unit') || '';
+          const localJabatan = localStorage.getItem('hrms_emp_jabatan') || 'Guru';
+          this.currentUser = { email: savedEmail, role: 'employee', name: localName, unit: localUnit, jabatan: localJabatan };
+          
+          ui.showToast('⚠️', 'Koneksi lambat. Menggunakan profil tersimpan.', false);
+          window.router.navigateTo('attendance');
         }
       }
     } else {
@@ -39,6 +45,9 @@ window.auth = {
       if (res.registered) {
         localStorage.setItem('hrms_email', email);
         localStorage.setItem('hrms_role', 'employee');
+        localStorage.setItem('hrms_emp_name', res.nama);
+        localStorage.setItem('hrms_emp_unit', res.unit);
+        localStorage.setItem('hrms_emp_jabatan', res.jabatan || '');
         this.currentUser = { email, role: 'employee', name: res.nama, unit: res.unit, jabatan: res.jabatan };
         ui.showToast('✅', 'Berhasil login!', true);
         window.router.navigateTo('attendance');
