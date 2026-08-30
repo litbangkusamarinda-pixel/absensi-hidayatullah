@@ -670,8 +670,8 @@ window.pages.initDashboard = function() {
     
     try {
       const res = await window.api.getWhatsAppQR(adminEmail);
-      if (!res.success) {
-        if (res.message.includes("Super Admin")) {
+      if (!res || !res.success) {
+        if (res && res.message && res.message.includes("Super Admin")) {
           statusText.innerHTML = '<span class="text-white/30 font-bold">Akses Dibatasi</span>';
           area.innerHTML = '<div class="text-white/40 text-[11px] text-center px-4 leading-relaxed"><i data-lucide="lock" class="w-6 h-6 mx-auto mb-2 opacity-50"></i>Hanya <b>Super Admin</b> yang diizinkan untuk mengonfigurasi fitur WhatsApp otomatis.</div>';
           if (window.lucide) window.lucide.createIcons();
@@ -683,7 +683,7 @@ window.pages.initDashboard = function() {
           }
           return;
         }
-        throw new Error(res.message);
+        throw new Error((res && res.message) ? res.message : "Gagal mengambil status WhatsApp.");
       }
 
       const isConnected = res.status && res.status.device_status === "connect";
@@ -704,9 +704,10 @@ window.pages.initDashboard = function() {
         statusText.innerHTML = '<span class="text-red-400 font-bold">Terputus (Offline)</span>';
         
         if (res.qr && res.qr.url) {
+          const qrSrc = res.qr.url.startsWith('http') ? res.qr.url : 'data:image/png;base64,' + res.qr.url;
           area.innerHTML = `
             <div class="bg-white p-3 rounded-2xl shadow-xl border-4 border-white/[0.04] mb-3">
-              <img src="${res.qr.url}" alt="WhatsApp QR" class="w-40 h-40 object-contain rounded-lg">
+              <img src="${qrSrc}" alt="WhatsApp QR" class="w-40 h-40 object-contain rounded-lg">
             </div>
             <div class="text-[10px] text-white/50 text-center px-2">Scan QR ini menggunakan fitur <b>Perangkat Taut</b> di WhatsApp Anda.</div>
           `;
