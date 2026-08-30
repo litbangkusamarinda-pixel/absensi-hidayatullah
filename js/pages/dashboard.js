@@ -199,6 +199,30 @@ window.pages.renderDashboard = function() {
           </div>
         </div>
 
+        <!-- WhatsApp Gateway Panel -->
+        <div class="glass-card p-5 flex flex-col h-[420px] relative overflow-hidden">
+          <div class="absolute bottom-0 right-0 w-48 h-48 bg-[#10B981]/5 rounded-full blur-[60px] -z-10 pointer-events-none"></div>
+
+          <div class="flex items-center justify-between mb-4 shrink-0">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#10B981]/15 border border-[#10B981]/20 flex items-center justify-center">
+                <i data-lucide="message-circle" class="w-5 h-5 text-[#34D399]"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-white">WhatsApp Gateway</h3>
+                <p class="text-[10px] text-white/40" id="waStatusText">Memeriksa status...</p>
+              </div>
+            </div>
+            <button onclick="window.pages.loadWhatsAppQR()" class="btn-icon text-white/40 hover:text-white" title="Refresh Status">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+          </div>
+          
+          <div class="flex-1 flex flex-col items-center justify-center relative" id="waContentArea">
+            <div class="text-white/30 text-xs animate-pulse">Memuat data dari Fonnte...</div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -635,8 +659,92 @@ window.pages.initDashboard = function() {
     }
   };
 
+  // ═══ WhatsApp Fonnte QR Logic ═══
+  window.pages.loadWhatsAppQR = async function() {
+    const area = document.getElementById('waContentArea');
+    const statusText = document.getElementById('waStatusText');
+    if (!area || !statusText) return;
+
+    area.innerHTML = '<div class="text-white/30 text-xs animate-pulse">Menghubungkan ke Fonnte...</div>';
+    statusText.innerHTML = 'Memeriksa status...';
+    
+    try {
+      const res = await window.api.getWhatsAppQR(adminEmail);
+      if (!res.success) {
+        if (res.message.includes("Super Admin")) {
+          statusText.innerHTML = '<span class="text-white/30 font-bold">Akses Dibatasi</span>';
+          area.innerHTML = '<div class="text-white/40 text-[11px] text-center px-4 leading-relaxed"><i data-lucide="lock" class="w-6 h-6 mx-auto mb-2 opacity-50"></i>Hanya <b>Super Admin</b> yang diizinkan untuk mengonfigurasi fitur WhatsApp otomatis.</div>';
+          if (window.lucide) window.lucide.createIcons();
+          
+          // Disable refresh button
+          const refreshBtn = statusText.parentElement.nextElementSibling;
+          if (refreshBtn && refreshBtn.tagName === 'BUTTON') {
+             refreshBtn.style.display = 'none';
+          }
+          return;
+        }
+        throw new Error(res.message);
+      }
+
+      const isConnected = res.status && res.status.device_status === "connect";
+
+      if (isConnected) {
+        statusText.innerHTML = '<span class="text-[#34D399] font-bold">Terkoneksi (Online)</span>';
+        area.innerHTML = `
+          <div class="w-20 h-20 rounded-full bg-[#10B981]/20 flex items-center justify-center mb-4 border border-[#10B981]/30">
+            <i data-lucide="check-circle" class="w-10 h-10 text-[#34D399]"></i>
+          </div>
+          <div class="text-sm font-bold text-white mb-1">WhatsApp Terhubung</div>
+          <div class="text-[10px] text-white/50 text-center px-4 mb-6">Laporan otomatis akan dikirim ke grup dan kepala sekolah.</div>
+          <button onclick="window.pages.disconnectWhatsApp()" class="btn-secondary text-xs py-2 px-4 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50">
+            <i data-lucide="log-out" class="w-3.5 h-3.5 mr-1"></i> Putuskan Koneksi
+          </button>
+        `;
+      } else {
+        statusText.innerHTML = '<span class="text-red-400 font-bold">Terputus (Offline)</span>';
+        
+        if (res.qr && res.qr.url) {
+          area.innerHTML = `
+            <div class="bg-white p-3 rounded-2xl shadow-xl border-4 border-white/[0.04] mb-3">
+              <img src="${res.qr.url}" alt="WhatsApp QR" class="w-40 h-40 object-contain rounded-lg">
+            </div>
+            <div class="text-[10px] text-white/50 text-center px-2">Scan QR ini menggunakan fitur <b>Perangkat Taut</b> di WhatsApp Anda.</div>
+          `;
+        } else {
+          area.innerHTML = `
+            <div class="text-red-400 text-xs text-center px-4">Gagal memuat QR Code.<br><span class="text-white/40">Coba klik refresh di pojok kanan atas panel ini.</span></div>
+          `;
+        }
+      }
+      if (window.lucide) window.lucide.createIcons();
+    } catch (e) {
+      statusText.innerHTML = '<span class="text-red-400 font-bold">Error API</span>';
+      area.innerHTML = '<div class="text-red-400 text-xs">Koneksi ke server gagal.</div>';
+    }
+  };
+
+  window.pages.disconnectWhatsApp = async function() {
+    if (!confirm('Anda yakin ingin memutuskan koneksi WhatsApp saat ini? Anda harus scan ulang untuk mengaktifkannya.')) return;
+    
+    window.ui.showLoading("Memutuskan koneksi...");
+    try {
+      const res = await window.api.disconnectWhatsApp(adminEmail);
+      window.ui.hideLoading();
+      if (res.status === true) {
+        window.ui.showToast('✅', 'Koneksi terputus!', true);
+      } else {
+        window.ui.showToast('⚠️', res.reason || 'Gagal memutuskan', false);
+      }
+      window.pages.loadWhatsAppQR();
+    } catch(e) {
+      window.ui.hideLoading();
+      window.ui.showToast('❌', 'Error memutuskan WA', false);
+    }
+  };
+
   // ═══ Initialize ═══
   refreshDashboardData();
+  window.pages.loadWhatsAppQR();
   initWeeklyChart(adminEmail);
   
   // Auto-refresh

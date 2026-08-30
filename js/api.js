@@ -64,5 +64,9 @@ window.api = {
   
   getPiketListAdmin: () => apiCall('getPiketListAdmin'),
   savePiketAdmin: (data) => apiCall('savePiketAdmin', data),
-  deletePiketAdmin: (data) => apiCall('deletePiketAdmin', data)
+  deletePiketAdmin: (data) => apiCall('deletePiketAdmin', data),
+  
+  // WhatsApp Fonnte
+  getWhatsAppQR: (adminEmail) => apiCall('getWhatsAppQR', { adminEmail }),
+  disconnectWhatsApp: (adminEmail) => apiCall('disconnectWhatsApp', { adminEmail })
 };
